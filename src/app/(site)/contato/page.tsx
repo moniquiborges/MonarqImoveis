@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { siteConfig, buildWhatsappUrl } from "@/lib/site-config";
+import { FacebookIcon, InstagramIcon } from "@/components/ui/SocialIcons";
 import {
   MessageCircle,
   Mail,
@@ -13,7 +14,8 @@ import {
   Send,
   CheckCircle2,
   ShieldCheck,
-  HelpCircle,
+  Building,
+  Scale,
 } from "lucide-react";
 
 export default function ContatoPage() {
@@ -53,19 +55,20 @@ export default function ContatoPage() {
         {/* Cabeçalho */}
         <div className="mb-12 max-w-3xl">
           <p className="text-xs uppercase tracking-[0.2em] text-terracota font-semibold mb-2">
-            Atendimento Exclusivo
+            Atendimento Personalizado
           </p>
           <h1 className="font-display text-3xl md:text-5xl text-mineral font-normal tracking-tight">
             Fale com a MONARQ
           </h1>
-          <p className="mt-4 text-sm md:text-base text-graphite/70 leading-relaxed">
-            Estamos à disposição para apresentar nosso portfólio de ativos, esclarecer dúvidas jurídicas,
-            agendar reuniões presenciais ou alinhar estratégias de investimento sob medida.
+          <p className="mt-3 text-sm md:text-base text-graphite/70 leading-relaxed">
+            <strong>Construímos. Avaliamos. Vendemos. Regularizamos.</strong>
+            <br />
+            Apoio jurídico especializado e inteligência de mercado para decisões patrimoniais sólidas no litoral catarinense, mercado urbano e agronegócio.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
-          {/* Coluna Esquerda: Canais Diretos & Informações Regulatórias */}
+          {/* Coluna Esquerda: Canais Diretos & Informações Físicas */}
           <div className="lg:col-span-5 space-y-8">
             <div className="rounded-sm border border-areia/60 bg-white p-6 md:p-8 shadow-xs">
               <h3 className="font-display text-xl text-graphite font-medium mb-6">
@@ -73,95 +76,119 @@ export default function ContatoPage() {
               </h3>
 
               <div className="space-y-5 text-sm">
-                {/* WhatsApp */}
+                {/* WhatsApp MS */}
                 {whatsappDirectUrl && (
                   <div className="flex items-start gap-3.5">
-                    <div className="rounded-xs bg-[#25D366]/10 p-2.5 text-[#25D366]">
+                    <div className="rounded-xs bg-[#25D366]/10 p-2.5 text-[#25D366] shrink-0">
                       <MessageCircle className="h-5 w-5" />
                     </div>
                     <div>
-                      <span className="text-xs text-graphite/50 block">WhatsApp Oficial</span>
+                      <span className="text-xs text-graphite/60 block">WhatsApp Oficial (MS)</span>
                       <a
                         href={whatsappDirectUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="font-medium text-graphite hover:text-mineral transition-colors"
                       >
-                        {siteConfig.whatsappDisplay || "Iniciar conversa"}
+                        {siteConfig.whatsappDisplay}
                       </a>
                     </div>
                   </div>
                 )}
 
-                {/* Telefone */}
-                {siteConfig.contactPhone && (
-                  <div className="flex items-start gap-3.5">
-                    <div className="rounded-xs bg-mineral/10 p-2.5 text-mineral">
-                      <Phone className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs text-graphite/50 block">Telefone Comercial</span>
-                      <a
-                        href={`tel:${siteConfig.contactPhone}`}
-                        className="font-medium text-graphite hover:text-mineral transition-colors"
-                      >
-                        {siteConfig.contactPhone}
-                      </a>
-                    </div>
+                {/* Telefone SC */}
+                <div className="flex items-start gap-3.5">
+                  <div className="rounded-xs bg-mineral/10 p-2.5 text-mineral shrink-0">
+                    <Phone className="h-5 w-5" />
                   </div>
-                )}
+                  <div>
+                    <span className="text-xs text-graphite/60 block">Telefone Comercial (Litoral SC)</span>
+                    <a
+                      href={`tel:${siteConfig.contactPhone.replace(/\D/g, "")}`}
+                      className="font-medium text-graphite hover:text-mineral transition-colors"
+                    >
+                      {siteConfig.contactPhone}
+                    </a>
+                  </div>
+                </div>
 
                 {/* E-mail */}
-                {siteConfig.contactEmail && (
-                  <div className="flex items-start gap-3.5">
-                    <div className="rounded-xs bg-mineral/10 p-2.5 text-mineral">
-                      <Mail className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs text-graphite/50 block">E-mail Institucional</span>
-                      <a
-                        href={`mailto:${siteConfig.contactEmail}`}
-                        className="font-medium text-graphite hover:text-mineral transition-colors"
-                      >
-                        {siteConfig.contactEmail}
-                      </a>
-                    </div>
+                <div className="flex items-start gap-3.5">
+                  <div className="rounded-xs bg-mineral/10 p-2.5 text-mineral shrink-0">
+                    <Mail className="h-5 w-5" />
                   </div>
-                )}
+                  <div>
+                    <span className="text-xs text-graphite/60 block">E-mail Institucional</span>
+                    <a
+                      href={`mailto:${siteConfig.contactEmail}`}
+                      className="font-medium text-graphite hover:text-mineral transition-colors"
+                    >
+                      {siteConfig.contactEmail}
+                    </a>
+                  </div>
+                </div>
+
+                {/* Endereço Sede */}
+                <div className="flex items-start gap-3.5">
+                  <div className="rounded-xs bg-mineral/10 p-2.5 text-mineral shrink-0">
+                    <Building className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="text-xs text-graphite/60 block">Escritório Central</span>
+                    <p className="font-medium text-graphite leading-snug">
+                      Av. Afonso Pena, 1.897 – 4° Andar
+                      <br />
+                      <span className="text-xs text-graphite/70 font-normal">
+                        Edifício Executive Center – Campo Grande/MS
+                      </span>
+                    </p>
+                  </div>
+                </div>
 
                 {/* Horário */}
                 <div className="flex items-start gap-3.5">
-                  <div className="rounded-xs bg-mineral/10 p-2.5 text-mineral">
+                  <div className="rounded-xs bg-mineral/10 p-2.5 text-mineral shrink-0">
                     <Clock className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-xs text-graphite/50 block">Horário de Funcionamento</span>
+                    <span className="text-xs text-graphite/60 block">Horário de Atendimento</span>
                     <p className="font-medium text-graphite">
                       Segunda a Sexta: 08h às 18h
                       <br />
-                      <span className="text-xs text-graphite/60 font-normal">
-                        Sábados e plantões sob agendamento prévio
+                      <span className="text-xs text-graphite/70 font-normal">
+                        Plantões e visitas sob agendamento prévio
                       </span>
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Informações Institucionais */}
-              <div className="mt-8 border-t border-areia/40 pt-6 text-xs text-graphite/60 space-y-1.5">
-                {siteConfig.creci && (
-                  <p>
-                    <strong>Registro Profissional:</strong> CRECI {siteConfig.creci}
-                  </p>
-                )}
-                {siteConfig.cnpj && (
-                  <p>
-                    <strong>CNPJ:</strong> {siteConfig.cnpj}
-                  </p>
-                )}
-                <p className="text-[11px] text-graphite/50 pt-2">
-                  MONARQ Imóveis &amp; Investimentos Ltda. Todos os direitos reservados.
-                </p>
+              {/* Redes Sociais */}
+              <div className="mt-8 border-t border-areia/40 pt-6">
+                <span className="text-xs uppercase tracking-wider text-graphite/60 font-semibold block mb-3">
+                  Siga a MONARQ
+                </span>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={siteConfig.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="focus-ring flex items-center gap-2 rounded-xs border border-areia/70 bg-offwhite/50 px-3 py-2 text-xs font-medium text-graphite hover:bg-offwhite hover:text-terracota transition-colors"
+                  >
+                    <InstagramIcon className="h-4 w-4" />
+                    <span>{siteConfig.instagramHandle}</span>
+                  </a>
+
+                  <a
+                    href={siteConfig.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="focus-ring flex items-center gap-2 rounded-xs border border-areia/70 bg-offwhite/50 px-3 py-2 text-xs font-medium text-graphite hover:bg-offwhite hover:text-mineral transition-colors"
+                  >
+                    <FacebookIcon className="h-4 w-4" />
+                    <span>Facebook</span>
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -196,7 +223,7 @@ export default function ContatoPage() {
                     Mensagem Recebida com Sucesso!
                   </h4>
                   <p className="mt-2 text-sm text-graphite/70 max-w-md mx-auto">
-                    Agradecemos o contato. Um consultor da equipe MONARQ entrará em contato em até 1 dia útil através do WhatsApp ou e-mail informado.
+                    Agradecemos o contato. Um consultor da equipe MONARQ entrará em contato em breve através do WhatsApp ou e-mail informado.
                   </p>
                   <button
                     type="button"
@@ -241,7 +268,7 @@ export default function ContatoPage() {
                         id="form-phone"
                         type="tel"
                         required
-                        placeholder="(00) 00000-0000"
+                        placeholder="(67) 98213-3789"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3.5 py-2.5 text-xs text-graphite placeholder:text-graphite/40 transition-colors focus:border-mineral focus:bg-white"
@@ -278,7 +305,7 @@ export default function ContatoPage() {
                       <option value="campo-grande">Imóveis em Campo Grande / MS</option>
                       <option value="rural">Propriedades Rurais &amp; Fazendas (MS / MT)</option>
                       <option value="avaliacao">Avaliação Mercadológica (PTAM)</option>
-                      <option value="regularizacao">Regularização Imobiliária &amp; Jurídico</option>
+                      <option value="regularizacao">Regularização Imobiliária &amp; Apoio Jurídico</option>
                       <option value="outro">Outro assunto institucional</option>
                     </select>
                   </div>
@@ -308,9 +335,9 @@ export default function ContatoPage() {
                 </form>
               )}
 
-              <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-graphite/50">
+              <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-graphite/60">
                 <ShieldCheck className="h-4 w-4 text-mineral" />
-                <span>Seus dados são confidenciais e nunca serão compartilhados.</span>
+                <span>Seus dados são confidenciais e protegidos por sigilo profissional.</span>
               </div>
             </div>
           </div>
