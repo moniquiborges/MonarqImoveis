@@ -13,7 +13,7 @@ create type public.user_role as enum ('admin', 'editor');
 create type public.listing_status as enum ('draft', 'published', 'archived', 'sold');
 create type public.development_stage as enum ('lancamento', 'em-obras', 'pronto', 'vendido');
 create type public.unit_status as enum ('disponivel', 'reservado', 'vendido');
-create type public.rural_activity as enum ('agricultura', 'pecuaria', 'investimento');
+create type public.rural_activity as enum ('venda', 'arrendamento', 'agricultura', 'pecuaria', 'investimento');
 create type public.property_badge as enum (
   'exclusivo',
   'lancamento',

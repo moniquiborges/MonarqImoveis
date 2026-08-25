@@ -61,7 +61,12 @@ export interface UrbanProperty {
   gallery: PropertyImage[];
 }
 
-export type RuralActivity = "agricultura" | "pecuaria" | "investimento";
+export type RuralActivity =
+  | "venda"
+  | "arrendamento"
+  | "agricultura"
+  | "pecuaria"
+  | "investimento";
 
 export interface RuralProperty {
   slug: string;

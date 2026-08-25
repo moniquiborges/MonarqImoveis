@@ -129,7 +129,9 @@ export function SearchModule() {
               <option value="MT">Mato Grosso</option>
             </select>
             <select className={selectClasses} onChange={(e) => updateField("atividade", e.target.value)} defaultValue="">
-              <option value="">Atividade</option>
+              <option value="">Atividade / Finalidade</option>
+              <option value="venda">Venda</option>
+              <option value="arrendamento">Arrendamento</option>
               <option value="agricultura">Agricultura</option>
               <option value="pecuaria">Pecuária</option>
               <option value="investimento">Investimento</option>

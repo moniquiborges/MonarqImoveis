@@ -327,10 +327,12 @@ export default function AdminRuralPage() {
                     onChange={(e) =>
                       setNewRural({ ...newRural, activity: e.target.value as RuralActivity })
                     }
-                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite cursor-pointer"
                   >
-                    <option value="pecuaria">Pecuária</option>
+                    <option value="venda">Venda</option>
+                    <option value="arrendamento">Arrendamento</option>
                     <option value="agricultura">Agricultura / Soja</option>
+                    <option value="pecuaria">Pecuária</option>
                     <option value="investimento">Investimento / Eucalipto</option>
                   </select>
                 </div>

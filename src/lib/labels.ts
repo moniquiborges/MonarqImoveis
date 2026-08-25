@@ -8,6 +8,8 @@ export const stageLabels: Record<DevelopmentStage, string> = {
 };
 
 export const ruralActivityLabels: Record<RuralActivity, string> = {
+  venda: "Venda",
+  arrendamento: "Arrendamento",
   agricultura: "Agricultura",
   pecuaria: "Pecuária",
   investimento: "Investimento",

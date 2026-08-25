@@ -91,11 +91,13 @@ export default function RuralPage() {
             },
             {
               id: "filter-activity",
-              label: "Aptidão Principal",
+              label: "Atividade / Finalidade",
               value: selectedActivity,
               onChange: setSelectedActivity,
               options: [
-                { value: "all", label: "Todas as Aptidões" },
+                { value: "all", label: "Todas as Finalidades & Aptidões" },
+                { value: "venda", label: "Venda" },
+                { value: "arrendamento", label: "Arrendamento" },
                 { value: "agricultura", label: "Agricultura / Lavoura" },
                 { value: "pecuaria", label: "Pecuária / Cria e Recria" },
                 { value: "investimento", label: "Investimento & Silvicultura" },
