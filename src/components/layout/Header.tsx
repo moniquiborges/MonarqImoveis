@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Menu, X, Heart } from "lucide-react";
 import { primaryNav } from "./nav-data";
-import { ButtonLink } from "@/components/ui/Button";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { cn } from "@/lib/utils";
 
@@ -15,40 +14,47 @@ export function Header() {
   const { totalFavorites, setIsDrawerOpen } = useFavorites();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-graphite/8 bg-offwhite/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-20 w-full max-w-[1440px] items-center justify-between px-6 md:px-10 lg:px-16">
-        <Link href="/" className="focus-ring shrink-0" aria-label="MONARQ Imóveis & Investimentos">
+    <header className="sticky top-0 z-40 border-b border-graphite/8 bg-offwhite/95 backdrop-blur-md">
+      <div className="mx-auto flex h-20 w-full max-w-[1480px] items-center justify-between px-5 md:px-8 lg:px-12">
+        {/* Logo MONARQ */}
+        <Link
+          href="/"
+          className="focus-ring shrink-0 flex items-center pr-2 md:pr-4"
+          aria-label="MONARQ Imóveis & Investimentos - Página Inicial"
+        >
           <Image
             src="/brand/monarq-logo-horizontal.png"
             alt="MONARQ Imóveis & Investimentos"
-            width={175}
-            height={45}
+            width={180}
+            height={46}
             priority
-            className="h-9 w-auto md:h-10"
+            className="h-8 md:h-9 xl:h-10 w-auto object-contain"
           />
         </Link>
 
-        {/* Navegação Desktop */}
-        <nav className="hidden items-center gap-7 xl:gap-8 lg:flex">
+        {/* Navegação Desktop Distribuída */}
+        <nav className="hidden items-center gap-4 xl:gap-6 2xl:gap-7 lg:flex">
           {primaryNav.map((item) => (
             <div
               key={item.href}
-              className="relative"
+              className="relative py-2"
               onMouseEnter={() => item.children && setOpenDropdown(item.label)}
               onMouseLeave={() => item.children && setOpenDropdown(null)}
             >
               <Link
                 href={item.href}
-                className="focus-ring flex items-center gap-1 py-2 text-[13px] font-medium uppercase tracking-[0.06em] text-graphite/80 transition-colors hover:text-mineral"
+                className="focus-ring flex items-center gap-1 text-[11.5px] xl:text-[12.5px] font-semibold uppercase tracking-[0.05em] text-graphite/75 transition-colors hover:text-mineral whitespace-nowrap py-1"
               >
-                {item.label}
-                {item.children ? <ChevronDown className="h-3.5 w-3.5" /> : null}
+                <span>{item.label}</span>
+                {item.children ? (
+                  <ChevronDown className="h-3 w-3 opacity-60 transition-transform duration-200 group-hover:rotate-180" />
+                ) : null}
               </Link>
 
               {item.children ? (
                 <div
                   className={cn(
-                    "absolute left-0 top-full min-w-[220px] rounded-sm border border-graphite/8 bg-white py-2 shadow-[0_16px_40px_-16px_rgba(21,58,70,0.25)] transition-all duration-200 z-50",
+                    "absolute left-0 top-full min-w-[210px] rounded-xs border border-areia/60 bg-white py-2 shadow-[0_16px_36px_-12px_rgba(21,58,70,0.18)] transition-all duration-200 z-50",
                     openDropdown === item.label
                       ? "pointer-events-auto translate-y-0 opacity-100"
                       : "pointer-events-none -translate-y-1 opacity-0"
@@ -58,7 +64,7 @@ export function Header() {
                     <Link
                       key={child.href}
                       href={child.href}
-                      className="focus-ring block px-4 py-2 text-[13px] text-graphite/80 hover:bg-offwhite hover:text-mineral"
+                      className="focus-ring block px-4 py-2 text-[12.5px] text-graphite/80 hover:bg-offwhite hover:text-mineral transition-colors"
                     >
                       {child.label}
                     </Link>
@@ -70,31 +76,35 @@ export function Header() {
         </nav>
 
         {/* Lado Direito: Favoritos & CTA */}
-        <div className="flex items-center gap-3 md:gap-4">
+        <div className="flex items-center gap-2.5 md:gap-3.5 shrink-0 pl-2">
           {/* Botão de Favoritos no Header */}
           <button
             type="button"
             onClick={() => setIsDrawerOpen(true)}
-            aria-label={`Ver ${totalFavorites} imóveis favoritados`}
-            className="focus-ring relative flex h-10 w-10 items-center justify-center rounded-full bg-white text-graphite/80 shadow-2xs hover:text-terracota transition-all cursor-pointer hover:scale-105 active:scale-95"
+            aria-label={`Ver ${totalFavorites} imóveis salvos`}
+            className="focus-ring relative flex h-9.5 w-9.5 items-center justify-center rounded-full border border-areia/60 bg-white text-graphite/75 shadow-2xs hover:border-mineral/40 hover:text-terracota transition-all cursor-pointer hover:scale-105 active:scale-95"
             title="Meus Imóveis Salvos"
           >
             <Heart
-              className={`h-5 w-5 ${
+              className={`h-4.5 w-4.5 ${
                 totalFavorites > 0 ? "fill-terracota text-terracota" : ""
               }`}
             />
             {totalFavorites > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-terracota text-[10px] font-bold text-white shadow-sm animate-fade-in">
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-terracota text-[9px] font-bold text-white shadow-xs animate-fade-in">
                 {totalFavorites}
               </span>
             )}
           </button>
 
+          {/* CTA Especialista */}
           <div className="hidden lg:block">
-            <ButtonLink href="/contato" variant="primary">
+            <Link
+              href="/contato"
+              className="focus-ring inline-flex h-9.5 items-center justify-center rounded-xs bg-mineral px-4 text-[11.5px] xl:text-[12px] font-semibold uppercase tracking-[0.08em] text-offwhite hover:bg-mineral-light transition-colors whitespace-nowrap shadow-2xs"
+            >
               Falar com Especialista
-            </ButtonLink>
+            </Link>
           </div>
 
           {/* Botão Menu Mobile */}
@@ -110,7 +120,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* Menu Mobile */}
+      {/* Menu Mobile Retrátil */}
       <div
         className={cn(
           "overflow-y-auto border-t border-graphite/8 bg-offwhite transition-[max-height] duration-300 ease-in-out lg:hidden",
@@ -123,7 +133,7 @@ export function Header() {
               <Link
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className="focus-ring block py-2.5 text-[15px] font-medium text-graphite"
+                className="focus-ring block py-2 text-[14px] font-semibold uppercase tracking-wider text-graphite"
               >
                 {item.label}
               </Link>
@@ -134,7 +144,7 @@ export function Header() {
                       key={child.href}
                       href={child.href}
                       onClick={() => setMobileOpen(false)}
-                      className="focus-ring py-1.5 text-[13px] text-graphite/65"
+                      className="focus-ring py-1.5 text-[13px] text-graphite/70"
                     >
                       {child.label}
                     </Link>
@@ -143,14 +153,13 @@ export function Header() {
               ) : null}
             </div>
           ))}
-          <ButtonLink
+          <Link
             href="/contato"
-            variant="primary"
-            className="mt-4 w-full"
             onClick={() => setMobileOpen(false)}
+            className="focus-ring mt-4 flex h-11 w-full items-center justify-center rounded-xs bg-mineral text-xs font-semibold uppercase tracking-wider text-offwhite hover:bg-mineral-light transition-colors"
           >
             Falar com Especialista
-          </ButtonLink>
+          </Link>
         </nav>
       </div>
     </header>
