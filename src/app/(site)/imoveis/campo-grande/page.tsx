@@ -1,0 +1,136 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { Container } from "@/components/ui/Container";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { FilterBar } from "@/components/property/FilterBar";
+import { PropertyCard } from "@/components/property/PropertyCard";
+import { urbanPropertyToCard } from "@/components/property/adapters";
+import { mockUrbanProperties } from "@/lib/mock/properties";
+
+export default function CampoGrandePage() {
+  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Bairros únicos disponíveis nos dados
+  const neighborhoods = useMemo(() => {
+    const set = new Set(mockUrbanProperties.map((p) => p.neighborhood));
+    return Array.from(set);
+  }, []);
+
+  // Tipos únicos disponíveis
+  const propertyTypes = useMemo(() => {
+    const set = new Set(mockUrbanProperties.map((p) => p.type));
+    return Array.from(set);
+  }, []);
+
+  const filteredProperties = useMemo(() => {
+    return mockUrbanProperties.filter((item) => {
+      if (selectedType !== "all" && item.type !== selectedType) return false;
+      if (selectedNeighborhood !== "all" && item.neighborhood !== selectedNeighborhood) return false;
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesTitle = item.title.toLowerCase().includes(q);
+        const matchesNeighborhood = item.neighborhood.toLowerCase().includes(q);
+        const matchesCode = item.code.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesNeighborhood && !matchesCode) return false;
+      }
+
+      return true;
+    });
+  }, [selectedType, selectedNeighborhood, searchQuery]);
+
+  const hasActiveFilters =
+    selectedType !== "all" || selectedNeighborhood !== "all" || searchQuery !== "";
+
+  const handleReset = () => {
+    setSelectedType("all");
+    setSelectedNeighborhood("all");
+    setSearchQuery("");
+  };
+
+  return (
+    <main className="py-8 md:py-12">
+      <Container>
+        {/* Breadcrumb */}
+        <Breadcrumb
+          items={[
+            { label: "Início", href: "/" },
+            { label: "Imóveis Urbanos", href: "/imoveis/campo-grande" },
+            { label: "Campo Grande / MS" },
+          ]}
+        />
+
+        {/* Cabeçalho */}
+        <div className="mb-8 max-w-3xl">
+          <p className="text-xs uppercase tracking-[0.15em] text-terracota font-semibold mb-2">
+            Mercado Imobiliário de Alto Padrão
+          </p>
+          <h1 className="font-display text-3xl md:text-5xl text-mineral font-normal tracking-tight">
+            Imóveis em Campo Grande &mdash; MS
+          </h1>
+          <p className="mt-4 text-sm md:text-base text-graphite/70 leading-relaxed">
+            Casas em condomínio fechado, coberturas exclusivas e apartamentos de alto padrão nos bairros
+            mais tradicionais e valorizados da capital sul-mato-grossense.
+          </p>
+        </div>
+
+        {/* Barra de Filtros */}
+        <FilterBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Buscar por condomínio, bairro ou código (ex: MRQ-U101)..."
+          selects={[
+            {
+              id: "filter-type",
+              label: "Tipo de Imóvel",
+              value: selectedType,
+              onChange: setSelectedType,
+              options: [
+                { value: "all", label: "Todos os Tipos" },
+                ...propertyTypes.map((t) => ({ value: t, label: t })),
+              ],
+            },
+            {
+              id: "filter-neighborhood",
+              label: "Bairro / Região",
+              value: selectedNeighborhood,
+              onChange: setSelectedNeighborhood,
+              options: [
+                { value: "all", label: "Todos os Bairros" },
+                ...neighborhoods.map((n) => ({ value: n, label: n })),
+              ],
+            },
+          ]}
+          totalResults={filteredProperties.length}
+          hasActiveFilters={hasActiveFilters}
+          onReset={handleReset}
+        />
+
+        {/* Grade de Imóveis */}
+        {filteredProperties.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
+            {filteredProperties.map((p) => (
+              <PropertyCard key={p.slug} {...urbanPropertyToCard(p)} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-sm border border-dashed border-areia/80 p-12 text-center bg-white/40">
+            <h3 className="font-display text-lg text-graphite">Nenhum imóvel urbano encontrado</h3>
+            <p className="mt-2 text-xs text-graphite/60 max-w-md mx-auto">
+              Não encontramos imóveis para os critérios selecionados. Redefina os filtros ou fale diretamente com nossos corretores credenciados.
+            </p>
+            <button
+              onClick={handleReset}
+              className="mt-5 inline-flex items-center rounded-xs bg-mineral px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-offwhite hover:bg-mineral-light transition-colors"
+            >
+              Limpar Filtros
+            </button>
+          </div>
+        )}
+      </Container>
+    </main>
+  );
+}
