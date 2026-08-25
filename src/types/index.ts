@@ -68,11 +68,24 @@ export type RuralActivity =
   | "pecuaria"
   | "investimento";
 
+export type RuralState =
+  | "MS"
+  | "MT"
+  | "GO"
+  | "MG"
+  | "SP"
+  | "PR"
+  | "BA"
+  | "PI"
+  | "MA"
+  | "TO"
+  | "PA";
+
 export interface RuralProperty {
   slug: string;
   code: string;
   title: string;
-  state: "MS" | "MT";
+  state: RuralState | string;
   municipality: string;
   totalHectares: number;
   activity: RuralActivity[];

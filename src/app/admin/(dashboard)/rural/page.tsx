@@ -24,7 +24,7 @@ export default function AdminRuralPage() {
 
   const [newRural, setNewRural] = useState({
     title: "",
-    state: "MS" as "MS" | "MT",
+    state: "MS" as RuralProperty["state"],
     municipality: "Ribas do Rio Pardo",
     totalHectares: "1500",
     activity: "pecuaria" as RuralActivity,
@@ -285,11 +285,20 @@ export default function AdminRuralPage() {
                   </label>
                   <select
                     value={newRural.state}
-                    onChange={(e) => setNewRural({ ...newRural, state: e.target.value as "MS" | "MT" })}
+                    onChange={(e) => setNewRural({ ...newRural, state: e.target.value as any })}
                     className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
                   >
                     <option value="MS">Mato Grosso do Sul (MS)</option>
                     <option value="MT">Mato Grosso (MT)</option>
+                    <option value="GO">Goiás (GO)</option>
+                    <option value="MG">Minas Gerais (MG)</option>
+                    <option value="SP">São Paulo (SP)</option>
+                    <option value="PR">Paraná (PR)</option>
+                    <option value="BA">Bahia (BA)</option>
+                    <option value="PI">Piauí (PI)</option>
+                    <option value="MA">Maranhão (MA)</option>
+                    <option value="TO">Tocantins (TO)</option>
+                    <option value="PA">Pará (PA)</option>
                   </select>
                 </div>
 

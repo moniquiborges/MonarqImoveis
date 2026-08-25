@@ -125,8 +125,17 @@ export function SearchModule() {
           <>
             <select className={selectClasses} onChange={(e) => updateField("estado", e.target.value)} defaultValue="">
               <option value="">Estado</option>
-              <option value="MS">Mato Grosso do Sul</option>
-              <option value="MT">Mato Grosso</option>
+              <option value="MS">Mato Grosso do Sul (MS)</option>
+              <option value="MT">Mato Grosso (MT)</option>
+              <option value="GO">Goiás (GO)</option>
+              <option value="MG">Minas Gerais (MG)</option>
+              <option value="SP">São Paulo (SP)</option>
+              <option value="PR">Paraná (PR)</option>
+              <option value="BA">Bahia (BA)</option>
+              <option value="PI">Piauí (PI)</option>
+              <option value="MA">Maranhão (MA)</option>
+              <option value="TO">Tocantins (TO)</option>
+              <option value="PA">Pará (PA)</option>
             </select>
             <select className={selectClasses} onChange={(e) => updateField("atividade", e.target.value)} defaultValue="">
               <option value="">Atividade / Finalidade</option>
