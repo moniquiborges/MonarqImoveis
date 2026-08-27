@@ -13,15 +13,21 @@ import type { RuralActivity } from "@/types";
 export default function RuralPage() {
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedActivity, setSelectedActivity] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const filteredProperties = useMemo(() => {
     return mockRuralProperties.filter((item) => {
-      // Estado (MS / MT)
+      // Estado (MS / MT / etc)
       if (selectedState !== "all" && item.state !== selectedState) return false;
 
-      // Aptidão da Propriedade
+      // Finalidade (Venda / Arrendamento)
       if (selectedActivity !== "all" && !item.activity.includes(selectedActivity as RuralActivity)) {
+        return false;
+      }
+
+      // Tipo de Imóvel Rural (Fazendas, Chácaras, Sítio, Ranchos)
+      if (selectedType !== "all" && item.type !== selectedType) {
         return false;
       }
 
@@ -36,14 +42,15 @@ export default function RuralPage() {
 
       return true;
     });
-  }, [selectedState, selectedActivity, searchQuery]);
+  }, [selectedState, selectedActivity, selectedType, searchQuery]);
 
   const hasActiveFilters =
-    selectedState !== "all" || selectedActivity !== "all" || searchQuery !== "";
+    selectedState !== "all" || selectedActivity !== "all" || selectedType !== "all" || searchQuery !== "";
 
   const handleReset = () => {
     setSelectedState("all");
     setSelectedActivity("all");
+    setSelectedType("all");
     setSearchQuery("");
   };
 
@@ -104,12 +111,22 @@ export default function RuralPage() {
               value: selectedActivity,
               onChange: setSelectedActivity,
               options: [
-                { value: "all", label: "Todas as Finalidades & Aptidões" },
+                { value: "all", label: "Todas as Finalidades" },
                 { value: "venda", label: "Venda" },
                 { value: "arrendamento", label: "Arrendamento" },
-                { value: "agricultura", label: "Agricultura / Lavoura" },
-                { value: "pecuaria", label: "Pecuária / Cria e Recria" },
-                { value: "investimento", label: "Investimento & Silvicultura" },
+              ],
+            },
+            {
+              id: "filter-type",
+              label: "Tipo de Imóvel",
+              value: selectedType,
+              onChange: setSelectedType,
+              options: [
+                { value: "all", label: "Todos os Tipos" },
+                { value: "fazenda", label: "Fazendas" },
+                { value: "chacara", label: "Chácaras" },
+                { value: "sitio", label: "Sítio" },
+                { value: "rancho", label: "Ranchos" },
               ],
             },
           ]}

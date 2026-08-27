@@ -12,8 +12,7 @@ export const siteConfig = {
   contactPhone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "(47) 99976-1982",
   phoneScDisplay: "(47) 99976-1982",
   phoneMsDisplay: "(67) 98213-3789",
-  creci: process.env.NEXT_PUBLIC_CRECI || "12.345-J",
-  cnpj: process.env.NEXT_PUBLIC_CNPJ || "00.000.000/0001-00",
+  cnpj: process.env.NEXT_PUBLIC_CNPJ || "65.640.045/0001-76",
   instagramUrl:
     process.env.NEXT_PUBLIC_INSTAGRAM_URL ||
     "https://www.instagram.com/monarqimoveis.invest?igsh=ZmFnajlia2h2NDRx&igsi=ZmFnajlia2h2NDRx",

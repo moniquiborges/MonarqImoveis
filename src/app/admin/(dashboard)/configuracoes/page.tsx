@@ -10,10 +10,9 @@ export default function AdminConfiguracoesPage() {
     tagline: siteConfig.tagline,
     whatsappNumber: siteConfig.whatsappNumber || "5567999998888",
     whatsappDisplay: siteConfig.whatsappDisplay || "(67) 99999-8888",
-    contactEmail: siteConfig.contactEmail || "contato@monarqimoveis.com.br",
-    contactPhone: siteConfig.contactPhone || "(67) 3333-2222",
-    creci: siteConfig.creci || "12.345-J/MS",
-    cnpj: siteConfig.cnpj || "00.000.000/0001-00",
+    contactEmail: siteConfig.contactEmail || "contatomonarqimoveis@gmail.com",
+    contactPhone: siteConfig.contactPhone || "(47) 99976-1982",
+    cnpj: siteConfig.cnpj || "65.640.045/0001-76",
     instagramUrl: siteConfig.instagramUrl || "https://instagram.com/monarqimoveis",
     facebookUrl: siteConfig.facebookUrl || "https://facebook.com/monarqimoveis",
     gtmId: "GTM-XXXXXX",
@@ -130,16 +129,6 @@ export default function AdminConfiguracoesPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-graphite mb-1">Registro CRECI</label>
-              <input
-                type="text"
-                value={config.creci}
-                onChange={(e) => setConfig({ ...config, creci: e.target.value })}
-                className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
-              />
-            </div>
-
             <div>
               <label className="block text-xs font-medium text-graphite mb-1">CNPJ</label>
               <input

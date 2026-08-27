@@ -15,6 +15,13 @@ export const ruralActivityLabels: Record<RuralActivity, string> = {
   investimento: "Investimento",
 };
 
+export const ruralTypeLabels: Record<string, string> = {
+  fazenda: "Fazenda",
+  chacara: "Chácara",
+  sitio: "Sítio",
+  rancho: "Rancho",
+};
+
 export const propertyBadgeLabels: Record<PropertyBadge, string> = {
   exclusivo: "Exclusivo",
   lancamento: "Lançamento",

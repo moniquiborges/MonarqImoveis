@@ -61,6 +61,8 @@ export interface UrbanProperty {
   gallery: PropertyImage[];
 }
 
+export type RuralType = "fazenda" | "chacara" | "sitio" | "rancho";
+
 export type RuralActivity =
   | "venda"
   | "arrendamento"
@@ -85,6 +87,7 @@ export interface RuralProperty {
   slug: string;
   code: string;
   title: string;
+  type?: RuralType | string;
   state: RuralState | string;
   municipality: string;
   totalHectares: number;

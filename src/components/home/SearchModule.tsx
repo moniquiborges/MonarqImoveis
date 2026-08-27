@@ -38,7 +38,7 @@ export function SearchModule() {
   }
 
   return (
-    <div className="w-full max-w-3xl rounded-sm bg-offwhite/95 p-2 shadow-[0_24px_64px_-24px_rgba(0,0,0,0.4)] backdrop-blur-sm">
+    <div className="w-full max-w-4xl rounded-sm bg-offwhite/95 p-2 shadow-[0_24px_64px_-24px_rgba(0,0,0,0.4)] backdrop-blur-sm">
       <div className="flex gap-1 p-1">
         {categories.map((c) => (
           <button
@@ -58,7 +58,7 @@ export function SearchModule() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 lg:grid-cols-5">
         {category === "empreendimentos" ? (
           <>
             <select className={selectClasses} onChange={(e) => updateField("cidade", e.target.value)} defaultValue="">
@@ -141,9 +141,13 @@ export function SearchModule() {
               <option value="">Atividade / Finalidade</option>
               <option value="venda">Venda</option>
               <option value="arrendamento">Arrendamento</option>
-              <option value="agricultura">Agricultura</option>
-              <option value="pecuaria">Pecuária</option>
-              <option value="investimento">Investimento</option>
+            </select>
+            <select className={selectClasses} onChange={(e) => updateField("tipo", e.target.value)} defaultValue="">
+              <option value="">Tipo de Imóvel</option>
+              <option value="fazenda">Fazendas</option>
+              <option value="chacara">Chácaras</option>
+              <option value="sitio">Sítio</option>
+              <option value="rancho">Ranchos</option>
             </select>
             <select className={selectClasses} onChange={(e) => updateField("hectares", e.target.value)} defaultValue="">
               <option value="">Faixa de hectares</option>

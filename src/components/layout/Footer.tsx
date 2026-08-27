@@ -146,18 +146,36 @@ export function Footer() {
       </Container>
 
       <div className="border-t border-offwhite/10">
-        <Container className="flex flex-col gap-3 py-6 text-[12px] text-offwhite/50 md:flex-row md:items-center md:justify-between">
+        <Container className="flex flex-col gap-4 py-6 text-[12px] text-offwhite/50 md:flex-row md:items-center md:justify-between">
           <p>
             © {year} MONARQ Imóveis & Investimentos. Todos os direitos reservados.
-            {siteConfig.creci ? ` · CRECI ${siteConfig.creci}` : ""}
             {siteConfig.cnpj ? ` · CNPJ ${siteConfig.cnpj}` : ""}
           </p>
-          <div className="flex gap-5">
-            {legalLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="focus-ring hover:text-offwhite">
-                {link.label}
-              </Link>
-            ))}
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex gap-5">
+              {legalLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="focus-ring hover:text-offwhite transition-colors">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+            <a
+              href="https://www.oriumdigital.com.br/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="focus-ring flex items-center gap-2 text-offwhite/40 transition-colors hover:text-offwhite/80 group"
+              title="Desenvolvido por Orium Digital"
+              aria-label="Desenvolvido por Orium Digital"
+            >
+              <span className="text-[11px] tracking-wide">Desenvolvido por</span>
+              <Image
+                src="/brand/orium-logo-white.png"
+                alt="Orium Digital"
+                width={80}
+                height={24}
+                className="h-4 w-auto opacity-50 transition-opacity group-hover:opacity-100"
+              />
+            </a>
           </div>
         </Container>
       </div>
