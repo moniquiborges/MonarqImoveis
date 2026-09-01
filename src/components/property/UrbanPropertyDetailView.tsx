@@ -56,10 +56,10 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
   const property = useMemo(() => {
     return (
       dbProperty ||
-      localProperties.find((p) => p.slug === initialSlug) ||
-      initialProperty
+      initialProperty ||
+      localProperties.find((p) => p.slug === initialSlug)
     );
-  }, [dbProperty, localProperties, initialSlug, initialProperty]);
+  }, [dbProperty, initialProperty, localProperties, initialSlug]);
 
   if (loadingDb && !property) {
     return (

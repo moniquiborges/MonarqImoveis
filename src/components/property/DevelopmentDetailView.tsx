@@ -64,10 +64,10 @@ export function DevelopmentDetailView({
   const development = useMemo(() => {
     return (
       dbDevelopment ||
-      localDevelopments.find((d) => d.slug === initialSlug) ||
-      initialDevelopment
+      initialDevelopment ||
+      localDevelopments.find((d) => d.slug === initialSlug)
     );
-  }, [dbDevelopment, localDevelopments, initialSlug, initialDevelopment]);
+  }, [dbDevelopment, initialDevelopment, localDevelopments, initialSlug]);
 
   if (loadingDb && !development) {
     return (
