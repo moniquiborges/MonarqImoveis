@@ -4,15 +4,11 @@ import React, { useState, useRef } from "react";
 import {
   Upload,
   Link as LinkIcon,
-  Image as ImageIcon,
-  Sparkles,
   Camera,
   Trash2,
   Star,
-  Check,
   Layers,
 } from "lucide-react";
-import { mockImages } from "@/lib/mock/images";
 
 export interface ImageData {
   url: string;
@@ -22,7 +18,7 @@ export interface ImageData {
 interface ImageUploadProps {
   label?: string;
   helperText?: string;
-  coverImage: ImageData;
+  coverImage?: ImageData;
   onCoverChange?: (image: ImageData) => void;
   gallery?: ImageData[];
   onGalleryChange?: (gallery: ImageData[]) => void;
@@ -32,72 +28,31 @@ interface ImageUploadProps {
   className?: string;
 }
 
-const PRESET_COLLECTIONS = {
-  urban: [
-    { title: "Casa Alto Padrão", url: mockImages.modernHouse },
-    { title: "Living Duplex Integrado", url: mockImages.livingRoom1 },
-    { title: "Living Contemporâneo", url: mockImages.livingRoom2 },
-    { title: "Suíte Master", url: mockImages.bedroom1 },
-    { title: "Cozinha Gourmet", url: mockImages.kitchen1 },
-    { title: "Fachada Moderna Noturna", url: mockImages.houseExterior1 },
-    { title: "Área de Lazer & Piscina", url: mockImages.poolHouse },
-    { title: "Edifício Residencial", url: mockImages.urbanBuilding1 },
-  ],
-  coastal: [
-    { title: "Vista Mar Frente-Mar", url: mockImages.coastalHouse1 },
-    { title: "Edifício Litoral Catarinense", url: mockImages.urbanBuilding2 },
-    { title: "Living Panorâmico", url: mockImages.livingRoom3 },
-    { title: "Orla & Praia Aérea", url: mockImages.beachAerial },
-    { title: "Pôr do Sol Balneário", url: mockImages.beach2 },
-    { title: "Varanda Gourmet com Vista", url: mockImages.poolHouse },
-  ],
-  rural: [
-    { title: "Fazenda Produtiva Pecuária", url: mockImages.ruralLandscape1 },
-    { title: "Lavoura de Grãos / Agricultura", url: mockImages.ruralLandscape2 },
-    { title: "Sede de Fazenda", url: mockImages.farmField },
-    { title: "Pasto & Topografia Plana", url: mockImages.ruralLandscape1 },
-  ],
-  blog: [
-    { title: "Mercado Imobiliário", url: mockImages.urbanBuilding1 },
-    { title: "Litoral SC", url: mockImages.beach2 },
-    { title: "Agronegócio", url: mockImages.ruralLandscape1 },
-    { title: "Design de Interiores", url: mockImages.livingRoom1 },
-  ],
-  general: [
-    { title: "Living de Luxo", url: mockImages.livingRoom1 },
-    { title: "Fachada Moderna", url: mockImages.modernHouse },
-    { title: "Vista Mar", url: mockImages.coastalHouse1 },
-    { title: "Fazenda", url: mockImages.ruralLandscape1 },
-  ],
-};
-
 export function ImageUpload({
   label = "Fotografias do Imóvel",
   helperText,
-  coverImage,
+  coverImage = { url: "", alt: "" },
   onCoverChange,
   gallery = [],
   onGalleryChange,
   onChangeImages,
   allowGallery = true,
-  category = "urban",
   className = "",
 }: ImageUploadProps) {
-  const [activeTab, setActiveTab] = useState<"upload" | "url" | "presets">("upload");
+  const [activeTab, setActiveTab] = useState<"upload" | "url">("upload");
   const [urlInput, setUrlInput] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const presets = PRESET_COLLECTIONS[category] || PRESET_COLLECTIONS.urban;
 
   // Monta a lista unificada de todas as fotos presentes no anúncio
   const allImages: ImageData[] = [];
-  if (coverImage?.url) {
+  if (coverImage?.url && coverImage.url.trim() !== "") {
     allImages.push(coverImage);
   }
   if (allowGallery && gallery && gallery.length > 0) {
     gallery.forEach((g) => {
-      if (g.url && (!coverImage?.url || g.url !== coverImage.url)) {
+      if (g.url && g.url.trim() !== "" && (!coverImage?.url || g.url !== coverImage.url)) {
         allImages.push(g);
       }
     });
@@ -113,12 +68,11 @@ export function ImageUpload({
     }
   };
 
-  // Adiciona novas imagens (via upload múltiplo, URL ou banco de sugestões)
+  // Adiciona novas imagens (via upload múltiplo ou URL)
   const addImages = (newImgs: ImageData[]) => {
     if (!newImgs || newImgs.length === 0) return;
 
     if (!allowGallery) {
-      // Modo imagem única (ex: banner ou blog)
       updateImages(newImgs[0], []);
       return;
     }
@@ -131,7 +85,7 @@ export function ImageUpload({
     if (incomingValid.length === 0) return;
 
     // Se ainda não tem capa definida, a primeira imagem assume como capa
-    if (!coverImage?.url) {
+    if (!coverImage?.url || coverImage.url.trim() === "") {
       const first = incomingValid[0];
       const rest = incomingValid.slice(1);
       updateImages(first, rest);
@@ -168,16 +122,12 @@ export function ImageUpload({
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext("2d");
-
-          if (!ctx) {
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/jpeg", 0.78));
+          } else {
             resolve(dataUrl);
-            return;
           }
-
-          ctx.drawImage(img, 0, 0, width, height);
-          // Comprime para JPEG 0.78 para caber dezenas de fotos sem estourar o storage
-          const compressed = canvas.toDataURL("image/jpeg", 0.78);
-          resolve(compressed);
         };
         img.onerror = () => resolve(dataUrl);
         img.src = dataUrl;
@@ -187,29 +137,24 @@ export function ImageUpload({
     });
   };
 
-  // Processa múltiplos arquivos selecionados pelo input ou drop
-  const handleFiles = async (files: FileList | File[]) => {
-    const fileArray = Array.from(files).filter((file) => file.type.startsWith("image/"));
-    if (fileArray.length === 0) {
-      alert("Por favor, selecione arquivos de imagem válidos (JPG, PNG, WEBP, etc.).");
-      return;
+  const handleFiles = async (files: FileList) => {
+    setIsProcessing(true);
+    const newItems: ImageData[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith("image/")) continue;
+      const compressedUrl = await compressImage(file);
+      if (compressedUrl) {
+        newItems.push({
+          url: compressedUrl,
+          alt: file.name.replace(/\.[^/.]+$/, ""),
+        });
+      }
     }
 
-    try {
-      const loadedImgs: ImageData[] = [];
-      for (const file of fileArray) {
-        const compressedUrl = await compressImage(file);
-        if (compressedUrl) {
-          loadedImgs.push({
-            url: compressedUrl,
-            alt: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
-          });
-        }
-      }
-      addImages(loadedImgs);
-    } catch (err) {
-      console.error("Erro ao carregar imagens:", err);
-    }
+    addImages(newItems);
+    setIsProcessing(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -220,29 +165,21 @@ export function ImageUpload({
     }
   };
 
-  const handleUrlSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const trimmed = urlInput.trim();
-    if (!trimmed) return;
-
-    addImages([{ url: trimmed, alt: "Imagem do anúncio" }]);
+  const handleUrlSubmit = () => {
+    if (!urlInput.trim()) return;
+    addImages([{ url: urlInput.trim(), alt: "Foto do Imóvel" }]);
     setUrlInput("");
   };
 
-  const handleSelectPreset = (url: string, title: string) => {
-    addImages([{ url, alt: title }]);
+  // Troca a foto de capa quando o usuário clica na estrela
+  const handleSetAsCover = (selectedImage: ImageData) => {
+    if (selectedImage.url === coverImage?.url) return;
+
+    const remainingGallery = allImages.filter((img) => img.url !== selectedImage.url);
+    updateImages(selectedImage, remainingGallery);
   };
 
-  // Define uma imagem específica como Capa Principal com a Estrela (★)
-  const handleSetAsCover = (selectedImg: ImageData) => {
-    if (selectedImg.url === coverImage?.url) return;
-
-    // A nova galeria conterá todas as outras fotos (inclusive a capa antiga) exceto a nova capa
-    const updatedGallery = allImages.filter((img) => img.url !== selectedImg.url);
-    updateImages(selectedImg, updatedGallery);
-  };
-
-  // Remove uma imagem da galeria ou da capa
+  // Remove uma imagem da galeria
   const handleRemoveImage = (imgToRemove: ImageData) => {
     const isCover = imgToRemove.url === coverImage?.url;
     const remaining = allImages.filter((img) => img.url !== imgToRemove.url);
@@ -282,7 +219,7 @@ export function ImageUpload({
           <div className="flex items-center gap-1.5 bg-mineral/10 text-mineral px-2.5 py-1 rounded-xs text-[11px] font-semibold">
             <Layers className="h-3.5 w-3.5" />
             <span>
-              {allImages.length} {allImages.length === 1 ? "foto" : "fotos"} no anúncio
+              {allImages.length} {allImages.length === 1 ? "foto" : "fotos"} adicionadas
             </span>
           </div>
         )}
@@ -314,19 +251,6 @@ export function ImageUpload({
         >
           <LinkIcon className="h-3.5 w-3.5" />
           Link / URL
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("presets")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xs transition-colors cursor-pointer ${
-            activeTab === "presets"
-              ? "bg-mineral text-offwhite font-semibold shadow-xs"
-              : "text-graphite/60 hover:text-graphite hover:bg-offwhite"
-          }`}
-        >
-          <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-          Fotos Sugeridas
         </button>
       </div>
 
@@ -362,11 +286,13 @@ export function ImageUpload({
             <Upload className="h-5 w-5" />
           </div>
           <p className="text-xs font-semibold text-graphite">
-            Clique para selecionar fotos ou arraste e solte aqui
+            {isProcessing
+              ? "Processando e otimizando fotografias..."
+              : "Clique para selecionar fotos ou arraste e solte aqui"}
           </p>
           <p className="text-[11px] text-graphite/60 mt-1">
             {allowGallery
-              ? "Você pode selecionar várias fotos de uma vez (PNG, JPG, WEBP)"
+              ? "Você pode selecionar várias fotos de uma vez do computador ou celular (PNG, JPG, WEBP)"
               : "Formatos suportados: PNG, JPG, WEBP"}
           </p>
         </div>
@@ -398,62 +324,19 @@ export function ImageUpload({
         </div>
       )}
 
-      {/* Conteúdo da Aba: Fotos Sugeridas */}
-      {activeTab === "presets" && (
-        <div className="space-y-2">
-          <p className="text-[11px] text-graphite/60">
-            Clique em qualquer imagem para adicionar à galeria do anúncio:
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
-            {presets.map((preset, idx) => {
-              const isAlreadyAdded = allImages.some((img) => img.url === preset.url);
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleSelectPreset(preset.url, preset.title)}
-                  className={`group relative aspect-video overflow-hidden rounded-xs border text-left transition-all hover:border-mineral hover:shadow-xs cursor-pointer ${
-                    isAlreadyAdded ? "border-mineral ring-1 ring-mineral" : "border-areia/70 bg-areia/20"
-                  }`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={preset.url}
-                    alt={preset.title}
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-graphite/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
-                    <span className="text-[10px] text-white font-medium line-clamp-1">
-                      {preset.title}
-                    </span>
-                  </div>
-                  {isAlreadyAdded && (
-                    <span className="absolute top-1 right-1 rounded-full bg-mineral p-0.5 text-white shadow-xs">
-                      <Check className="h-3 w-3" />
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Grid Unificado com Todas as Fotos do Anúncio */}
-      <div className="space-y-2 pt-2 border-t border-areia/30">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-graphite uppercase tracking-wider block">
-            Galeria do Anúncio ({allImages.length}):
-          </span>
-          {allImages.length > 0 && (
+      {/* Grid Unificado: SÓ APARECE QUANDO O ADMIN TIVER ENVIADO FOTOS */}
+      {allImages.length > 0 && (
+        <div className="space-y-2 pt-2 border-t border-areia/30">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-graphite uppercase tracking-wider block">
+              Galeria do Anúncio ({allImages.length}):
+            </span>
             <span className="text-[10px] text-graphite/50 flex items-center gap-1">
               <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
               Estrela indica a Capa Principal do site
             </span>
-          )}
-        </div>
+          </div>
 
-        {allImages.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {allImages.map((img, i) => {
               const isCover = img.url === coverImage?.url;
@@ -535,16 +418,8 @@ export function ImageUpload({
               );
             })}
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center p-6 border border-dashed border-areia rounded-xs bg-offwhite/50 text-graphite/50 text-xs text-center">
-            <ImageIcon className="h-5 w-5 mb-1.5 opacity-40" />
-            <span>Nenhuma foto adicionada ainda ao anúncio.</span>
-            <span className="text-[11px] text-graphite/40 mt-0.5">
-              Selecione os arquivos pelo computador ou cole links acima.
-            </span>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

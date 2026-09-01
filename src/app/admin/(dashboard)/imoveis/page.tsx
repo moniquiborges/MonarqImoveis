@@ -146,8 +146,8 @@ export default function AdminImoveisPage() {
     parking: 2,
     area: 140,
     coverImage: {
-      url: mockImages.coastalHouse1,
-      alt: "Capa do Imóvel",
+      url: "",
+      alt: "",
     },
     gallery: [],
   });
@@ -170,7 +170,7 @@ export default function AdminImoveisPage() {
       suites: dev.suitesRange ? dev.suitesRange[0] : 2,
       parking: dev.parkingRange ? dev.parkingRange[0] : 2,
       area: dev.areaRange ? dev.areaRange[0] : 100,
-      coverImage: dev.coverImage || { url: mockImages.coastalHouse1, alt: dev.name },
+      coverImage: dev.coverImage || { url: "", alt: dev.name },
       gallery: dev.gallery || [],
       stage: dev.stage,
       distanceToSea: dev.distanceToSea,
@@ -194,7 +194,7 @@ export default function AdminImoveisPage() {
       suites: urban.suites,
       parking: urban.parking,
       area: urban.area,
-      coverImage: urban.coverImage || { url: mockImages.livingRoom1, alt: urban.title },
+      coverImage: urban.coverImage || { url: "", alt: urban.title },
       gallery: urban.gallery || [],
       siteUrl: `/imoveis/campo-grande/${urban.slug}`,
     }));
@@ -263,8 +263,8 @@ export default function AdminImoveisPage() {
       parking: 2,
       area: selectedState === "SC" ? 160 : 130,
       coverImage: {
-        url: selectedState === "SC" ? mockImages.coastalHouse1 : mockImages.livingRoom1,
-        alt: "Foto de Capa",
+        url: "",
+        alt: "",
       },
       gallery: [],
     });
