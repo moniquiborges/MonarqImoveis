@@ -27,25 +27,38 @@ export function CurrencyInput({
   showPresets = true,
   allowSobConsulta = true,
 }: CurrencyInputProps) {
-  const [displayValue, setDisplayValue] = useState<string>("");
+  const [displayValue, setDisplayValue] = useState<string>(() => {
+    if (!value || value === 0) return "";
+    if (typeof value === "number") {
+      return new Intl.NumberFormat("pt-BR").format(value);
+    }
+    return String(value);
+  });
   const [isSobConsulta, setIsSobConsulta] = useState<boolean>(false);
 
   useEffect(() => {
-    if (value === 0 && isSobConsulta) {
-      setDisplayValue("");
+    if (isSobConsulta) {
+      if (displayValue !== "") setDisplayValue("");
       return;
     }
-    if (value === "" || value === undefined || value === null) {
-      setDisplayValue("");
-    } else if (typeof value === "number") {
-      if (value === 0) {
+    if (value === "" || value === undefined || value === null || value === 0) {
+      if (displayValue !== "" && parseCurrency(displayValue) !== 0) {
         setDisplayValue("");
-      } else {
-        // Format with thousand dots for clarity
-        setDisplayValue(new Intl.NumberFormat("pt-BR").format(value));
       }
-    } else {
-      setDisplayValue(String(value));
+      return;
+    }
+
+    const currentParsed = parseCurrency(displayValue);
+    const targetNum = typeof value === "number" ? value : parseCurrency(value);
+
+    // Atualiza o displayValue apenas se houver diferença numérica real (ex: reset do formulário ou clique em atalho)
+    // Isso impede que a digitação contínua (ex: 2000 -> 2000000) seja interrompida e resetada
+    if (currentParsed !== targetNum) {
+      if (typeof value === "number") {
+        setDisplayValue(new Intl.NumberFormat("pt-BR").format(value));
+      } else {
+        setDisplayValue(String(value));
+      }
     }
   }, [value, isSobConsulta]);
 
@@ -57,6 +70,19 @@ export function CurrencyInput({
     setDisplayValue(raw);
     const num = parseCurrency(raw);
     onChange(num, raw);
+  };
+
+  const handleBlur = () => {
+    if (!displayValue) return;
+    const num = parseCurrency(displayValue);
+    if (num > 0) {
+      const hasLetters = /[a-zA-Z]/.test(displayValue);
+      if (!hasLetters) {
+        const formatted = new Intl.NumberFormat("pt-BR").format(num);
+        setDisplayValue(formatted);
+        onChange(num, formatted);
+      }
+    }
   };
 
   const handleApplyPreset = (amount: number) => {
@@ -120,6 +146,7 @@ export function CurrencyInput({
               placeholder={placeholder}
               value={displayValue}
               onChange={handleInputChange}
+              onBlur={handleBlur}
               className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 py-2 pl-9 pr-24 text-xs font-medium text-graphite placeholder:text-graphite/40 transition-colors focus:border-mineral focus:bg-white"
             />
             {numeric > 0 && (

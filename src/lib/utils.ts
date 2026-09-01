@@ -57,7 +57,7 @@ export function parseCurrency(value: string | number): number {
 
   // Tratar multiplicadores em texto ("milhão", "milhoes", "milhões", "mi", "mil", "k", "bi")
   const isBillion = clean.includes("bi") || clean.includes("bilh");
-  const isMillion = clean.includes("mi") || clean.includes("milh");
+  const isMillion = clean.includes("mi") || clean.includes("milh") || /(?:^|\s|\d)m(?:$|\s)/.test(clean);
   const isThousand = clean.includes("mil") || clean.includes("k");
 
   clean = clean.replace(/r\$/gi, "").replace(/reais/gi, "").trim();
@@ -65,8 +65,24 @@ export function parseCurrency(value: string | number): number {
   if (isBillion || isMillion || isThousand) {
     const match = clean.match(/^[\d.,]+/);
     if (match) {
-      const numStr = match[0].replace(/\./g, "").replace(",", ".");
-      const baseNum = parseFloat(numStr) || 0;
+      let num = match[0];
+      if (num.includes(",") && num.includes(".")) {
+        const lastComma = num.lastIndexOf(",");
+        const lastDot = num.lastIndexOf(".");
+        if (lastComma > lastDot) {
+          num = num.replace(/\./g, "").replace(",", ".");
+        } else {
+          num = num.replace(/,/g, "");
+        }
+      } else if (num.includes(",")) {
+        num = num.replace(",", ".");
+      } else if (num.includes(".")) {
+        // If 3 digits after dot (e.g. 1.500 mil), treat dot as thousand separator
+        if (/\.\d{3}$/.test(num)) {
+          num = num.replace(/\./g, "");
+        }
+      }
+      const baseNum = parseFloat(num) || 0;
       if (isBillion) return Math.round(baseNum * 1_000_000_000);
       if (isMillion) return Math.round(baseNum * 1_000_000);
       if (isThousand) return Math.round(baseNum * 1_000);
@@ -74,22 +90,32 @@ export function parseCurrency(value: string | number): number {
   }
 
   if (clean.includes(",") && clean.includes(".")) {
-    clean = clean.replace(/\./g, "").replace(",", ".");
-  } else if (clean.includes(",")) {
-    if (/,\d{1,2}$/.test(clean)) {
-      clean = clean.replace(",", ".");
+    const lastComma = clean.lastIndexOf(",");
+    const lastDot = clean.lastIndexOf(".");
+    if (lastComma > lastDot) {
+      // Padrão BR: 1.500.000,50
+      clean = clean.replace(/\./g, "").replace(",", ".");
     } else {
+      // Padrão US: 1,500,000.50
       clean = clean.replace(/,/g, "");
     }
-  } else if (clean.includes(".")) {
-    const dotCount = (clean.match(/\./g) || []).length;
-    if (dotCount > 1) {
-      clean = clean.replace(/\./g, "");
+  } else if (clean.includes(",")) {
+    const commaCount = (clean.match(/,/g) || []).length;
+    if (commaCount > 1) {
+      clean = clean.replace(/,/g, "");
     } else {
-      if (/\.\d{3}$/.test(clean)) {
-        clean = clean.replace(/\./g, "");
+      if (/,\d{1,2}$/.test(clean)) {
+        clean = clean.replace(",", ".");
+      } else if (/,\d{3}$/.test(clean)) {
+        clean = clean.replace(/,/g, "");
+      } else {
+        clean = clean.replace(",", ".");
       }
     }
+  } else if (clean.includes(".")) {
+    // No contexto imobiliário brasileiro, todos os pontos funcionam como separadores de milhar
+    // Ex: "2.000", "2.0000", "2.000.000" -> remove todos os pontos para evitar que "2.0000" vire 2 no parseFloat
+    clean = clean.replace(/\./g, "");
   }
 
   clean = clean.replace(/[^\d.]/g, "");
