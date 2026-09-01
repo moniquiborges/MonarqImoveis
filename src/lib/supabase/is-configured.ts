@@ -1,3 +1,5 @@
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./constants";
+
 export function isSupabaseConfigured() {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+  return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 }

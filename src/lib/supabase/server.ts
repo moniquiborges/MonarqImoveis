@@ -1,17 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./constants";
 import type { Database } from "@/types/database";
 
 /**
- * Cliente Supabase para uso em Server Components, Server Actions e Route
- * Handlers. Usa a chave anônima + cookies de sessão do usuário — respeita RLS.
+ * Cliente Supabase para uso em Server Components, Server Actions e Route Handlers.
  */
 export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -23,8 +23,7 @@ export async function createClient() {
               cookieStore.set(name, value, options);
             });
           } catch {
-            // Chamado a partir de um Server Component sem permissão de escrita
-            // de cookies; seguro ignorar quando há um proxy renovando a sessão.
+            // Chamado a partir de um Server Component sem permissão de escrita de cookies
           }
         },
       },
