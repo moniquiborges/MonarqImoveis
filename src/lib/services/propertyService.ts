@@ -220,15 +220,26 @@ export async function fetchDevelopments(): Promise<Development[]> {
         deliveryDate: row.delivery_forecast || undefined,
         shortDescription: row.short_description || "",
         priceFrom: row.price_from ? Number(row.price_from) : undefined,
-        bedroomsRange: [row.bedrooms_min || 2, row.bedrooms_max || 4],
+        bedroomsRange:
+          row.bedrooms_min && row.bedrooms_max
+            ? [row.bedrooms_min, row.bedrooms_max]
+            : row.bedrooms_min
+            ? [row.bedrooms_min, row.bedrooms_min]
+            : undefined,
         suitesRange: row.suites_min ? [row.suites_min, row.suites_max || row.suites_min] : undefined,
         parkingRange: row.parking_min ? [row.parking_min, row.parking_max || row.parking_min] : undefined,
-        areaRange: [Number(row.area_min) || 100, Number(row.area_max) || 200],
+        areaRange:
+          row.area_min && row.area_max
+            ? [Number(row.area_min), Number(row.area_max)]
+            : row.area_min
+            ? [Number(row.area_min), Number(row.area_min)]
+            : undefined,
         distanceToSea: row.distance_to_sea || undefined,
         badges: row.badges || ["lancamento", "alto-padrao"],
         coverImage,
         gallery,
         description: row.description || undefined,
+        features: row.amenities || row.features || [],
       };
     });
   } catch (err) {
@@ -286,14 +297,25 @@ export async function fetchDevelopmentBySlug(slug: string): Promise<Development 
       shortDescription: row.short_description || "",
       description: row.description || undefined,
       priceFrom: row.price_from ? Number(row.price_from) : undefined,
-      bedroomsRange: [row.bedrooms_min || 2, row.bedrooms_max || 4],
+      bedroomsRange:
+        row.bedrooms_min && row.bedrooms_max
+          ? [row.bedrooms_min, row.bedrooms_max]
+          : row.bedrooms_min
+          ? [row.bedrooms_min, row.bedrooms_min]
+          : undefined,
       suitesRange: row.suites_min ? [row.suites_min, row.suites_max || row.suites_min] : undefined,
       parkingRange: row.parking_min ? [row.parking_min, row.parking_max || row.parking_min] : undefined,
-      areaRange: [Number(row.area_min) || 100, Number(row.area_max) || 200],
+      areaRange:
+        row.area_min && row.area_max
+          ? [Number(row.area_min), Number(row.area_max)]
+          : row.area_min
+          ? [Number(row.area_min), Number(row.area_min)]
+          : undefined,
       distanceToSea: row.distance_to_sea || undefined,
       badges: row.badges || ["lancamento", "alto-padrao"],
       coverImage,
       gallery,
+      features: row.amenities || row.features || [],
     };
   } catch (err) {
     console.error("Erro ao buscar empreendimento por slug no Supabase:", err);

@@ -97,6 +97,7 @@ export async function POST(req: Request) {
             area_min: dev.areaRange ? dev.areaRange[0] : 100,
             area_max: dev.areaRange ? dev.areaRange[1] : 200,
             distance_to_sea: dev.distanceToSea,
+            amenities: dev.features || [],
             status: "published",
             badges: dev.badges || ["lancamento", "alto-padrao"],
           },
