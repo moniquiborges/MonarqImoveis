@@ -249,19 +249,15 @@ export function DevelopmentDetailView({
               </div>
             </div>
 
-            {/* Descrição Editorial */}
-            <div className="prose max-w-none">
-              <h2 className="font-display text-2xl text-graphite mb-4">Sobre o Empreendimento</h2>
-              <p className="text-graphite/80 leading-relaxed text-base">
-                {development.shortDescription}
-              </p>
-              <p className="mt-4 text-graphite/80 leading-relaxed text-sm">
-                Projetado com padrão construtivo refinado, o empreendimento prioriza a iluminação natural,
-                integração entre os ambientes de convívio social e acabamento nobre em todas as áreas
-                privativas e de lazer. Uma oportunidade ímpar para investimento com sólida valorização imobiliária
-                no litoral catarinense ou para desfrutar momentos inesquecíveis em família.
-              </p>
-            </div>
+            {/* Descrição Editorial (Opcional) */}
+            {(development.description || development.shortDescription) && (
+              <div className="prose max-w-none rounded-sm border border-areia/60 bg-white p-6 shadow-xs">
+                <h2 className="font-display text-2xl text-graphite mb-4">Sobre o Empreendimento</h2>
+                <div className="text-graphite/80 leading-relaxed text-sm sm:text-base whitespace-pre-line space-y-3">
+                  {development.description || development.shortDescription}
+                </div>
+              </div>
+            )}
 
             {/* Destaques de Lazer e Infraestrutura */}
             <div className="border-t border-areia/40 pt-8">

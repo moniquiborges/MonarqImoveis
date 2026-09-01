@@ -204,19 +204,15 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
               </div>
             </div>
 
-            {/* Descrição Detalhada */}
-            <div className="prose max-w-none">
-              <h2 className="font-display text-2xl text-graphite mb-4">Apresentação do Imóvel</h2>
-              <p className="text-graphite/80 leading-relaxed text-base">
-                Excelente oportunidade residencial localizada no coração do bairro {property.neighborhood},
-                uma das regiões mais nobres e desejadas de Campo Grande/MS.
-              </p>
-              <p className="mt-4 text-graphite/80 leading-relaxed text-sm">
-                Imóvel com planta inteligente e excelente ventilação cruzada. Conta com acabamentos de primeira
-                linha, ampla área social integrada, marcenaria planejada em pontos estratégicos e total segurança
-                para você e sua família.
-              </p>
-            </div>
+            {/* Descrição Detalhada (Opcional - só aparece se foi preenchida no admin) */}
+            {property.description && property.description.trim() !== "" && (
+              <div className="prose max-w-none rounded-sm border border-areia/60 bg-white p-6 shadow-xs">
+                <h2 className="font-display text-2xl text-graphite mb-4">Sobre o Imóvel</h2>
+                <div className="text-graphite/80 leading-relaxed text-sm sm:text-base whitespace-pre-line space-y-3">
+                  {property.description}
+                </div>
+              </div>
+            )}
 
             {/* Diferenciais e Conveniências */}
             <div className="border-t border-areia/40 pt-8">

@@ -244,18 +244,15 @@ export function RuralPropertyDetailView({ initialSlug, initialProperty }: Props)
               </div>
             </div>
 
-            {/* Descrição e Aptidão da Fazenda */}
-            <div className="prose max-w-none">
-              <h2 className="font-display text-2xl text-graphite mb-4">Apresentação da Propriedade</h2>
-              <p className="text-graphite/80 leading-relaxed text-base">
-                Área com excelente potencial produtivo no município de {property.municipality}/{property.state}.
-                Região de forte expansão agrícola e pecuária com logística consolidada para escoamento de safra e gado.
-              </p>
-              <p className="mt-4 text-graphite/80 leading-relaxed text-sm">
-                Propriedade com solo corrigido, cercas em excelente estado de conservação, divisões de pastos
-                planejadas e corredores de acesso. Altitude e índice pluviométrico favoráveis para safrinha e pastejo rotacionado.
-              </p>
-            </div>
+            {/* Descrição e Aptidão da Fazenda (Opcional) */}
+            {property.description && property.description.trim() !== "" && (
+              <div className="prose max-w-none rounded-sm border border-areia/60 bg-white p-6 shadow-xs">
+                <h2 className="font-display text-2xl text-graphite mb-4">Sobre a Propriedade</h2>
+                <div className="text-graphite/80 leading-relaxed text-sm sm:text-base whitespace-pre-line space-y-3">
+                  {property.description}
+                </div>
+              </div>
+            )}
 
             {/* Benfeitorias e Estrutura Operacional */}
             <div className="border-t border-areia/40 pt-8">

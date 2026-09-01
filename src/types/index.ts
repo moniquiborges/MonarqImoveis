@@ -42,6 +42,7 @@ export interface Development {
   badges: PropertyBadge[];
   coverImage: PropertyImage;
   gallery: PropertyImage[];
+  description?: string;
 }
 
 export interface UrbanProperty {
@@ -59,6 +60,7 @@ export interface UrbanProperty {
   badges: PropertyBadge[];
   coverImage: PropertyImage;
   gallery: PropertyImage[];
+  description?: string;
 }
 
 export type RuralType = "fazenda" | "chacara" | "sitio" | "rancho";
@@ -97,6 +99,7 @@ export interface RuralProperty {
   badges: PropertyBadge[];
   coverImage: PropertyImage;
   gallery: PropertyImage[];
+  description?: string;
 }
 
 export interface BlogPost {

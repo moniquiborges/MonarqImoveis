@@ -70,6 +70,7 @@ interface UnifiedPropertyItem {
   distanceToSea?: string;
   deliveryDate?: string;
   shortDescription?: string;
+  description?: string;
   siteUrl: string;
 }
 
@@ -121,6 +122,7 @@ export default function AdminImoveisPage() {
     distanceToSea: string;
     deliveryDate: string;
     shortDescription: string;
+    description: string;
     price: number | null;
     bedrooms: number;
     suites: number;
@@ -140,6 +142,7 @@ export default function AdminImoveisPage() {
     distanceToSea: "Frente-mar",
     deliveryDate: "2028",
     shortDescription: "",
+    description: "",
     price: 1850000,
     bedrooms: 3,
     suites: 3,
@@ -176,6 +179,7 @@ export default function AdminImoveisPage() {
       distanceToSea: dev.distanceToSea,
       deliveryDate: dev.deliveryDate,
       shortDescription: dev.shortDescription,
+      description: dev.description || dev.shortDescription || "",
       siteUrl: `/empreendimentos/${dev.city}/${dev.slug}`,
     }));
 
@@ -196,6 +200,7 @@ export default function AdminImoveisPage() {
       area: urban.area,
       coverImage: urban.coverImage || { url: "", alt: urban.title },
       gallery: urban.gallery || [],
+      description: urban.description || "",
       siteUrl: `/imoveis/campo-grande/${urban.slug}`,
     }));
 
@@ -257,6 +262,7 @@ export default function AdminImoveisPage() {
       distanceToSea: "Frente-mar",
       deliveryDate: "2028",
       shortDescription: "",
+      description: "",
       price: selectedState === "SC" ? 2200000 : 1250000,
       bedrooms: 3,
       suites: selectedState === "SC" ? 3 : 2,
@@ -285,6 +291,7 @@ export default function AdminImoveisPage() {
       distanceToSea: item.distanceToSea || "Frente-mar",
       deliveryDate: item.deliveryDate || "2028",
       shortDescription: item.shortDescription || "",
+      description: item.description || "",
       price: item.price,
       bedrooms: item.bedrooms,
       suites: item.suites,
@@ -341,6 +348,7 @@ export default function AdminImoveisPage() {
                 shortDescription:
                   formData.shortDescription ||
                   `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
+                description: formData.description.trim() || undefined,
                 priceFrom: formData.price ?? undefined,
                 bedroomsRange: [Number(formData.bedrooms) || 2, Number(formData.bedrooms) + 1],
                 suitesRange: [Number(formData.suites) || 2, Number(formData.suites) + 1],
@@ -371,6 +379,7 @@ export default function AdminImoveisPage() {
             shortDescription:
               formData.shortDescription ||
               `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
+            description: formData.description.trim() || undefined,
             priceFrom: formData.price ?? undefined,
             bedroomsRange: [Number(formData.bedrooms) || 2, Number(formData.bedrooms) + 1],
             suitesRange: [Number(formData.suites) || 2, Number(formData.suites) + 1],
@@ -418,6 +427,7 @@ export default function AdminImoveisPage() {
                 suites: Number(formData.suites) || 0,
                 parking: Number(formData.parking) || 0,
                 area: Number(formData.area) || 0,
+                description: formData.description.trim() || undefined,
                 coverImage: {
                   url: formData.coverImage.url || mockImages.livingRoom1,
                   alt: formData.coverImage.alt || formData.title,
@@ -443,6 +453,7 @@ export default function AdminImoveisPage() {
             suites: Number(formData.suites) || 2,
             parking: Number(formData.parking) || 2,
             area: Number(formData.area) || 120,
+            description: formData.description.trim() || undefined,
             badges: ["novo", "alto-padrao"],
             coverImage: {
               url: formData.coverImage.url || mockImages.livingRoom1,
@@ -1008,6 +1019,25 @@ export default function AdminImoveisPage() {
                     className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
                   />
                 </div>
+              </div>
+
+              {/* Descrição Detalhada do Imóvel (Opcional) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-medium text-graphite">
+                    Descrição Detalhada do Imóvel <span className="text-graphite/40 font-normal">(Opcional)</span>
+                  </label>
+                  <span className="text-[10px] text-graphite/50">
+                    Se deixado em branco, a seção não aparece no site.
+                  </span>
+                </div>
+                <textarea
+                  rows={4}
+                  placeholder="Escreva detalhes sobre o imóvel, diferenciais, acabamentos, localização, etc. Caso não preencha, o anúncio será publicado sem o bloco de texto."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40 leading-relaxed"
+                />
               </div>
 
               {/* Valor de Venda com CurrencyInput */}

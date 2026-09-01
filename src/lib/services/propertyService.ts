@@ -61,6 +61,7 @@ export async function fetchUrbanProperties(): Promise<UrbanProperty[]> {
         badges: row.badges || ["novo", "alto-padrao"],
         coverImage,
         gallery,
+        description: row.description || undefined,
       };
     });
   } catch (err) {
@@ -121,6 +122,7 @@ export async function fetchUrbanPropertyBySlug(slugOrCode: string): Promise<Urba
       badges: row.badges || ["novo", "alto-padrao"],
       coverImage,
       gallery,
+      description: row.description || undefined,
     };
   } catch (err) {
     console.error("Erro ao buscar imóvel por slug/código no Supabase:", err);
@@ -224,6 +226,7 @@ export async function fetchDevelopments(): Promise<Development[]> {
         badges: row.badges || ["lancamento", "alto-padrao"],
         coverImage,
         gallery,
+        description: row.description || undefined,
       };
     });
   } catch (err) {
@@ -279,6 +282,7 @@ export async function fetchDevelopmentBySlug(slug: string): Promise<Development 
       stage: row.stage as DevelopmentStage,
       deliveryDate: row.delivery_forecast || undefined,
       shortDescription: row.short_description || "",
+      description: row.description || undefined,
       priceFrom: row.price_from ? Number(row.price_from) : undefined,
       bedroomsRange: [row.bedrooms_min || 2, row.bedrooms_max || 4],
       suitesRange: row.suites_min ? [row.suites_min, row.suites_max || row.suites_min] : undefined,
@@ -377,6 +381,7 @@ export async function fetchRuralProperties(): Promise<RuralProperty[]> {
         badges: row.badges || ["oportunidade"],
         coverImage,
         gallery,
+        description: row.description || undefined,
       };
     });
   } catch (err) {
@@ -429,6 +434,7 @@ export async function fetchRuralPropertyBySlug(slug: string): Promise<RuralPrope
       badges: row.badges || ["oportunidade"],
       coverImage,
       gallery,
+      description: row.description || undefined,
     };
   } catch (err) {
     console.error("Erro ao buscar propriedade rural por slug no Supabase:", err);
