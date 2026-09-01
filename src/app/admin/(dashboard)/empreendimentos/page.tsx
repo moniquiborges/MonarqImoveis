@@ -72,10 +72,10 @@ export default function AdminEmpreendimentosPage() {
     shortDescription: string;
     description: string;
     features: string[];
-    bedroomsMin: number;
-    bedroomsMax: number;
-    areaMin: number;
-    areaMax: number;
+    bedroomsMin: string | number;
+    bedroomsMax: string | number;
+    areaMin: string | number;
+    areaMax: string | number;
     distanceToSea: string;
     coverImage: ImageData;
     gallery: ImageData[];
@@ -85,16 +85,16 @@ export default function AdminEmpreendimentosPage() {
     city: "porto-belo",
     neighborhood: "Perequê",
     stage: "lancamento",
-    priceFrom: 1850000,
-    deliveryDate: "2028",
+    priceFrom: null,
+    deliveryDate: "",
     shortDescription: "",
     description: "",
     features: [],
-    bedroomsMin: 2,
-    bedroomsMax: 4,
-    areaMin: 100,
-    areaMax: 220,
-    distanceToSea: "Frente-mar",
+    bedroomsMin: "",
+    bedroomsMax: "",
+    areaMin: "",
+    areaMax: "",
+    distanceToSea: "",
     coverImage: {
       url: "",
       alt: "",
@@ -203,16 +203,16 @@ export default function AdminEmpreendimentosPage() {
       city: "porto-belo",
       neighborhood: "Perequê",
       stage: "lancamento",
-      priceFrom: 1850000,
-      deliveryDate: "2028",
+      priceFrom: null,
+      deliveryDate: "",
       shortDescription: "",
       description: "",
       features: [],
-      bedroomsMin: 2,
-      bedroomsMax: 4,
-      areaMin: 100,
-      areaMax: 220,
-      distanceToSea: "Frente-mar",
+      bedroomsMin: "",
+      bedroomsMax: "",
+      areaMin: "",
+      areaMax: "",
+      distanceToSea: "",
       coverImage: {
         url: "",
         alt: "",
@@ -232,15 +232,15 @@ export default function AdminEmpreendimentosPage() {
       neighborhood: dev.neighborhood || "Perequê",
       stage: dev.stage,
       priceFrom: dev.priceFrom ?? null,
-      deliveryDate: dev.deliveryDate || "2028",
+      deliveryDate: dev.deliveryDate || "",
       shortDescription: dev.shortDescription || "",
       description: dev.description || "",
       features: dev.features || [],
-      bedroomsMin: dev.bedroomsRange ? dev.bedroomsRange[0] : 2,
-      bedroomsMax: dev.bedroomsRange ? dev.bedroomsRange[1] : 4,
-      areaMin: dev.areaRange ? dev.areaRange[0] : 100,
-      areaMax: dev.areaRange ? dev.areaRange[1] : 220,
-      distanceToSea: dev.distanceToSea || "Frente-mar",
+      bedroomsMin: dev.bedroomsRange ? dev.bedroomsRange[0] : "",
+      bedroomsMax: dev.bedroomsRange ? dev.bedroomsRange[1] : "",
+      areaMin: dev.areaRange ? dev.areaRange[0] : "",
+      areaMax: dev.areaRange ? dev.areaRange[1] : "",
+      distanceToSea: dev.distanceToSea || "",
       coverImage: dev.coverImage || { url: "", alt: dev.name },
       gallery: dev.gallery || [],
     });
@@ -277,6 +277,33 @@ export default function AdminEmpreendimentosPage() {
       let updated: Development[];
       const code = formData.code.trim().toUpperCase() || `MRQ-SC${100 + items.length + 1}`;
 
+      // Configuração condicional de Dormitórios (Opcional)
+      const bMin = formData.bedroomsMin !== "" && formData.bedroomsMin !== null && Number(formData.bedroomsMin) > 0 ? Number(formData.bedroomsMin) : null;
+      const bMax = formData.bedroomsMax !== "" && formData.bedroomsMax !== null && Number(formData.bedroomsMax) > 0 ? Number(formData.bedroomsMax) : null;
+      let bedroomsRange: [number, number] | undefined = undefined;
+      if (bMin && bMax) {
+        bedroomsRange = [Math.min(bMin, bMax), Math.max(bMin, bMax)];
+      } else if (bMin && !bMax) {
+        bedroomsRange = [bMin, bMin];
+      } else if (!bMin && bMax) {
+        bedroomsRange = [bMax, bMax];
+      }
+
+      // Configuração condicional de Área (Opcional)
+      const aMin = formData.areaMin !== "" && formData.areaMin !== null && Number(formData.areaMin) > 0 ? Number(formData.areaMin) : null;
+      const aMax = formData.areaMax !== "" && formData.areaMax !== null && Number(formData.areaMax) > 0 ? Number(formData.areaMax) : null;
+      let areaRange: [number, number] | undefined = undefined;
+      if (aMin && aMax) {
+        areaRange = [Math.min(aMin, aMax), Math.max(aMin, aMax)];
+      } else if (aMin && !aMax) {
+        areaRange = [aMin, aMin];
+      } else if (!aMin && aMax) {
+        areaRange = [aMax, aMax];
+      }
+
+      const distanceToSea = formData.distanceToSea.trim() ? formData.distanceToSea.trim() : undefined;
+      const deliveryDate = formData.deliveryDate.trim() ? formData.deliveryDate.trim() : undefined;
+
       if (editingSlug) {
         updated = items.map((item) => {
           if (item.slug === editingSlug) {
@@ -288,16 +315,16 @@ export default function AdminEmpreendimentosPage() {
               cityLabel,
               neighborhood: formData.neighborhood || "Centro",
               stage: formData.stage,
-              deliveryDate: formData.deliveryDate,
+              deliveryDate,
               shortDescription:
                 formData.shortDescription ||
                 `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
               description: formData.description.trim() || undefined,
               features: formData.features,
               priceFrom: formData.priceFrom ?? undefined,
-              bedroomsRange: [Number(formData.bedroomsMin) || 2, Number(formData.bedroomsMax) || 4],
-              areaRange: [Number(formData.areaMin) || 80, Number(formData.areaMax) || 200],
-              distanceToSea: formData.distanceToSea,
+              bedroomsRange,
+              areaRange,
+              distanceToSea,
               coverImage: {
                 url: formData.coverImage.url || "",
                 alt: formData.coverImage.alt || formData.name,
@@ -319,16 +346,16 @@ export default function AdminEmpreendimentosPage() {
           cityLabel,
           neighborhood: formData.neighborhood || "Centro",
           stage: formData.stage,
-          deliveryDate: formData.deliveryDate,
+          deliveryDate,
           shortDescription:
             formData.shortDescription ||
             `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
           description: formData.description.trim() || undefined,
           features: formData.features,
           priceFrom: formData.priceFrom ?? undefined,
-          bedroomsRange: [Number(formData.bedroomsMin) || 2, Number(formData.bedroomsMax) || 4],
-          areaRange: [Number(formData.areaMin) || 80, Number(formData.areaMax) || 200],
-          distanceToSea: formData.distanceToSea,
+          bedroomsRange,
+          areaRange,
+          distanceToSea,
           badges: ["lancamento", "alto-padrao"],
           coverImage: {
             url: formData.coverImage.url || "",
@@ -671,27 +698,27 @@ export default function AdminEmpreendimentosPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-graphite mb-1">
-                    Proximidade do Mar
+                    Proximidade do Mar <span className="text-graphite/40 font-normal">(Opcional)</span>
                   </label>
                   <input
                     type="text"
                     placeholder="Ex: Frente-mar, Quadra do Mar, 150m da Praia..."
                     value={formData.distanceToSea}
                     onChange={(e) => setFormData({ ...formData, distanceToSea: e.target.value })}
-                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-graphite mb-1">
-                    Previsão de Entrega
+                    Previsão de Entrega <span className="text-graphite/40 font-normal">(Opcional)</span>
                   </label>
                   <input
                     type="text"
                     placeholder="Ex: Dezembro/2028 ou Pronto"
                     value={formData.deliveryDate}
                     onChange={(e) => setFormData({ ...formData, deliveryDate: e.target.value })}
-                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40"
                   />
                 </div>
               </div>
@@ -699,54 +726,66 @@ export default function AdminEmpreendimentosPage() {
               {/* Configuração das Unidades (Quartos e Metragens) */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-graphite mb-1">Dorms. Mínimo</label>
+                  <label className="block text-xs font-medium text-graphite mb-1">
+                    Dorms. Mínimo <span className="text-graphite/40 font-normal">(Opcional)</span>
+                  </label>
                   <input
                     type="number"
-                    min="1"
+                    min="0"
+                    placeholder="Ex: 2"
                     value={formData.bedroomsMin}
                     onChange={(e) =>
-                      setFormData({ ...formData, bedroomsMin: Number(e.target.value) || 1 })
+                      setFormData({ ...formData, bedroomsMin: e.target.value })
                     }
-                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-graphite mb-1">Dorms. Máximo</label>
+                  <label className="block text-xs font-medium text-graphite mb-1">
+                    Dorms. Máximo <span className="text-graphite/40 font-normal">(Opcional)</span>
+                  </label>
                   <input
                     type="number"
-                    min="1"
+                    min="0"
+                    placeholder="Ex: 4"
                     value={formData.bedroomsMax}
                     onChange={(e) =>
-                      setFormData({ ...formData, bedroomsMax: Number(e.target.value) || 1 })
+                      setFormData({ ...formData, bedroomsMax: e.target.value })
                     }
-                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-graphite mb-1">Área Mínima (m²)</label>
+                  <label className="block text-xs font-medium text-graphite mb-1">
+                    Área Mínima (m²) <span className="text-graphite/40 font-normal">(Opcional)</span>
+                  </label>
                   <input
                     type="number"
-                    min="1"
+                    min="0"
+                    placeholder="Ex: 100"
                     value={formData.areaMin}
                     onChange={(e) =>
-                      setFormData({ ...formData, areaMin: Number(e.target.value) || 1 })
+                      setFormData({ ...formData, areaMin: e.target.value })
                     }
-                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-graphite mb-1">Área Máxima (m²)</label>
+                  <label className="block text-xs font-medium text-graphite mb-1">
+                    Área Máxima (m²) <span className="text-graphite/40 font-normal">(Opcional)</span>
+                  </label>
                   <input
                     type="number"
-                    min="1"
+                    min="0"
+                    placeholder="Ex: 220"
                     value={formData.areaMax}
                     onChange={(e) =>
-                      setFormData({ ...formData, areaMax: Number(e.target.value) || 1 })
+                      setFormData({ ...formData, areaMax: e.target.value })
                     }
-                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40"
                   />
                 </div>
               </div>

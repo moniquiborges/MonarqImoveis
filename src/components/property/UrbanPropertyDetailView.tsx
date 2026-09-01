@@ -147,62 +147,72 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
           {/* Coluna Esquerda: Especificações e Descrição */}
           <div className="lg:col-span-8 space-y-10">
-            {/* Grid de Especificações */}
-            <div className="rounded-sm border border-areia/60 bg-white p-6 shadow-xs">
-              <h3 className="text-xs uppercase tracking-[0.15em] text-terracota font-semibold mb-4">
-                Características do Imóvel
-              </h3>
+            {/* Grid de Especificações Técnicas */}
+            {(property.area > 0 || property.bedrooms > 0 || property.suites > 0 || property.parking > 0) && (
+              <div className="rounded-sm border border-areia/60 bg-white p-6 shadow-xs">
+                <h3 className="text-xs uppercase tracking-[0.15em] text-terracota font-semibold mb-4">
+                  Visão Geral do Imóvel
+                </h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                    <Ruler className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-graphite/50 block">Área Útil</span>
-                    <strong className="text-graphite font-medium text-sm md:text-base">
-                      {formatArea(property.area)}
-                    </strong>
-                  </div>
-                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
+                  {property.area > 0 && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Ruler className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Área Útil</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {formatArea(property.area)}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
 
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                    <BedDouble className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-graphite/50 block">Dormitórios</span>
-                    <strong className="text-graphite font-medium text-sm md:text-base">
-                      {property.bedrooms} dormitórios
-                    </strong>
-                  </div>
-                </div>
+                  {property.bedrooms > 0 && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <BedDouble className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Dormitórios</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {property.bedrooms} {property.bedrooms === 1 ? "dormitório" : "dormitórios"}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
 
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                    <Bath className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-graphite/50 block">Banheiros</span>
-                    <strong className="text-graphite font-medium text-sm md:text-base">
-                      {property.suites} banheiros
-                    </strong>
-                  </div>
-                </div>
+                  {property.suites > 0 && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Bath className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Banheiros</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {property.suites} {property.suites === 1 ? "banheiro" : "banheiros"}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
 
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                    <Car className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-graphite/50 block">Garagem</span>
-                    <strong className="text-graphite font-medium text-sm md:text-base">
-                      {property.parking} vagas
-                    </strong>
-                  </div>
+                  {property.parking > 0 && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Car className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Garagem</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {property.parking} {property.parking === 1 ? "vaga" : "vagas"}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Descrição Detalhada (Opcional - só aparece se foi preenchida no admin) */}
             {property.description && property.description.trim() !== "" && (

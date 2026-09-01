@@ -160,94 +160,113 @@ export function DevelopmentDetailView({
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
           {/* Coluna Esquerda: Especificações, Descrição e Diferenciais */}
           <div className="lg:col-span-8 space-y-10">
-            {/* Grid de Especificações Rápidas */}
-            <div className="rounded-sm border border-areia/60 bg-white p-6 shadow-xs">
-              <h3 className="text-xs uppercase tracking-[0.15em] text-terracota font-semibold mb-4">
-                Visão Geral do Imóvel
-              </h3>
+            {/* Grid de Especificações Rápidas (Só aparece se houver especificações) */}
+            {(Boolean(development.areaRange && (development.areaRange[0] > 0 || development.areaRange[1] > 0)) ||
+              Boolean(development.bedroomsRange && (development.bedroomsRange[0] > 0 || development.bedroomsRange[1] > 0)) ||
+              Boolean(development.suitesRange && (development.suitesRange[0] > 0 || development.suitesRange[1] > 0)) ||
+              Boolean(development.parkingRange && (development.parkingRange[0] > 0 || development.parkingRange[1] > 0)) ||
+              Boolean(development.distanceToSea && development.distanceToSea.trim() !== "") ||
+              Boolean(development.deliveryDate && development.deliveryDate.trim() !== "")) && (
+              <div className="rounded-sm border border-areia/60 bg-white p-6 shadow-xs">
+                <h3 className="text-xs uppercase tracking-[0.15em] text-terracota font-semibold mb-4">
+                  Visão Geral do Imóvel
+                </h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 text-sm">
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                    <Ruler className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-graphite/50 block">Área Privativa</span>
-                    <strong className="text-graphite font-medium text-sm md:text-base">
-                      {development.areaRange[0]} a {development.areaRange[1]} m²
-                    </strong>
-                  </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 text-sm">
+                  {development.areaRange && (development.areaRange[0] > 0 || development.areaRange[1] > 0) && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Ruler className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Área Privativa</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {development.areaRange[0] === development.areaRange[1]
+                            ? `${development.areaRange[0]} m²`
+                            : `${development.areaRange[0]} a ${development.areaRange[1]} m²`}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
+
+                  {development.bedroomsRange && (development.bedroomsRange[0] > 0 || development.bedroomsRange[1] > 0) && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <BedDouble className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Dormitórios</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {development.bedroomsRange[0] === development.bedroomsRange[1]
+                            ? `${development.bedroomsRange[0]} dorms.`
+                            : `${development.bedroomsRange[0]} a ${development.bedroomsRange[1]} dorms.`}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
+
+                  {development.suitesRange && (development.suitesRange[0] > 0 || development.suitesRange[1] > 0) && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Bath className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Suítes</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {development.suitesRange[0] === development.suitesRange[1]
+                            ? `${development.suitesRange[0]} suítes`
+                            : `${development.suitesRange[0]} a ${development.suitesRange[1]} suítes`}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
+
+                  {development.parkingRange && (development.parkingRange[0] > 0 || development.parkingRange[1] > 0) && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Car className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Vagas de Garagem</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {development.parkingRange[0] === development.parkingRange[1]
+                            ? `${development.parkingRange[0]} vagas`
+                            : `${development.parkingRange[0]} a ${development.parkingRange[1]} vagas`}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
+
+                  {development.distanceToSea && development.distanceToSea.trim() !== "" && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Waves className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Proximidade do Mar</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {development.distanceToSea}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
+
+                  {development.deliveryDate && development.deliveryDate.trim() !== "" && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Calendar className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Previsão de Entrega</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {development.deliveryDate}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                    <BedDouble className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-graphite/50 block">Dormitórios</span>
-                    <strong className="text-graphite font-medium text-sm md:text-base">
-                      {development.bedroomsRange[0]} a {development.bedroomsRange[1]} dorms.
-                    </strong>
-                  </div>
-                </div>
-
-                {development.suitesRange && (
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                      <Bath className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs text-graphite/50 block">Suítes</span>
-                      <strong className="text-graphite font-medium text-sm md:text-base">
-                        {development.suitesRange[0]} a {development.suitesRange[1]} suítes
-                      </strong>
-                    </div>
-                  </div>
-                )}
-
-                {development.parkingRange && (
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                      <Car className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs text-graphite/50 block">Vagas de Garagem</span>
-                      <strong className="text-graphite font-medium text-sm md:text-base">
-                        {development.parkingRange[0]} a {development.parkingRange[1]} vagas
-                      </strong>
-                    </div>
-                  </div>
-                )}
-
-                {development.distanceToSea && (
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                      <Waves className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs text-graphite/50 block">Proximidade do Mar</span>
-                      <strong className="text-graphite font-medium text-sm md:text-base">
-                        {development.distanceToSea}
-                      </strong>
-                    </div>
-                  </div>
-                )}
-
-                {development.deliveryDate && (
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
-                      <Calendar className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <span className="text-xs text-graphite/50 block">Previsão de Entrega</span>
-                      <strong className="text-graphite font-medium text-sm md:text-base">
-                        {development.deliveryDate}
-                      </strong>
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
+            )}
 
             {/* Descrição Editorial (Opcional) */}
             {(development.description || development.shortDescription) && (

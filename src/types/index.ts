@@ -35,10 +35,10 @@ export interface Development {
   deliveryDate?: string;
   shortDescription: string;
   priceFrom?: number;
-  bedroomsRange: [number, number];
+  bedroomsRange?: [number, number];
   suitesRange?: [number, number];
   parkingRange?: [number, number];
-  areaRange: [number, number];
+  areaRange?: [number, number];
   distanceToSea?: string;
   badges: PropertyBadge[];
   coverImage: PropertyImage;
