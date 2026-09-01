@@ -252,6 +252,7 @@ type TableDef<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row;
   Insert: Insert;
   Update: Update;
+  Relationships: [];
 };
 
 export interface Database {
@@ -269,6 +270,18 @@ export interface Database {
       leads: TableDef<LeadRow>;
       favorites: TableDef<FavoriteRow>;
       settings: TableDef<SettingRow>;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
     };
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -11,6 +11,7 @@ import { SimilarProperties } from "@/components/property/SimilarProperties";
 import { ruralPropertyToCard } from "@/components/property/adapters";
 import { mockRuralProperties } from "@/lib/mock/rural";
 import { getStoredRuralProperties, useLiveStoredData } from "@/lib/storage";
+import { fetchRuralPropertyBySlug } from "@/lib/services/propertyService";
 import { ruralActivityLabels } from "@/lib/labels";
 import { formatBRL } from "@/lib/utils";
 import type { RuralProperty } from "@/types";
@@ -25,6 +26,7 @@ import {
   Droplets,
   Tractor,
   Compass,
+  Loader2,
 } from "lucide-react";
 
 interface Props {
@@ -33,15 +35,47 @@ interface Props {
 }
 
 export function RuralPropertyDetailView({ initialSlug, initialProperty }: Props) {
-  const [ruralProperties] = useLiveStoredData<RuralProperty[]>(
+  const [localRuralProperties] = useLiveStoredData<RuralProperty[]>(
     getStoredRuralProperties,
     mockRuralProperties,
     "rural"
   );
+  const [dbProperty, setDbProperty] = useState<RuralProperty | null>(null);
+  const [loadingDb, setLoadingDb] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchRuralPropertyBySlug(initialSlug).then((prop) => {
+      if (isMounted) {
+        if (prop) setDbProperty(prop);
+        setLoadingDb(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [initialSlug]);
 
   const property = useMemo(() => {
-    return ruralProperties.find((p) => p.slug === initialSlug) || initialProperty;
-  }, [ruralProperties, initialSlug, initialProperty]);
+    return (
+      dbProperty ||
+      localRuralProperties.find((p) => p.slug === initialSlug) ||
+      initialProperty
+    );
+  }, [dbProperty, localRuralProperties, initialSlug, initialProperty]);
+
+  if (loadingDb && !property) {
+    return (
+      <main className="py-24 text-center">
+        <Container className="flex flex-col items-center justify-center gap-3">
+          <Loader2 className="h-6 w-6 animate-spin text-mineral" />
+          <p className="text-xs uppercase tracking-wider text-graphite/60">
+            Carregando propriedade rural...
+          </p>
+        </Container>
+      </main>
+    );
+  }
 
   if (!property) {
     return (
@@ -66,7 +100,7 @@ export function RuralPropertyDetailView({ initialSlug, initialProperty }: Props)
 
   const alqueires = (property.totalHectares / 2.42).toFixed(1);
 
-  const similarItems = ruralProperties
+  const similarItems = localRuralProperties
     .filter((p) => p.slug !== property.slug)
     .map(ruralPropertyToCard);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -11,6 +11,7 @@ import { SimilarProperties } from "@/components/property/SimilarProperties";
 import { urbanPropertyToCard } from "@/components/property/adapters";
 import { mockUrbanProperties } from "@/lib/mock/properties";
 import { getStoredUrbanProperties, useLiveStoredData } from "@/lib/storage";
+import { fetchUrbanProperties, fetchUrbanPropertyBySlug } from "@/lib/services/propertyService";
 import { formatArea } from "@/lib/utils";
 import type { UrbanProperty } from "@/types";
 import {
@@ -21,6 +22,7 @@ import {
   MapPin,
   ShieldCheck,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 
 interface Props {
@@ -29,15 +31,47 @@ interface Props {
 }
 
 export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props) {
-  const [properties] = useLiveStoredData<UrbanProperty[]>(
+  const [localProperties] = useLiveStoredData<UrbanProperty[]>(
     getStoredUrbanProperties,
     mockUrbanProperties,
     "urban"
   );
+  const [dbProperty, setDbProperty] = useState<UrbanProperty | null>(null);
+  const [loadingDb, setLoadingDb] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchUrbanPropertyBySlug(initialSlug).then((prop) => {
+      if (isMounted) {
+        if (prop) setDbProperty(prop);
+        setLoadingDb(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [initialSlug]);
 
   const property = useMemo(() => {
-    return properties.find((p) => p.slug === initialSlug) || initialProperty;
-  }, [properties, initialSlug, initialProperty]);
+    return (
+      dbProperty ||
+      localProperties.find((p) => p.slug === initialSlug) ||
+      initialProperty
+    );
+  }, [dbProperty, localProperties, initialSlug, initialProperty]);
+
+  if (loadingDb && !property) {
+    return (
+      <main className="py-24 text-center">
+        <Container className="flex flex-col items-center justify-center gap-3">
+          <Loader2 className="h-6 w-6 animate-spin text-mineral" />
+          <p className="text-xs uppercase tracking-wider text-graphite/60">
+            Carregando imóvel...
+          </p>
+        </Container>
+      </main>
+    );
+  }
 
   if (!property) {
     return (
@@ -45,7 +79,7 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
         <Container>
           <h1 className="font-display text-2xl text-graphite mb-2">Imóvel não encontrado</h1>
           <p className="text-sm text-graphite/60 mb-6">
-            O anúncio solicitado pode ter sido removido ou o link está incorreto.
+            O anúncio solicitado pode ter sido atualizado ou o link está incorreto.
           </p>
           <Link
             href="/imoveis/campo-grande"
@@ -58,7 +92,7 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
     );
   }
 
-  const similarItems = properties
+  const similarItems = localProperties
     .filter((p) => p.slug !== property.slug)
     .map(urbanPropertyToCard);
 

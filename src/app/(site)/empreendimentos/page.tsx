@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -8,7 +8,8 @@ import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { developmentToCard } from "@/components/property/adapters";
 import { mockDevelopments } from "@/lib/mock/developments";
-import { getStoredDevelopments, useLiveStoredData } from "@/lib/storage";
+import { getStoredDevelopments, saveStoredDevelopments, useLiveStoredData } from "@/lib/storage";
+import { fetchDevelopments } from "@/lib/services/propertyService";
 import { stageLabels } from "@/lib/labels";
 import type { Development, ScCity, DevelopmentStage } from "@/types";
 
@@ -20,11 +21,21 @@ const cityTabs: { value: string; label: string }[] = [
 ];
 
 export default function EmpreendimentosPage() {
-  const [developments] = useLiveStoredData<Development[]>(
+  const [developments, setDevelopments] = useLiveStoredData<Development[]>(
     getStoredDevelopments,
     mockDevelopments,
     "developments"
   );
+
+  useEffect(() => {
+    fetchDevelopments().then((dbDevs) => {
+      if (dbDevs && dbDevs.length > 0) {
+        setDevelopments(() => dbDevs);
+        saveStoredDevelopments(dbDevs);
+      }
+    });
+  }, [setDevelopments]);
+
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedStage, setSelectedStage] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");

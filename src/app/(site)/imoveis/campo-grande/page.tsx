@@ -1,21 +1,32 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { urbanPropertyToCard } from "@/components/property/adapters";
 import { mockUrbanProperties } from "@/lib/mock/properties";
-import { getStoredUrbanProperties, useLiveStoredData } from "@/lib/storage";
+import { getStoredUrbanProperties, saveStoredUrbanProperties, useLiveStoredData } from "@/lib/storage";
+import { fetchUrbanProperties } from "@/lib/services/propertyService";
 import type { UrbanProperty } from "@/types";
 
 export default function CampoGrandePage() {
-  const [properties] = useLiveStoredData<UrbanProperty[]>(
+  const [properties, setProperties] = useLiveStoredData<UrbanProperty[]>(
     getStoredUrbanProperties,
     mockUrbanProperties,
     "urban"
   );
+
+  useEffect(() => {
+    fetchUrbanProperties().then((dbProps) => {
+      if (dbProps && dbProps.length > 0) {
+        setProperties(() => dbProps);
+        saveStoredUrbanProperties(dbProps);
+      }
+    });
+  }, [setProperties]);
+
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");

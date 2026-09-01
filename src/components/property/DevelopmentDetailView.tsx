@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -11,8 +11,9 @@ import { SimilarProperties } from "@/components/property/SimilarProperties";
 import { developmentToCard } from "@/components/property/adapters";
 import { mockDevelopments } from "@/lib/mock/developments";
 import { getStoredDevelopments, useLiveStoredData } from "@/lib/storage";
+import { fetchDevelopmentBySlug } from "@/lib/services/propertyService";
 import { stageLabels } from "@/lib/labels";
-import type { Development, ScCity } from "@/types";
+import type { Development } from "@/types";
 import {
   BedDouble,
   Bath,
@@ -24,6 +25,7 @@ import {
   CheckCircle,
   Sparkles,
   MapPin,
+  Loader2,
 } from "lucide-react";
 
 interface Props {
@@ -37,15 +39,47 @@ export function DevelopmentDetailView({
   initialSlug,
   initialDevelopment,
 }: Props) {
-  const [developments] = useLiveStoredData<Development[]>(
+  const [localDevelopments] = useLiveStoredData<Development[]>(
     getStoredDevelopments,
     mockDevelopments,
     "developments"
   );
+  const [dbDevelopment, setDbDevelopment] = useState<Development | null>(null);
+  const [loadingDb, setLoadingDb] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchDevelopmentBySlug(initialSlug).then((dev) => {
+      if (isMounted) {
+        if (dev) setDbDevelopment(dev);
+        setLoadingDb(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [initialSlug]);
 
   const development = useMemo(() => {
-    return developments.find((d) => d.slug === initialSlug) || initialDevelopment;
-  }, [developments, initialSlug, initialDevelopment]);
+    return (
+      dbDevelopment ||
+      localDevelopments.find((d) => d.slug === initialSlug) ||
+      initialDevelopment
+    );
+  }, [dbDevelopment, localDevelopments, initialSlug, initialDevelopment]);
+
+  if (loadingDb && !development) {
+    return (
+      <main className="py-24 text-center">
+        <Container className="flex flex-col items-center justify-center gap-3">
+          <Loader2 className="h-6 w-6 animate-spin text-mineral" />
+          <p className="text-xs uppercase tracking-wider text-graphite/60">
+            Carregando empreendimento...
+          </p>
+        </Container>
+      </main>
+    );
+  }
 
   if (!development) {
     return (
@@ -68,7 +102,7 @@ export function DevelopmentDetailView({
     );
   }
 
-  const similarItems = developments
+  const similarItems = localDevelopments
     .filter((d) => d.slug !== development.slug)
     .map(developmentToCard);
 

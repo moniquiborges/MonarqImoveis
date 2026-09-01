@@ -1,22 +1,33 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { ruralPropertyToCard } from "@/components/property/adapters";
 import { mockRuralProperties } from "@/lib/mock/rural";
-import { getStoredRuralProperties, useLiveStoredData } from "@/lib/storage";
+import { getStoredRuralProperties, saveStoredRuralProperties, useLiveStoredData } from "@/lib/storage";
+import { fetchRuralProperties } from "@/lib/services/propertyService";
 import { ruralActivityLabels } from "@/lib/labels";
 import type { RuralProperty, RuralActivity } from "@/types";
 
 export default function RuralPage() {
-  const [ruralProperties] = useLiveStoredData<RuralProperty[]>(
+  const [ruralProperties, setRuralProperties] = useLiveStoredData<RuralProperty[]>(
     getStoredRuralProperties,
     mockRuralProperties,
     "rural"
   );
+
+  useEffect(() => {
+    fetchRuralProperties().then((dbRural) => {
+      if (dbRural && dbRural.length > 0) {
+        setRuralProperties(() => dbRural);
+        saveStoredRuralProperties(dbRural);
+      }
+    });
+  }, [setRuralProperties]);
+
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedActivity, setSelectedActivity] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");

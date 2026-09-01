@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Home,
@@ -33,6 +33,14 @@ import {
   saveStoredDevelopments,
   useLiveStoredData,
 } from "@/lib/storage";
+import {
+  fetchUrbanProperties,
+  fetchDevelopments,
+  saveUrbanPropertyToDb,
+  deleteUrbanPropertyFromDb,
+  saveDevelopmentToDb,
+  deleteDevelopmentFromDb,
+} from "@/lib/services/propertyService";
 import { CurrencyInput } from "@/components/admin/CurrencyInput";
 import { ImageUpload, ImageData } from "@/components/admin/ImageUpload";
 import type { UrbanProperty, Development, ScCity, DevelopmentStage } from "@/types";
@@ -72,6 +80,22 @@ export default function AdminImoveisPage() {
     mockDevelopments,
     "developments"
   );
+
+  // Sincroniza dados com o Supabase no carregamento
+  useEffect(() => {
+    fetchUrbanProperties().then((dbUrbans) => {
+      if (dbUrbans && dbUrbans.length > 0) {
+        setUrbanItems(() => dbUrbans);
+        saveStoredUrbanProperties(dbUrbans);
+      }
+    });
+    fetchDevelopments().then((dbDevs) => {
+      if (dbDevs && dbDevs.length > 0) {
+        setDevItems(() => dbDevs);
+        saveStoredDevelopments(dbDevs);
+      }
+    });
+  }, [setUrbanItems, setDevItems]);
 
   const [stateFilter, setStateFilter] = useState<"all" | "SC" | "MS">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -341,6 +365,10 @@ export default function AdminImoveisPage() {
 
       setDevItems(() => updatedDevs);
       saveStoredDevelopments(updatedDevs);
+      const targetDev = updatedDevs.find((d) => d.slug === (editingItem?.slug || rawSlug));
+      if (targetDev) {
+        saveDevelopmentToDb(targetDev);
+      }
       showToast(`✓ Imóvel em Santa Catarina (${cityLabel}) salvo com sucesso!`);
     } else {
       // Salva / Atualiza em Imóveis Urbanos MS
@@ -399,6 +427,10 @@ export default function AdminImoveisPage() {
 
       setUrbanItems(() => updatedUrban);
       saveStoredUrbanProperties(updatedUrban);
+      const targetUrban = updatedUrban.find((u) => u.slug === (editingItem?.slug || rawSlug));
+      if (targetUrban) {
+        saveUrbanPropertyToDb(targetUrban);
+      }
       showToast("✓ Imóvel em Campo Grande / MS salvo com sucesso!");
     }
 
@@ -411,11 +443,13 @@ export default function AdminImoveisPage() {
         const updated = devItems.filter((d) => d.slug !== item.slug);
         setDevItems(() => updated);
         saveStoredDevelopments(updated);
+        deleteDevelopmentFromDb(item.slug);
         showToast("✓ Imóvel de Santa Catarina removido.");
       } else {
         const updated = urbanItems.filter((u) => u.slug !== item.slug);
         setUrbanItems(() => updated);
         saveStoredUrbanProperties(updated);
+        deleteUrbanPropertyFromDb(item.slug);
         showToast("✓ Imóvel de Campo Grande removido.");
       }
     }
