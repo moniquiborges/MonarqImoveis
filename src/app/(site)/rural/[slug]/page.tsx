@@ -1,7 +1,10 @@
 import { RuralPropertyDetailView } from "@/components/property/RuralPropertyDetailView";
-import { mockRuralProperties, getRuralPropertyBySlug } from "@/lib/mock/rural";
+import { mockRuralProperties } from "@/lib/mock/rural";
+import { fetchRuralPropertyBySlug } from "@/lib/services/propertyService";
 import { ruralActivityLabels } from "@/lib/labels";
 import type { Metadata } from "next";
+
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return mockRuralProperties.map((p) => ({
@@ -15,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const prop = getRuralPropertyBySlug(slug);
+  const prop = await fetchRuralPropertyBySlug(slug);
 
   if (!prop) return { title: "Propriedade Rural | MONARQ" };
 
@@ -43,7 +46,7 @@ export default async function RuralPropertyDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = getRuralPropertyBySlug(slug);
+  const property = await fetchRuralPropertyBySlug(slug);
 
   return (
     <RuralPropertyDetailView

@@ -1,7 +1,10 @@
 import { UrbanPropertyDetailView } from "@/components/property/UrbanPropertyDetailView";
-import { mockUrbanProperties, getUrbanPropertyBySlug } from "@/lib/mock/properties";
+import { mockUrbanProperties } from "@/lib/mock/properties";
+import { fetchUrbanPropertyBySlug } from "@/lib/services/propertyService";
 import { formatArea } from "@/lib/utils";
 import type { Metadata } from "next";
+
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return mockUrbanProperties.map((p) => ({
@@ -15,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const prop = getUrbanPropertyBySlug(slug);
+  const prop = await fetchUrbanPropertyBySlug(slug);
 
   if (!prop) return { title: "Imóvel | MONARQ" };
 
@@ -41,7 +44,7 @@ export default async function UrbanPropertyDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = getUrbanPropertyBySlug(slug);
+  const property = await fetchUrbanPropertyBySlug(slug);
 
   return (
     <UrbanPropertyDetailView

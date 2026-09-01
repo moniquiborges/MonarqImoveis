@@ -1,6 +1,9 @@
 import { DevelopmentDetailView } from "@/components/property/DevelopmentDetailView";
-import { mockDevelopments, getDevelopmentBySlug } from "@/lib/mock/developments";
+import { mockDevelopments } from "@/lib/mock/developments";
+import { fetchDevelopmentBySlug } from "@/lib/services/propertyService";
 import type { Metadata } from "next";
+
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return mockDevelopments.map((dev) => ({
@@ -15,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ city: string; slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const dev = getDevelopmentBySlug(slug);
+  const dev = await fetchDevelopmentBySlug(slug);
 
   if (!dev) return { title: "Empreendimento | MONARQ" };
 
@@ -41,7 +44,7 @@ export default async function DevelopmentDetailPage({
   params: Promise<{ city: string; slug: string }>;
 }) {
   const { city, slug } = await params;
-  const development = getDevelopmentBySlug(slug);
+  const development = await fetchDevelopmentBySlug(slug);
 
   return (
     <DevelopmentDetailView
