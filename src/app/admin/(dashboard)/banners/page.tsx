@@ -13,8 +13,10 @@ import {
   Sparkles,
   Layers,
   ArrowRight,
+  X,
 } from "lucide-react";
 import { mockImages } from "@/lib/mock/images";
+import { ImageUpload, ImageData } from "@/components/admin/ImageUpload";
 
 interface BannerItem {
   id: string;
@@ -71,15 +73,27 @@ const initialBanners: BannerItem[] = [
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<BannerItem[]>(initialBanners);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form State
-  const [newBanner, setNewBanner] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    subtitle: string;
+    location: "hero" | "destaque-sc" | "campo-grande" | "rural";
+    ctaText: string;
+    ctaLink: string;
+    coverImage: ImageData;
+    active: boolean;
+  }>({
     title: "",
     subtitle: "",
-    location: "hero" as "hero" | "destaque-sc" | "campo-grande" | "rural",
+    location: "hero",
     ctaText: "Saiba Mais",
     ctaLink: "/empreendimentos",
-    imageUrl: mockImages.urbanBuilding1,
+    coverImage: {
+      url: mockImages.coastalHouse1,
+      alt: "Banner de Destaque",
+    },
     active: true,
   });
 
@@ -95,7 +109,41 @@ export default function AdminBannersPage() {
     }
   };
 
-  const handleCreateBanner = (e: React.FormEvent) => {
+  const handleOpenCreate = () => {
+    setEditingId(null);
+    setFormData({
+      title: "",
+      subtitle: "",
+      location: "hero",
+      ctaText: "Saiba Mais",
+      ctaLink: "/empreendimentos",
+      coverImage: {
+        url: mockImages.coastalHouse1,
+        alt: "Banner de Destaque",
+      },
+      active: true,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (banner: BannerItem) => {
+    setEditingId(banner.id);
+    setFormData({
+      title: banner.title,
+      subtitle: banner.subtitle,
+      location: banner.location,
+      ctaText: banner.ctaText,
+      ctaLink: banner.ctaLink,
+      coverImage: {
+        url: banner.imageUrl,
+        alt: banner.title,
+      },
+      active: banner.active,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSaveBanner = (e: React.FormEvent) => {
     e.preventDefault();
     const locationLabels = {
       hero: "Hero Principal (Home)",
@@ -104,29 +152,41 @@ export default function AdminBannersPage() {
       rural: "Seção Rural & Agro",
     };
 
-    const created: BannerItem = {
-      id: `ban-${Date.now()}`,
-      title: newBanner.title,
-      subtitle: newBanner.subtitle,
-      location: newBanner.location,
-      locationLabel: locationLabels[newBanner.location],
-      imageUrl: newBanner.imageUrl,
-      ctaText: newBanner.ctaText,
-      ctaLink: newBanner.ctaLink,
-      active: newBanner.active,
-      order: banners.length + 1,
-    };
+    if (editingId) {
+      setBanners(
+        banners.map((b) =>
+          b.id === editingId
+            ? {
+                ...b,
+                title: formData.title,
+                subtitle: formData.subtitle,
+                location: formData.location,
+                locationLabel: locationLabels[formData.location],
+                imageUrl: formData.coverImage.url || mockImages.coastalHouse1,
+                ctaText: formData.ctaText,
+                ctaLink: formData.ctaLink,
+                active: formData.active,
+              }
+            : b
+        )
+      );
+    } else {
+      const created: BannerItem = {
+        id: `ban-${Date.now()}`,
+        title: formData.title,
+        subtitle: formData.subtitle,
+        location: formData.location,
+        locationLabel: locationLabels[formData.location],
+        imageUrl: formData.coverImage.url || mockImages.coastalHouse1,
+        ctaText: formData.ctaText,
+        ctaLink: formData.ctaLink,
+        active: formData.active,
+        order: banners.length + 1,
+      };
 
-    setBanners([created, ...banners]);
-    setNewBanner({
-      title: "",
-      subtitle: "",
-      location: "hero",
-      ctaText: "Saiba Mais",
-      ctaLink: "/empreendimentos",
-      imageUrl: mockImages.urbanBuilding1,
-      active: true,
-    });
+      setBanners([created, ...banners]);
+    }
+
     setIsModalOpen(false);
   };
 
@@ -148,7 +208,7 @@ export default function AdminBannersPage() {
 
         <button
           type="button"
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenCreate}
           className="focus-ring inline-flex items-center justify-center gap-2 rounded-xs bg-mineral px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-offwhite hover:bg-mineral-light transition-colors shadow-xs cursor-pointer"
         >
           <Plus className="h-4 w-4" />
@@ -167,11 +227,11 @@ export default function AdminBannersPage() {
           >
             {/* Pré-visualização da Imagem */}
             <div className="relative aspect-[16/9] bg-graphite overflow-hidden">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={item.imageUrl}
                 alt={item.title}
-                fill
-                className="object-cover opacity-85 transition-transform duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover opacity-85 transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-graphite/80 via-transparent to-transparent" />
 
@@ -199,38 +259,34 @@ export default function AdminBannersPage() {
                 </p>
               </div>
 
-              <div className="border-t border-areia/40 pt-3">
-                <div className="flex items-center justify-between text-xs text-graphite/60 mb-3">
-                  <span className="font-medium text-mineral">Botão: {item.ctaText}</span>
-                  <span className="text-[11px] text-graphite/40 truncate max-w-[120px]">
-                    {item.ctaLink}
-                  </span>
+              <div className="flex items-center justify-between border-t border-areia/30 pt-4 text-xs">
+                <div className="flex items-center gap-1 text-mineral font-medium">
+                  <span>{item.ctaText}</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </div>
 
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
                   <button
                     type="button"
                     onClick={() => handleToggleActive(item.id)}
-                    className="focus-ring inline-flex items-center gap-1.5 rounded-xs border border-areia/70 bg-offwhite/50 px-3 py-1.5 text-xs font-medium text-graphite hover:bg-offwhite transition-colors cursor-pointer"
+                    title={item.active ? "Desativar" : "Ativar"}
+                    className="p-1.5 rounded-xs text-graphite/60 hover:text-mineral hover:bg-areia/40 transition-colors cursor-pointer"
                   >
-                    {item.active ? (
-                      <>
-                        <EyeOff className="h-3.5 w-3.5" />
-                        Pausar
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-3.5 w-3.5" />
-                        Ativar
-                      </>
-                    )}
+                    {item.active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
-
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEdit(item)}
+                    title="Editar Banner"
+                    className="p-1.5 rounded-xs text-graphite/60 hover:text-mineral hover:bg-areia/40 transition-colors cursor-pointer"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
                   <button
                     type="button"
                     onClick={() => handleDeleteBanner(item.id)}
-                    className="rounded-xs p-1.5 text-graphite/40 hover:text-rose-600 transition-colors cursor-pointer"
-                    title="Excluir banner"
+                    title="Remover"
+                    className="p-1.5 rounded-xs text-graphite/60 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -241,51 +297,67 @@ export default function AdminBannersPage() {
         ))}
       </div>
 
-      {/* Modal: Novo Banner */}
+      {/* Modal de Criação / Edição de Banner */}
       {isModalOpen && (
         <div
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-graphite/60 backdrop-blur-xs p-4 animate-fade-in"
         >
-          <div className="w-full max-w-lg rounded-sm border border-areia/60 bg-white p-6 shadow-2xl space-y-5 animate-scale-in">
+          <div className="w-full max-w-2xl rounded-sm border border-areia/60 bg-white p-6 shadow-2xl space-y-5 animate-scale-in max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-areia/40 pb-3">
               <div className="flex items-center gap-2">
                 <GalleryHorizontal className="h-5 w-5 text-mineral" />
                 <h3 className="font-display text-lg font-medium text-graphite">
-                  Cadastrar Novo Banner
+                  {editingId ? "Editar Banner Promocional" : "Adicionar Novo Banner"}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-graphite/40 hover:text-graphite text-lg cursor-pointer"
+                className="text-graphite/40 hover:text-graphite cursor-pointer"
               >
-                ✕
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateBanner} className="space-y-4">
+            <form onSubmit={handleSaveBanner} className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-graphite mb-1">
-                  Posicionamento do Banner *
+                  Posição de Exibição *
                 </label>
                 <select
-                  value={newBanner.location}
+                  value={formData.location}
                   onChange={(e) =>
-                    setNewBanner({
-                      ...newBanner,
+                    setFormData({
+                      ...formData,
                       location: e.target.value as "hero" | "destaque-sc" | "campo-grande" | "rural",
                     })
                   }
                   className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite cursor-pointer"
                 >
                   <option value="hero">Hero Principal (Topo da Home)</option>
-                  <option value="destaque-sc">Destaque Litoral SC</option>
-                  <option value="campo-grande">Seção Imóveis Campo Grande</option>
-                  <option value="rural">Seção Agronegócio &amp; Rural</option>
+                  <option value="destaque-sc">Destaque Litoral SC (Porto Belo / Itapema / BC)</option>
+                  <option value="campo-grande">Seção Urbana (Campo Grande / MS)</option>
+                  <option value="rural">Seção Rural &amp; Agronegócio</option>
                 </select>
               </div>
+
+              {/* Upload de Imagem do Banner */}
+              <ImageUpload
+                label="Imagem de Fundo do Banner"
+                helperText="Escolha uma imagem de alto impacto com arquivo local, link ou banco de fotos."
+                category={
+                  formData.location === "destaque-sc"
+                    ? "coastal"
+                    : formData.location === "rural"
+                    ? "rural"
+                    : "urban"
+                }
+                coverImage={formData.coverImage}
+                onCoverChange={(img) => setFormData({ ...formData, coverImage: img })}
+                allowGallery={false}
+              />
 
               <div>
                 <label className="block text-xs font-medium text-graphite mb-1">
@@ -295,8 +367,8 @@ export default function AdminBannersPage() {
                   type="text"
                   required
                   placeholder="Ex: Lançamento Exclusivo Frente Mar em Itapema"
-                  value={newBanner.title}
-                  onChange={(e) => setNewBanner({ ...newBanner, title: e.target.value })}
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
                 />
               </div>
@@ -308,8 +380,8 @@ export default function AdminBannersPage() {
                 <textarea
                   rows={2}
                   placeholder="Ex: Condições facilitadas de parcelamento direto durante o período de obras."
-                  value={newBanner.subtitle}
-                  onChange={(e) => setNewBanner({ ...newBanner, subtitle: e.target.value })}
+                  value={formData.subtitle}
+                  onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
                   className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite resize-none"
                 />
               </div>
@@ -322,8 +394,8 @@ export default function AdminBannersPage() {
                   <input
                     type="text"
                     required
-                    value={newBanner.ctaText}
-                    onChange={(e) => setNewBanner({ ...newBanner, ctaText: e.target.value })}
+                    value={formData.ctaText}
+                    onChange={(e) => setFormData({ ...formData, ctaText: e.target.value })}
                     className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
                   />
                 </div>
@@ -335,8 +407,8 @@ export default function AdminBannersPage() {
                   <input
                     type="text"
                     required
-                    value={newBanner.ctaLink}
-                    onChange={(e) => setNewBanner({ ...newBanner, ctaLink: e.target.value })}
+                    value={formData.ctaLink}
+                    onChange={(e) => setFormData({ ...formData, ctaLink: e.target.value })}
                     className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
                   />
                 </div>
@@ -352,9 +424,9 @@ export default function AdminBannersPage() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xs bg-mineral px-4 py-2 text-xs font-semibold uppercase tracking-wider text-offwhite hover:bg-mineral-light cursor-pointer shadow-xs"
+                  className="rounded-xs bg-mineral px-5 py-2 text-xs font-semibold uppercase tracking-wider text-offwhite hover:bg-mineral-light cursor-pointer shadow-xs"
                 >
-                  Publicar Banner
+                  {editingId ? "Atualizar Banner" : "Publicar Banner"}
                 </button>
               </div>
             </form>

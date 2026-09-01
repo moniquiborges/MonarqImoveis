@@ -15,6 +15,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { formatBRL } from "@/lib/utils";
+import { CurrencyInput } from "@/components/admin/CurrencyInput";
 import { mockDevelopments } from "@/lib/mock/developments";
 
 interface Unit {
@@ -516,16 +517,13 @@ export default function AdminUnidadesPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-graphite mb-1">
-                    Valor da Unidade (R$) *
-                  </label>
-                  <input
-                    type="number"
+                  <CurrencyInput
+                    label="Valor da Unidade (R$)"
                     required
-                    placeholder="1800000"
                     value={newUnit.price}
-                    onChange={(e) => setNewUnit({ ...newUnit, price: e.target.value })}
-                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                    onChange={(numVal) => setNewUnit({ ...newUnit, price: String(numVal) })}
+                    placeholder="Ex: 1.850.000 ou 1,8 milhão"
+                    allowSobConsulta={false}
                   />
                 </div>
 
