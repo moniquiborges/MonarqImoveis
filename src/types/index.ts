@@ -24,6 +24,7 @@ export interface PropertyImage {
 
 export interface Development {
   slug: string;
+  code?: string;
   name: string;
   city: ScCity;
   cityLabel: string;

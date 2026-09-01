@@ -259,31 +259,24 @@ export function DevelopmentDetailView({
               </div>
             )}
 
-            {/* Destaques de Lazer e Infraestrutura */}
-            <div className="border-t border-areia/40 pt-8">
-              <h3 className="font-display text-xl text-graphite mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-terracota" />
-                Diferenciais e Infraestrutura
-              </h3>
+            {/* Destaques de Lazer e Infraestrutura (Opcional - exibe apenas se houver itens) */}
+            {development.features && development.features.length > 0 && (
+              <div className="border-t border-areia/40 pt-8">
+                <h3 className="font-display text-xl text-graphite mb-4 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-terracota" />
+                  Diferenciais e Infraestrutura
+                </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-graphite/80">
-                {[
-                  "Piscina adulto e infantil com deck molhado",
-                  "Espaço Gourmet e Salão de Festas mobiliado e decorado",
-                  "Academia equipada com vista panorâmica",
-                  "Hall de entrada com pé-direito duplo",
-                  "Fechaduras biométricas e controle de acesso facial",
-                  "Infraestrutura para automação residencial",
-                  "Vagas preparadas para recarga de veículo elétrico",
-                  "Paisagismo assinado com espécies nativas",
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2.5">
-                    <CheckCircle className="h-4 w-4 text-mineral shrink-0" />
-                    <span>{item}</span>
-                  </div>
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-graphite/80">
+                  {development.features.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5">
+                      <CheckCircle className="h-4 w-4 text-mineral shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Informações Construtivas / Construtora */}
             {development.builder && (

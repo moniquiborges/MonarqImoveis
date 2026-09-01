@@ -45,13 +45,15 @@ export async function POST(req: Request) {
       await supabase.from("property_images").delete().eq("entity_id", entityId);
 
       const allImages = [
-        { url: prop.coverImage.url, alt: prop.coverImage.alt || prop.title, is_cover: true, position: 0 },
-        ...(prop.gallery || []).map((g, idx) => ({
-          url: g.url,
-          alt: g.alt || prop.title,
-          is_cover: false,
-          position: idx + 1,
-        })),
+        ...(prop.coverImage?.url ? [{ url: prop.coverImage.url, alt: prop.coverImage.alt || prop.title, is_cover: true, position: 0 }] : []),
+        ...(prop.gallery || [])
+          .filter((g) => g.url && g.url.trim() !== "")
+          .map((g, idx) => ({
+            url: g.url,
+            alt: g.alt || prop.title,
+            is_cover: false,
+            position: idx + 1,
+          })),
       ];
 
       const imageInserts = allImages.map((img) => ({
@@ -86,14 +88,14 @@ export async function POST(req: Request) {
             short_description: dev.shortDescription,
             description: dev.description || null,
             price_from: dev.priceFrom,
-            bedrooms_min: dev.bedroomsRange[0],
-            bedrooms_max: dev.bedroomsRange[1],
+            bedrooms_min: dev.bedroomsRange ? dev.bedroomsRange[0] : 2,
+            bedrooms_max: dev.bedroomsRange ? dev.bedroomsRange[1] : 4,
             suites_min: dev.suitesRange ? dev.suitesRange[0] : null,
             suites_max: dev.suitesRange ? dev.suitesRange[1] : null,
             parking_min: dev.parkingRange ? dev.parkingRange[0] : null,
             parking_max: dev.parkingRange ? dev.parkingRange[1] : null,
-            area_min: dev.areaRange[0],
-            area_max: dev.areaRange[1],
+            area_min: dev.areaRange ? dev.areaRange[0] : 100,
+            area_max: dev.areaRange ? dev.areaRange[1] : 200,
             distance_to_sea: dev.distanceToSea,
             status: "published",
             badges: dev.badges || ["lancamento", "alto-padrao"],
@@ -111,13 +113,15 @@ export async function POST(req: Request) {
       await supabase.from("property_images").delete().eq("entity_id", entityId);
 
       const allImages = [
-        { url: dev.coverImage.url, alt: dev.coverImage.alt || dev.name, is_cover: true, position: 0 },
-        ...(dev.gallery || []).map((g, idx) => ({
-          url: g.url,
-          alt: g.alt || dev.name,
-          is_cover: false,
-          position: idx + 1,
-        })),
+        ...(dev.coverImage?.url ? [{ url: dev.coverImage.url, alt: dev.coverImage.alt || dev.name, is_cover: true, position: 0 }] : []),
+        ...(dev.gallery || [])
+          .filter((g) => g.url && g.url.trim() !== "")
+          .map((g, idx) => ({
+            url: g.url,
+            alt: g.alt || dev.name,
+            is_cover: false,
+            position: idx + 1,
+          })),
       ];
 
       const imageInserts = allImages.map((img) => ({
@@ -169,13 +173,15 @@ export async function POST(req: Request) {
       await supabase.from("property_images").delete().eq("entity_id", entityId);
 
       const allImages = [
-        { url: rural.coverImage.url, alt: rural.coverImage.alt || rural.title, is_cover: true, position: 0 },
-        ...(rural.gallery || []).map((g, idx) => ({
-          url: g.url,
-          alt: g.alt || rural.title,
-          is_cover: false,
-          position: idx + 1,
-        })),
+        ...(rural.coverImage?.url ? [{ url: rural.coverImage.url, alt: rural.coverImage.alt || rural.title, is_cover: true, position: 0 }] : []),
+        ...(rural.gallery || [])
+          .filter((g) => g.url && g.url.trim() !== "")
+          .map((g, idx) => ({
+            url: g.url,
+            alt: g.alt || rural.title,
+            is_cover: false,
+            position: idx + 1,
+          })),
       ];
 
       const imageInserts = allImages.map((img) => ({
