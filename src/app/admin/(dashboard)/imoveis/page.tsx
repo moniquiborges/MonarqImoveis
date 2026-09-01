@@ -19,6 +19,7 @@ import {
   Sparkles,
   Waves,
   Calendar,
+  CheckCircle2,
 } from "lucide-react";
 import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockDevelopments } from "@/lib/mock/developments";
@@ -76,6 +77,7 @@ export default function AdminImoveisPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<UnifiedPropertyItem | null>(null);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
 
   // Form State
   const [formData, setFormData] = useState<{
@@ -136,7 +138,7 @@ export default function AdminImoveisPage() {
       suites: dev.suitesRange ? dev.suitesRange[0] : 2,
       parking: dev.parkingRange ? dev.parkingRange[0] : 2,
       area: dev.areaRange ? dev.areaRange[0] : 100,
-      coverImage: dev.coverImage,
+      coverImage: dev.coverImage || { url: mockImages.coastalHouse1, alt: dev.name },
       gallery: dev.gallery || [],
       stage: dev.stage,
       distanceToSea: dev.distanceToSea,
@@ -159,7 +161,7 @@ export default function AdminImoveisPage() {
       suites: urban.suites,
       parking: urban.parking,
       area: urban.area,
-      coverImage: urban.coverImage,
+      coverImage: urban.coverImage || { url: mockImages.livingRoom1, alt: urban.title },
       gallery: urban.gallery || [],
       siteUrl: `/imoveis/campo-grande/${urban.slug}`,
     }));
@@ -186,6 +188,13 @@ export default function AdminImoveisPage() {
 
   const countSC = useMemo(() => devItems.length, [devItems]);
   const countMS = useMemo(() => urbanItems.length, [urbanItems]);
+
+  const showToast = (msg: string) => {
+    setSuccessToast(msg);
+    setTimeout(() => {
+      setSuccessToast(null);
+    }, 4000);
+  };
 
   const handleOpenCreate = (preselectedState?: "SC" | "MS") => {
     const selectedState = preselectedState || (stateFilter === "MS" ? "MS" : "SC");
@@ -242,6 +251,11 @@ export default function AdminImoveisPage() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.title.trim()) {
+      alert("Por favor, preencha o título do imóvel.");
+      return;
+    }
+
     const isSC = formData.state === "SC";
     const rawSlug =
       formData.title
@@ -260,7 +274,6 @@ export default function AdminImoveisPage() {
       };
 
       const cityLabel = cityLabels[formData.scCity] || "Porto Belo";
-
       let updatedDevs: Development[];
 
       if (editingItem && editingItem.state === "SC") {
@@ -328,6 +341,7 @@ export default function AdminImoveisPage() {
 
       setDevItems(() => updatedDevs);
       saveStoredDevelopments(updatedDevs);
+      showToast(`✓ Imóvel em Santa Catarina (${cityLabel}) salvo com sucesso!`);
     } else {
       // Salva / Atualiza em Imóveis Urbanos MS
       let updatedUrban: UrbanProperty[];
@@ -385,6 +399,7 @@ export default function AdminImoveisPage() {
 
       setUrbanItems(() => updatedUrban);
       saveStoredUrbanProperties(updatedUrban);
+      showToast("✓ Imóvel em Campo Grande / MS salvo com sucesso!");
     }
 
     setModalOpen(false);
@@ -396,16 +411,26 @@ export default function AdminImoveisPage() {
         const updated = devItems.filter((d) => d.slug !== item.slug);
         setDevItems(() => updated);
         saveStoredDevelopments(updated);
+        showToast("✓ Imóvel de Santa Catarina removido.");
       } else {
         const updated = urbanItems.filter((u) => u.slug !== item.slug);
         setUrbanItems(() => updated);
         saveStoredUrbanProperties(updated);
+        showToast("✓ Imóvel de Campo Grande removido.");
       }
     }
   };
 
   return (
     <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+      {/* Toast de Sucesso */}
+      {successToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xs bg-mineral px-4 py-3 text-xs font-semibold text-offwhite shadow-xl animate-fade-in">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+          <span>{successToast}</span>
+        </div>
+      )}
+
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

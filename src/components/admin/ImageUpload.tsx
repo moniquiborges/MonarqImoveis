@@ -142,31 +142,74 @@ export function ImageUpload({
     }
   };
 
+  // Função para redimensionar e comprimir fotos enviadas pelo usuário
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1280;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) {
+            resolve(dataUrl);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          // Comprime para JPEG 0.78 para caber dezenas de fotos sem estourar o storage
+          const compressed = canvas.toDataURL("image/jpeg", 0.78);
+          resolve(compressed);
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      };
+      reader.onerror = () => resolve("");
+      reader.readAsDataURL(file);
+    });
+  };
+
   // Processa múltiplos arquivos selecionados pelo input ou drop
-  const handleFiles = (files: FileList | File[]) => {
+  const handleFiles = async (files: FileList | File[]) => {
     const fileArray = Array.from(files).filter((file) => file.type.startsWith("image/"));
     if (fileArray.length === 0) {
       alert("Por favor, selecione arquivos de imagem válidos (JPG, PNG, WEBP, etc.).");
       return;
     }
 
-    const readPromises = fileArray.map((file) => {
-      return new Promise<ImageData>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const result = e.target?.result as string;
-          resolve({
-            url: result,
+    try {
+      const loadedImgs: ImageData[] = [];
+      for (const file of fileArray) {
+        const compressedUrl = await compressImage(file);
+        if (compressedUrl) {
+          loadedImgs.push({
+            url: compressedUrl,
             alt: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
           });
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    Promise.all(readPromises).then((loadedImgs) => {
+        }
+      }
       addImages(loadedImgs);
-    });
+    } catch (err) {
+      console.error("Erro ao carregar imagens:", err);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
