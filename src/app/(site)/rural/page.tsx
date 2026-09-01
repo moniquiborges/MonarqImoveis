@@ -7,17 +7,23 @@ import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { ruralPropertyToCard } from "@/components/property/adapters";
 import { mockRuralProperties } from "@/lib/mock/rural";
+import { getStoredRuralProperties, useLiveStoredData } from "@/lib/storage";
 import { ruralActivityLabels } from "@/lib/labels";
-import type { RuralActivity } from "@/types";
+import type { RuralProperty, RuralActivity } from "@/types";
 
 export default function RuralPage() {
+  const [ruralProperties] = useLiveStoredData<RuralProperty[]>(
+    getStoredRuralProperties,
+    mockRuralProperties,
+    "rural"
+  );
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedActivity, setSelectedActivity] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const filteredProperties = useMemo(() => {
-    return mockRuralProperties.filter((item) => {
+    return ruralProperties.filter((item) => {
       // Estado (MS / MT / etc)
       if (selectedState !== "all" && item.state !== selectedState) return false;
 

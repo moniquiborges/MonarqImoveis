@@ -18,12 +18,21 @@ import { mockDevelopments } from "@/lib/mock/developments";
 import { mockImages } from "@/lib/mock/images";
 import { stageLabels } from "@/lib/labels";
 import { formatBRL } from "@/lib/utils";
+import {
+  getStoredDevelopments,
+  saveStoredDevelopments,
+  useLiveStoredData,
+} from "@/lib/storage";
 import { CurrencyInput } from "@/components/admin/CurrencyInput";
 import { ImageUpload, ImageData } from "@/components/admin/ImageUpload";
 import type { Development, ScCity, DevelopmentStage } from "@/types";
 
 export default function AdminEmpreendimentosPage() {
-  const [items, setItems] = useState<Development[]>(mockDevelopments);
+  const [items, setItems] = useLiveStoredData<Development[]>(
+    getStoredDevelopments,
+    mockDevelopments,
+    "developments"
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
@@ -132,41 +141,43 @@ export default function AdminEmpreendimentosPage() {
         ? "Itapema"
         : "Balneário Camboriú";
 
+    let updated: Development[];
     if (editingSlug) {
-      setItems((prev) =>
-        prev.map((item) => {
-          if (item.slug === editingSlug) {
-            return {
-              ...item,
-              name: formData.name,
-              city: formData.city,
-              cityLabel,
-              neighborhood: formData.neighborhood || "Centro",
-              stage: formData.stage,
-              deliveryDate: formData.deliveryDate,
-              shortDescription: formData.shortDescription,
-              priceFrom: formData.priceFrom ?? undefined,
-              bedroomsRange: [Number(formData.bedroomsMin) || 2, Number(formData.bedroomsMax) || 4],
-              areaRange: [Number(formData.areaMin) || 80, Number(formData.areaMax) || 200],
-              distanceToSea: formData.distanceToSea,
-              coverImage: {
-                url: formData.coverImage.url || mockImages.coastalHouse1,
-                alt: formData.coverImage.alt || formData.name,
-              },
-              gallery: formData.gallery.map((g) => ({
-                url: g.url,
-                alt: g.alt || formData.name,
-              })),
-            };
-          }
-          return item;
-        })
-      );
+      updated = items.map((item) => {
+        if (item.slug === editingSlug) {
+          return {
+            ...item,
+            name: formData.name,
+            city: formData.city,
+            cityLabel,
+            neighborhood: formData.neighborhood || "Centro",
+            stage: formData.stage,
+            deliveryDate: formData.deliveryDate,
+            shortDescription: formData.shortDescription,
+            priceFrom: formData.priceFrom ?? undefined,
+            bedroomsRange: [Number(formData.bedroomsMin) || 2, Number(formData.bedroomsMax) || 4],
+            areaRange: [Number(formData.areaMin) || 80, Number(formData.areaMax) || 200],
+            distanceToSea: formData.distanceToSea,
+            coverImage: {
+              url: formData.coverImage.url || mockImages.coastalHouse1,
+              alt: formData.coverImage.alt || formData.name,
+            },
+            gallery: formData.gallery.map((g) => ({
+              url: g.url,
+              alt: g.alt || formData.name,
+            })),
+          };
+        }
+        return item;
+      });
     } else {
-      const slug = formData.name
-        .toLowerCase()
-        .replace(/[^\w ]+/g, "")
-        .replace(/ +/g, "-") || `dev-${Date.now()}`;
+      const slug =
+        formData.name
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^\w ]+/g, "")
+          .replace(/ +/g, "-") || `dev-${Date.now()}`;
 
       const created: Development = {
         slug,
@@ -192,15 +203,19 @@ export default function AdminEmpreendimentosPage() {
         })),
       };
 
-      setItems([created, ...items]);
+      updated = [created, ...items];
     }
 
+    setItems(() => updated);
+    saveStoredDevelopments(updated);
     setModalOpen(false);
   };
 
   const handleDelete = (slug: string) => {
     if (confirm("Tem certeza que deseja remover este empreendimento?")) {
-      setItems((prev) => prev.filter((i) => i.slug !== slug));
+      const updated = items.filter((i) => i.slug !== slug);
+      setItems(() => updated);
+      saveStoredDevelopments(updated);
     }
   };
 

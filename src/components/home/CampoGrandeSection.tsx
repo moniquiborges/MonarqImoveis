@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -6,8 +8,16 @@ import { PropertyCard } from "@/components/property/PropertyCard";
 import { urbanPropertyToCard } from "@/components/property/adapters";
 import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockImages } from "@/lib/mock/images";
+import { getStoredUrbanProperties, useLiveStoredData } from "@/lib/storage";
+import type { UrbanProperty } from "@/types";
 
 export function CampoGrandeSection() {
+  const [properties] = useLiveStoredData<UrbanProperty[]>(
+    getStoredUrbanProperties,
+    mockUrbanProperties,
+    "urban"
+  );
+
   return (
     <section className="py-24">
       <Container className="flex flex-col gap-14">
@@ -34,7 +44,7 @@ export function CampoGrandeSection() {
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {mockUrbanProperties.map((property) => (
+          {properties.map((property) => (
             <PropertyCard key={property.slug} {...urbanPropertyToCard(property)} />
           ))}
         </div>

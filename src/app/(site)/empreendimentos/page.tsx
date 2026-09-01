@@ -8,8 +8,9 @@ import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { developmentToCard } from "@/components/property/adapters";
 import { mockDevelopments } from "@/lib/mock/developments";
+import { getStoredDevelopments, useLiveStoredData } from "@/lib/storage";
 import { stageLabels } from "@/lib/labels";
-import type { ScCity, DevelopmentStage } from "@/types";
+import type { Development, ScCity, DevelopmentStage } from "@/types";
 
 const cityTabs: { value: string; label: string }[] = [
   { value: "all", label: "Todas as Cidades" },
@@ -19,12 +20,17 @@ const cityTabs: { value: string; label: string }[] = [
 ];
 
 export default function EmpreendimentosPage() {
+  const [developments] = useLiveStoredData<Development[]>(
+    getStoredDevelopments,
+    mockDevelopments,
+    "developments"
+  );
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedStage, setSelectedStage] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const filteredDevelopments = useMemo(() => {
-    return mockDevelopments.filter((dev) => {
+    return developments.filter((dev) => {
       // Filtro de Cidade
       if (selectedCity !== "all" && dev.city !== selectedCity) return false;
 
@@ -43,7 +49,7 @@ export default function EmpreendimentosPage() {
 
       return true;
     });
-  }, [selectedCity, selectedStage, searchQuery]);
+  }, [developments, selectedCity, selectedStage, searchQuery]);
 
   const hasActiveFilters = selectedCity !== "all" || selectedStage !== "all" || searchQuery !== "";
 

@@ -20,12 +20,21 @@ import {
 import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockImages } from "@/lib/mock/images";
 import { formatBRL, formatArea } from "@/lib/utils";
+import {
+  getStoredUrbanProperties,
+  saveStoredUrbanProperties,
+  useLiveStoredData,
+} from "@/lib/storage";
 import { CurrencyInput } from "@/components/admin/CurrencyInput";
 import { ImageUpload, ImageData } from "@/components/admin/ImageUpload";
 import type { UrbanProperty } from "@/types";
 
 export default function AdminImoveisPage() {
-  const [items, setItems] = useState<UrbanProperty[]>(mockUrbanProperties);
+  const [items, setItems] = useLiveStoredData<UrbanProperty[]>(
+    getStoredUrbanProperties,
+    mockUrbanProperties,
+    "urban"
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
@@ -111,40 +120,42 @@ export default function AdminImoveisPage() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
+    let updated: UrbanProperty[];
     if (editingSlug) {
       // Edição
-      setItems((prev) =>
-        prev.map((item) => {
-          if (item.slug === editingSlug) {
-            return {
-              ...item,
-              title: formData.title,
-              type: formData.type,
-              neighborhood: formData.neighborhood,
-              price: formData.price,
-              bedrooms: Number(formData.bedrooms) || 0,
-              suites: Number(formData.suites) || 0,
-              parking: Number(formData.parking) || 0,
-              area: Number(formData.area) || 0,
-              coverImage: {
-                url: formData.coverImage.url || mockImages.livingRoom1,
-                alt: formData.coverImage.alt || formData.title,
-              },
-              gallery: formData.gallery.map((g) => ({
-                url: g.url,
-                alt: g.alt || formData.title,
-              })),
-            };
-          }
-          return item;
-        })
-      );
+      updated = items.map((item) => {
+        if (item.slug === editingSlug) {
+          return {
+            ...item,
+            title: formData.title,
+            type: formData.type,
+            neighborhood: formData.neighborhood,
+            price: formData.price,
+            bedrooms: Number(formData.bedrooms) || 0,
+            suites: Number(formData.suites) || 0,
+            parking: Number(formData.parking) || 0,
+            area: Number(formData.area) || 0,
+            coverImage: {
+              url: formData.coverImage.url || mockImages.livingRoom1,
+              alt: formData.coverImage.alt || formData.title,
+            },
+            gallery: formData.gallery.map((g) => ({
+              url: g.url,
+              alt: g.alt || formData.title,
+            })),
+          };
+        }
+        return item;
+      });
     } else {
       // Criação
-      const slug = formData.title
-        .toLowerCase()
-        .replace(/[^\w ]+/g, "")
-        .replace(/ +/g, "-") || `imovel-${Date.now()}`;
+      const slug =
+        formData.title
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^\w ]+/g, "")
+          .replace(/ +/g, "-") || `imovel-${Date.now()}`;
 
       const created: UrbanProperty = {
         slug,
@@ -169,15 +180,19 @@ export default function AdminImoveisPage() {
         })),
       };
 
-      setItems([created, ...items]);
+      updated = [created, ...items];
     }
 
+    setItems(() => updated);
+    saveStoredUrbanProperties(updated);
     setModalOpen(false);
   };
 
   const handleDelete = (slug: string) => {
     if (confirm("Tem certeza que deseja remover este imóvel?")) {
-      setItems((prev) => prev.filter((i) => i.slug !== slug));
+      const updated = items.filter((i) => i.slug !== slug);
+      setItems(() => updated);
+      saveStoredUrbanProperties(updated);
     }
   };
 

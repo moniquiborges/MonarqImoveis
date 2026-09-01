@@ -7,26 +7,33 @@ import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { urbanPropertyToCard } from "@/components/property/adapters";
 import { mockUrbanProperties } from "@/lib/mock/properties";
+import { getStoredUrbanProperties, useLiveStoredData } from "@/lib/storage";
+import type { UrbanProperty } from "@/types";
 
 export default function CampoGrandePage() {
+  const [properties] = useLiveStoredData<UrbanProperty[]>(
+    getStoredUrbanProperties,
+    mockUrbanProperties,
+    "urban"
+  );
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Bairros únicos disponíveis nos dados
   const neighborhoods = useMemo(() => {
-    const set = new Set(mockUrbanProperties.map((p) => p.neighborhood));
+    const set = new Set(properties.map((p) => p.neighborhood));
     return Array.from(set);
-  }, []);
+  }, [properties]);
 
   // Tipos únicos disponíveis
   const propertyTypes = useMemo(() => {
-    const set = new Set(mockUrbanProperties.map((p) => p.type));
+    const set = new Set(properties.map((p) => p.type));
     return Array.from(set);
-  }, []);
+  }, [properties]);
 
   const filteredProperties = useMemo(() => {
-    return mockUrbanProperties.filter((item) => {
+    return properties.filter((item) => {
       if (selectedType !== "all" && item.type !== selectedType) return false;
       if (selectedNeighborhood !== "all" && item.neighborhood !== selectedNeighborhood) return false;
 
@@ -40,7 +47,7 @@ export default function CampoGrandePage() {
 
       return true;
     });
-  }, [selectedType, selectedNeighborhood, searchQuery]);
+  }, [properties, selectedType, selectedNeighborhood, searchQuery]);
 
   const hasActiveFilters =
     selectedType !== "all" || selectedNeighborhood !== "all" || searchQuery !== "";

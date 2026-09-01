@@ -18,12 +18,21 @@ import { mockRuralProperties } from "@/lib/mock/rural";
 import { mockImages } from "@/lib/mock/images";
 import { ruralActivityLabels } from "@/lib/labels";
 import { formatBRL } from "@/lib/utils";
+import {
+  getStoredRuralProperties,
+  saveStoredRuralProperties,
+  useLiveStoredData,
+} from "@/lib/storage";
 import { CurrencyInput } from "@/components/admin/CurrencyInput";
 import { ImageUpload, ImageData } from "@/components/admin/ImageUpload";
 import type { RuralProperty, RuralActivity, RuralState } from "@/types";
 
 export default function AdminRuralPage() {
-  const [items, setItems] = useState<RuralProperty[]>(mockRuralProperties);
+  const [items, setItems] = useLiveStoredData<RuralProperty[]>(
+    getStoredRuralProperties,
+    mockRuralProperties,
+    "rural"
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
@@ -103,37 +112,39 @@ export default function AdminRuralPage() {
     const price = formData.price;
     const pricePerHectare = price ? Math.round(price / ha) : undefined;
 
+    let updated: RuralProperty[];
     if (editingSlug) {
-      setItems((prev) =>
-        prev.map((item) => {
-          if (item.slug === editingSlug) {
-            return {
-              ...item,
-              title: formData.title,
-              state: formData.state,
-              municipality: formData.municipality,
-              totalHectares: ha,
-              activity: [formData.activity],
-              price,
-              pricePerHectare,
-              coverImage: {
-                url: formData.coverImage.url || mockImages.ruralLandscape1,
-                alt: formData.coverImage.alt || formData.title,
-              },
-              gallery: formData.gallery.map((g) => ({
-                url: g.url,
-                alt: g.alt || formData.title,
-              })),
-            };
-          }
-          return item;
-        })
-      );
+      updated = items.map((item) => {
+        if (item.slug === editingSlug) {
+          return {
+            ...item,
+            title: formData.title,
+            state: formData.state,
+            municipality: formData.municipality,
+            totalHectares: ha,
+            activity: [formData.activity],
+            price,
+            pricePerHectare,
+            coverImage: {
+              url: formData.coverImage.url || mockImages.ruralLandscape1,
+              alt: formData.coverImage.alt || formData.title,
+            },
+            gallery: formData.gallery.map((g) => ({
+              url: g.url,
+              alt: g.alt || formData.title,
+            })),
+          };
+        }
+        return item;
+      });
     } else {
-      const slug = formData.title
-        .toLowerCase()
-        .replace(/[^\w ]+/g, "")
-        .replace(/ +/g, "-") || `rural-${Date.now()}`;
+      const slug =
+        formData.title
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^\w ]+/g, "")
+          .replace(/ +/g, "-") || `rural-${Date.now()}`;
 
       const created: RuralProperty = {
         slug,
@@ -156,15 +167,19 @@ export default function AdminRuralPage() {
         })),
       };
 
-      setItems([created, ...items]);
+      updated = [created, ...items];
     }
 
+    setItems(() => updated);
+    saveStoredRuralProperties(updated);
     setModalOpen(false);
   };
 
   const handleDelete = (slug: string) => {
     if (confirm("Tem certeza que deseja remover esta propriedade rural?")) {
-      setItems((prev) => prev.filter((i) => i.slug !== slug));
+      const updated = items.filter((i) => i.slug !== slug);
+      setItems(() => updated);
+      saveStoredRuralProperties(updated);
     }
   };
 

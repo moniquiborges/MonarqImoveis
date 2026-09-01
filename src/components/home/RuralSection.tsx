@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, LandPlot } from "lucide-react";
@@ -6,8 +8,16 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ButtonLink } from "@/components/ui/Button";
 import { formatBRL } from "@/lib/utils";
 import { mockRuralProperties } from "@/lib/mock/rural";
+import { getStoredRuralProperties, useLiveStoredData } from "@/lib/storage";
+import type { RuralProperty } from "@/types";
 
 export function RuralSection() {
+  const [ruralProperties] = useLiveStoredData<RuralProperty[]>(
+    getStoredRuralProperties,
+    mockRuralProperties,
+    "rural"
+  );
+
   return (
     <section className="bg-mineral py-24 text-offwhite">
       <Container className="flex flex-col gap-12">
@@ -24,7 +34,7 @@ export function RuralSection() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {mockRuralProperties.map((property) => (
+          {ruralProperties.map((property) => (
             <Link
               key={property.slug}
               href={`/rural/${property.slug}`}
