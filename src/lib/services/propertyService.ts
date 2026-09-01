@@ -123,85 +123,31 @@ export async function fetchUrbanPropertyBySlug(slug: string): Promise<UrbanPrope
 }
 
 export async function saveUrbanPropertyToDb(prop: UrbanProperty): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured()) {
-    return { success: true };
-  }
-
   try {
-    const supabase = createBrowserSupabaseClient() as any;
-    
-    // 1. Salva ou atualiza o registro na tabela urban_properties
-    const { data: row, error: rowError } = await supabase
-      .from("urban_properties")
-      .upsert(
-        {
-          slug: prop.slug,
-          code: prop.code,
-          title: prop.title,
-          property_type: prop.type,
-          neighborhood: prop.neighborhood,
-          city: "Campo Grande",
-          price: prop.price,
-          bedrooms: prop.bedrooms,
-          suites: prop.suites,
-          parking: prop.parking,
-          area: prop.area,
-          status: "published",
-          badges: prop.badges || ["novo", "alto-padrao"],
-        },
-        { onConflict: "slug" }
-      )
-      .select("id")
-      .single();
-
-    if (rowError || !row) {
-      console.error("Erro ao salvar imóvel no Supabase:", rowError);
-      return { success: false, error: rowError?.message };
-    }
-
-    const entityId = row.id;
-
-    // 2. Limpa e recria as fotos vinculadas
-    await supabase.from("property_images").delete().eq("entity_id", entityId);
-
-    const allImages = [
-      { url: prop.coverImage.url, alt: prop.coverImage.alt || prop.title, is_cover: true, position: 0 },
-      ...(prop.gallery || []).map((g, idx) => ({
-        url: g.url,
-        alt: g.alt || prop.title,
-        is_cover: false,
-        position: idx + 1,
-      })),
-    ];
-
-    const imageInserts = allImages.map((img) => ({
-      entity_type: "urban_property",
-      entity_id: entityId,
-      url: img.url,
-      alt: img.alt,
-      is_cover: img.is_cover,
-      position: img.position,
-    }));
-
-    if (imageInserts.length > 0) {
-      await supabase.from("property_images").insert(imageInserts);
-    }
-
-    return { success: true };
+    const res = await fetch("/api/properties/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "urban", data: prop }),
+    });
+    const result = await res.json();
+    return result;
   } catch (err: any) {
-    console.error("Erro inesperado ao salvar imóvel no Supabase:", err);
+    console.error("Erro inesperado ao salvar imóvel no Supabase via API:", err);
     return { success: false, error: err.message };
   }
 }
 
 export async function deleteUrbanPropertyFromDb(slug: string): Promise<boolean> {
-  if (!isSupabaseConfigured()) return true;
   try {
-    const supabase = createBrowserSupabaseClient() as any;
-    const { error } = await supabase.from("urban_properties").delete().eq("slug", slug);
-    return !error;
+    const res = await fetch("/api/properties/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "urban", slug }),
+    });
+    const result = await res.json();
+    return Boolean(result.success);
   } catch (err) {
-    console.error("Erro ao remover imóvel do Supabase:", err);
+    console.error("Erro ao remover imóvel do Supabase via API:", err);
     return false;
   }
 }
@@ -342,89 +288,31 @@ export async function fetchDevelopmentBySlug(slug: string): Promise<Development 
 }
 
 export async function saveDevelopmentToDb(dev: Development): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured()) {
-    return { success: true };
-  }
-
   try {
-    const supabase = createBrowserSupabaseClient() as any;
-    
-    const { data: row, error: rowError } = await supabase
-      .from("developments")
-      .upsert(
-        {
-          slug: dev.slug,
-          name: dev.name,
-          city: dev.city,
-          neighborhood: dev.neighborhood,
-          stage: dev.stage,
-          delivery_forecast: dev.deliveryDate,
-          short_description: dev.shortDescription,
-          price_from: dev.priceFrom,
-          bedrooms_min: dev.bedroomsRange[0],
-          bedrooms_max: dev.bedroomsRange[1],
-          suites_min: dev.suitesRange ? dev.suitesRange[0] : null,
-          suites_max: dev.suitesRange ? dev.suitesRange[1] : null,
-          parking_min: dev.parkingRange ? dev.parkingRange[0] : null,
-          parking_max: dev.parkingRange ? dev.parkingRange[1] : null,
-          area_min: dev.areaRange[0],
-          area_max: dev.areaRange[1],
-          distance_to_sea: dev.distanceToSea,
-          status: "published",
-          badges: dev.badges || ["lancamento", "alto-padrao"],
-        },
-        { onConflict: "slug" }
-      )
-      .select("id")
-      .single();
-
-    if (rowError || !row) {
-      console.error("Erro ao salvar empreendimento no Supabase:", rowError);
-      return { success: false, error: rowError?.message };
-    }
-
-    const entityId = row.id;
-
-    await supabase.from("property_images").delete().eq("entity_id", entityId);
-
-    const allImages = [
-      { url: dev.coverImage.url, alt: dev.coverImage.alt || dev.name, is_cover: true, position: 0 },
-      ...(dev.gallery || []).map((g, idx) => ({
-        url: g.url,
-        alt: g.alt || dev.name,
-        is_cover: false,
-        position: idx + 1,
-      })),
-    ];
-
-    const imageInserts = allImages.map((img) => ({
-      entity_type: "development",
-      entity_id: entityId,
-      url: img.url,
-      alt: img.alt,
-      is_cover: img.is_cover,
-      position: img.position,
-    }));
-
-    if (imageInserts.length > 0) {
-      await supabase.from("property_images").insert(imageInserts);
-    }
-
-    return { success: true };
+    const res = await fetch("/api/properties/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "development", data: dev }),
+    });
+    const result = await res.json();
+    return result;
   } catch (err: any) {
-    console.error("Erro inesperado ao salvar empreendimento no Supabase:", err);
+    console.error("Erro inesperado ao salvar empreendimento no Supabase via API:", err);
     return { success: false, error: err.message };
   }
 }
 
 export async function deleteDevelopmentFromDb(slug: string): Promise<boolean> {
-  if (!isSupabaseConfigured()) return true;
   try {
-    const supabase = createBrowserSupabaseClient() as any;
-    const { error } = await supabase.from("developments").delete().eq("slug", slug);
-    return !error;
+    const res = await fetch("/api/properties/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "development", slug }),
+    });
+    const result = await res.json();
+    return Boolean(result.success);
   } catch (err) {
-    console.error("Erro ao remover empreendimento do Supabase:", err);
+    console.error("Erro ao remover empreendimento do Supabase via API:", err);
     return false;
   }
 }
@@ -541,81 +429,31 @@ export async function fetchRuralPropertyBySlug(slug: string): Promise<RuralPrope
 }
 
 export async function saveRuralPropertyToDb(prop: RuralProperty): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured()) {
-    return { success: true };
-  }
-
   try {
-    const supabase = createBrowserSupabaseClient() as any;
-    
-    const { data: row, error: rowError } = await supabase
-      .from("rural_properties")
-      .upsert(
-        {
-          slug: prop.slug,
-          code: prop.code,
-          title: prop.title,
-          state: prop.state,
-          municipality: prop.municipality,
-          total_hectares: prop.totalHectares,
-          activity: prop.activity,
-          price: prop.price,
-          price_per_hectare: prop.pricePerHectare,
-          status: "published",
-          badges: prop.badges || ["oportunidade"],
-        },
-        { onConflict: "slug" }
-      )
-      .select("id")
-      .single();
-
-    if (rowError || !row) {
-      console.error("Erro ao salvar propriedade rural no Supabase:", rowError);
-      return { success: false, error: rowError?.message };
-    }
-
-    const entityId = row.id;
-
-    await supabase.from("property_images").delete().eq("entity_id", entityId);
-
-    const allImages = [
-      { url: prop.coverImage.url, alt: prop.coverImage.alt || prop.title, is_cover: true, position: 0 },
-      ...(prop.gallery || []).map((g, idx) => ({
-        url: g.url,
-        alt: g.alt || prop.title,
-        is_cover: false,
-        position: idx + 1,
-      })),
-    ];
-
-    const imageInserts = allImages.map((img) => ({
-      entity_type: "rural_property",
-      entity_id: entityId,
-      url: img.url,
-      alt: img.alt,
-      is_cover: img.is_cover,
-      position: img.position,
-    }));
-
-    if (imageInserts.length > 0) {
-      await supabase.from("property_images").insert(imageInserts);
-    }
-
-    return { success: true };
+    const res = await fetch("/api/properties/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "rural", data: prop }),
+    });
+    const result = await res.json();
+    return result;
   } catch (err: any) {
-    console.error("Erro inesperado ao salvar propriedade rural no Supabase:", err);
+    console.error("Erro inesperado ao salvar propriedade rural no Supabase via API:", err);
     return { success: false, error: err.message };
   }
 }
 
 export async function deleteRuralPropertyFromDb(slug: string): Promise<boolean> {
-  if (!isSupabaseConfigured()) return true;
   try {
-    const supabase = createBrowserSupabaseClient() as any;
-    const { error } = await supabase.from("rural_properties").delete().eq("slug", slug);
-    return !error;
+    const res = await fetch("/api/properties/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "rural", slug }),
+    });
+    const result = await res.json();
+    return Boolean(result.success);
   } catch (err) {
-    console.error("Erro ao remover propriedade rural do Supabase:", err);
+    console.error("Erro ao remover propriedade rural do Supabase via API:", err);
     return false;
   }
 }
