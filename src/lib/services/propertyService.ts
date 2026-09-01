@@ -408,6 +408,7 @@ export async function fetchRuralProperties(): Promise<RuralProperty[]> {
         coverImage,
         gallery,
         description: row.description || undefined,
+        features: row.water_sources || row.features || [],
       };
     });
   } catch (err) {
@@ -416,9 +417,13 @@ export async function fetchRuralProperties(): Promise<RuralProperty[]> {
   }
 }
 
-export async function fetchRuralPropertyBySlug(slug: string): Promise<RuralProperty | undefined> {
+export async function fetchRuralPropertyBySlug(slugOrCode: string): Promise<RuralProperty | undefined> {
+  const normalized = slugOrCode.trim().toLowerCase();
+
   if (!isSupabaseConfigured()) {
-    return mockRuralProperties.find((p) => p.slug === slug);
+    return mockRuralProperties.find(
+      (p) => p.slug.toLowerCase() === normalized || p.code.toLowerCase() === normalized
+    );
   }
 
   try {
@@ -426,11 +431,13 @@ export async function fetchRuralPropertyBySlug(slug: string): Promise<RuralPrope
     const { data: row, error } = await supabase
       .from("rural_properties")
       .select("*")
-      .eq("slug", slug)
+      .or(`slug.eq.${slugOrCode},code.ilike.${slugOrCode}`)
       .maybeSingle();
 
     if (error || !row) {
-      return mockRuralProperties.find((p) => p.slug === slug);
+      return mockRuralProperties.find(
+        (p) => p.slug.toLowerCase() === normalized || p.code.toLowerCase() === normalized
+      );
     }
 
     const { data: images } = await supabase
@@ -461,10 +468,13 @@ export async function fetchRuralPropertyBySlug(slug: string): Promise<RuralPrope
       coverImage,
       gallery,
       description: row.description || undefined,
+      features: row.water_sources || row.features || [],
     };
   } catch (err) {
     console.error("Erro ao buscar propriedade rural por slug no Supabase:", err);
-    return mockRuralProperties.find((p) => p.slug === slug);
+    return mockRuralProperties.find(
+      (p) => p.slug.toLowerCase() === normalized || p.code.toLowerCase() === normalized
+    );
   }
 }
 
@@ -504,7 +514,6 @@ export async function deleteRuralPropertyFromDb(slug: string): Promise<boolean> 
 
 export async function resolveShortCode(codeOrSlug: string): Promise<string | null> {
   const code = codeOrSlug.trim();
-  const normalized = code.toLowerCase();
 
   // 1. Tenta buscar nos imóveis urbanos (MS)
   const urban = await fetchUrbanPropertyBySlug(code);
@@ -518,7 +527,7 @@ export async function resolveShortCode(codeOrSlug: string): Promise<string | nul
     return `/empreendimentos/${dev.city}/${dev.slug}`;
   }
 
-  // 3. Tenta buscar nas propriedades rurais
+  // 3. Tenta buscar nas propriedades rurais (MS/MT)
   const rural = await fetchRuralPropertyBySlug(code);
   if (rural) {
     return `/rural/${rural.slug}`;

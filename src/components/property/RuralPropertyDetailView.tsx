@@ -59,10 +59,10 @@ export function RuralPropertyDetailView({ initialSlug, initialProperty }: Props)
   const property = useMemo(() => {
     return (
       dbProperty ||
-      localRuralProperties.find((p) => p.slug === initialSlug) ||
-      initialProperty
+      initialProperty ||
+      localRuralProperties.find((p) => p.slug === initialSlug)
     );
-  }, [dbProperty, localRuralProperties, initialSlug, initialProperty]);
+  }, [dbProperty, initialProperty, localRuralProperties, initialSlug]);
 
   if (loadingDb && !property) {
     return (
@@ -255,28 +255,22 @@ export function RuralPropertyDetailView({ initialSlug, initialProperty }: Props)
             )}
 
             {/* Benfeitorias e Estrutura Operacional */}
-            <div className="border-t border-areia/40 pt-8">
-              <h3 className="font-display text-xl text-graphite mb-4 flex items-center gap-2">
-                <Tractor className="h-5 w-5 text-terracota" />
-                Benfeitorias e Infraestrutura
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-graphite/80">
-                {[
-                  "Sede com casa principal climatizada",
-                  "Casas para colaboradores e alojamento",
-                  "Curral completo com brete, balança digital e embarcadouro",
-                  "Barracão de máquinas e oficina",
-                  "Energia elétrica trifásica e poço artesiano",
-                  "Reserva Legal e APP totalmente demarcadas no CAR",
-                  "Estradas internas cascalhadas e transitáveis o ano todo",
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2.5">
-                    <CheckCircle className="h-4 w-4 text-mineral shrink-0" />
-                    <span>{item}</span>
-                  </div>
-                ))}
+            {property.features && property.features.length > 0 && (
+              <div className="border-t border-areia/40 pt-8">
+                <h3 className="font-display text-xl text-graphite mb-4 flex items-center gap-2">
+                  <Tractor className="h-5 w-5 text-terracota" />
+                  Benfeitorias e Infraestrutura
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-graphite/80">
+                  {property.features.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5">
+                      <CheckCircle className="h-4 w-4 text-mineral shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Sigilo Comercial e Due Diligence */}
             <div className="border-t border-areia/40 pt-8">
