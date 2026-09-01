@@ -393,8 +393,8 @@ export default function AdminEmpreendimentosPage() {
 
               {/* Upload de Imagens */}
               <ImageUpload
-                label="Imagens do Empreendimento (Perspectiva & Galeria)"
-                helperText="Adicione a imagem principal da torre e fotos dos detalhes da área de lazer e decorado."
+                label="Imagens do Empreendimento"
+                helperText="Envie várias fotos de uma vez. A 1ª foto se torna a capa automaticamente ou clique na estrela (★) para escolher a capa."
                 category="coastal"
                 coverImage={formData.coverImage}
                 onCoverChange={(img) => setFormData({ ...formData, coverImage: img })}

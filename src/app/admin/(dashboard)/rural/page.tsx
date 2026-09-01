@@ -380,8 +380,8 @@ export default function AdminRuralPage() {
 
               {/* Upload de Imagens */}
               <ImageUpload
-                label="Fotografias da Fazenda (Capa e Galeria)"
-                helperText="Adicione fotos aéreas, pastagens, sede ou lavoura."
+                label="Fotografias da Propriedade Rural"
+                helperText="Envie várias fotos de uma vez. A 1ª foto se torna a capa automaticamente ou clique na estrela (★) para escolher a capa."
                 category="rural"
                 coverImage={formData.coverImage}
                 onCoverChange={(img) => setFormData({ ...formData, coverImage: img })}

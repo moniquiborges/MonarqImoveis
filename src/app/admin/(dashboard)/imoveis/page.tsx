@@ -361,10 +361,10 @@ export default function AdminImoveisPage() {
                 />
               </div>
 
-              {/* Upload de Fotografias (Capa & Galeria) */}
+              {/* Upload de Fotografias (Galeria & Seleção de Capa por Estrela) */}
               <ImageUpload
-                label="Fotografias do Imóvel (Capa e Galeria)"
-                helperText="Adicione fotos pelo seu computador/celular, link web ou utilize o banco de imagens."
+                label="Fotografias do Imóvel"
+                helperText="Envie várias fotos de uma vez. A 1ª foto se torna a capa automaticamente ou clique na estrela (★) para escolher a capa."
                 category="urban"
                 coverImage={formData.coverImage}
                 onCoverChange={(img) => setFormData({ ...formData, coverImage: img })}
