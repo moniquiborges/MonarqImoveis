@@ -644,10 +644,10 @@ export default function AdminImoveisPage() {
                     )}
                   </td>
 
-                  {/* Quartos / Área */}
+                  {/* Quartos / Banheiros / Vagas / Área */}
                   <td className="p-4 text-graphite/70">
                     <div>
-                      {item.bedrooms} dorms ({item.suites} suítes) &bull; {item.parking} vagas
+                      {item.bedrooms} dorms ({item.suites} banheiros) &bull; {item.parking} vagas
                     </div>
                     <div className="text-[11px] text-graphite/50">{formatArea(item.area)}</div>
                   </td>
@@ -979,7 +979,7 @@ export default function AdminImoveisPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-graphite mb-1">Suítes</label>
+                  <label className="block text-xs font-medium text-graphite mb-1">Banheiros</label>
                   <input
                     type="number"
                     min="0"

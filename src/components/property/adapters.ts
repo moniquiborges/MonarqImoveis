@@ -30,7 +30,7 @@ export function urbanPropertyToCard(property: UrbanProperty): PropertyCardProps 
     code: property.code,
     specs: [
       { icon: BedDouble, label: `${property.bedrooms} dorm.` },
-      { icon: Bath, label: `${property.suites} suítes` },
+      { icon: Bath, label: `${property.suites} banheiros` },
       { icon: Car, label: `${property.parking} vagas` },
       { icon: Ruler, label: formatArea(property.area) },
     ],

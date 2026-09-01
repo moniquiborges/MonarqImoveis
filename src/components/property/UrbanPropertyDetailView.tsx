@@ -183,9 +183,9 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
                     <Bath className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-xs text-graphite/50 block">Suítes</span>
+                    <span className="text-xs text-graphite/50 block">Banheiros</span>
                     <strong className="text-graphite font-medium text-sm md:text-base">
-                      {property.suites} suítes
+                      {property.suites} banheiros
                     </strong>
                   </div>
                 </div>
