@@ -367,9 +367,14 @@ export default function AdminImoveisPage() {
                 helperText="Envie várias fotos de uma vez. A 1ª foto se torna a capa automaticamente ou clique na estrela (★) para escolher a capa."
                 category="urban"
                 coverImage={formData.coverImage}
-                onCoverChange={(img) => setFormData({ ...formData, coverImage: img })}
                 gallery={formData.gallery}
-                onGalleryChange={(gal) => setFormData({ ...formData, gallery: gal })}
+                onChangeImages={(cover, gal) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    coverImage: cover,
+                    gallery: gal,
+                  }))
+                }
                 allowGallery={true}
               />
 
