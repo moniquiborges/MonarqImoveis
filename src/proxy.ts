@@ -1,34 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/constants";
 
 const LOGIN_PATH = "/admin/login";
 const STAFF_ROLES = new Set(["admin", "editor"]);
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const isLoginPath = request.nextUrl.pathname === LOGIN_PATH;
 
-  // Modo de Demonstração Local (quando Supabase ainda não está conectado com credenciais remotas)
-  if (!supabaseUrl || !supabasePublishableKey) {
-    const demoSession = request.cookies.get("monarq_admin_session");
-
-    if (demoSession?.value) {
-      if (isLoginPath) {
-        return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-      }
-      return response;
-    }
-
-    if (!isLoginPath) {
-      return NextResponse.redirect(new URL(LOGIN_PATH, request.url));
-    }
-    return response;
-  }
-
-  const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
         return request.cookies.getAll();

@@ -32,18 +32,18 @@ export type LeadInterestDb =
   | "investimento";
 export type LeadStatusDb = "novo" | "contatado" | "qualificado" | "negociacao" | "convertido" | "perdido";
 
-interface Timestamps {
+type Timestamps = {
   created_at: string;
   updated_at: string;
-}
+};
 
-export interface ProfileRow extends Timestamps {
+export type ProfileRow = Timestamps & {
   id: string;
   full_name: string | null;
   role: UserRole;
-}
+};
 
-export interface AgentRow extends Timestamps {
+export type AgentRow = Timestamps & {
   id: string;
   full_name: string;
   email: string | null;
@@ -51,9 +51,9 @@ export interface AgentRow extends Timestamps {
   creci: string | null;
   photo_url: string | null;
   active: boolean;
-}
+};
 
-export interface DevelopmentRow extends Timestamps {
+export type DevelopmentRow = Timestamps & {
   id: string;
   slug: string;
   name: string;
@@ -90,9 +90,9 @@ export interface DevelopmentRow extends Timestamps {
   is_featured: boolean;
   seo_title: string | null;
   seo_description: string | null;
-}
+};
 
-export interface DevelopmentUnitRow extends Timestamps {
+export type DevelopmentUnitRow = Timestamps & {
   id: string;
   development_id: string;
   unit_number: string | null;
@@ -107,9 +107,9 @@ export interface DevelopmentUnitRow extends Timestamps {
   status: UnitStatus;
   floor_plan_url: string | null;
   notes: string | null;
-}
+};
 
-export interface UrbanPropertyRow extends Timestamps {
+export type UrbanPropertyRow = Timestamps & {
   id: string;
   slug: string;
   code: string;
@@ -135,9 +135,9 @@ export interface UrbanPropertyRow extends Timestamps {
   is_featured: boolean;
   seo_title: string | null;
   seo_description: string | null;
-}
+};
 
-export interface RuralPropertyRow extends Timestamps {
+export type RuralPropertyRow = Timestamps & {
   id: string;
   slug: string;
   code: string;
@@ -180,9 +180,9 @@ export interface RuralPropertyRow extends Timestamps {
   is_featured: boolean;
   seo_title: string | null;
   seo_description: string | null;
-}
+};
 
-export interface PropertyImageRow {
+export type PropertyImageRow = {
   id: string;
   entity_type: ImageEntityType;
   entity_id: string;
@@ -191,15 +191,15 @@ export interface PropertyImageRow {
   is_cover: boolean;
   position: number;
   created_at: string;
-}
+};
 
-export interface BlogCategoryRow {
+export type BlogCategoryRow = {
   id: string;
   slug: string;
   name: string;
-}
+};
 
-export interface BlogPostRow extends Timestamps {
+export type BlogPostRow = Timestamps & {
   id: string;
   slug: string;
   title: string;
@@ -213,9 +213,9 @@ export interface BlogPostRow extends Timestamps {
   published_at: string | null;
   seo_title: string | null;
   seo_description: string | null;
-}
+};
 
-export interface LeadRow extends Timestamps {
+export type LeadRow = Timestamps & {
   id: string;
   name: string;
   phone: string;
@@ -232,21 +232,21 @@ export interface LeadRow extends Timestamps {
   utm_content: string | null;
   status: LeadStatusDb;
   notes: string | null;
-}
+};
 
-export interface FavoriteRow {
+export type FavoriteRow = {
   id: string;
   user_id: string;
   entity_type: ImageEntityType;
   entity_id: string;
   created_at: string;
-}
+};
 
-export interface SettingRow {
+export type SettingRow = {
   key: string;
   value: Record<string, unknown>;
   updated_at: string;
-}
+};
 
 type TableDef<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row;
@@ -255,7 +255,7 @@ type TableDef<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Relationships: [];
 };
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       profiles: TableDef<ProfileRow>;
@@ -284,4 +284,4 @@ export interface Database {
       [_ in never]: never;
     };
   };
-}
+};

@@ -2,19 +2,13 @@
 
 import { useActionState, useState } from "react";
 import { signIn, type LoginState } from "./actions";
-import { KeyRound, ShieldCheck, Sparkles } from "lucide-react";
 
 const initialState: LoginState = { error: null };
 
 export default function AdminLoginPage() {
   const [state, formAction, pending] = useActionState(signIn, initialState);
-  const [email, setEmail] = useState("admin@monarqimoveis.com.br");
-  const [password, setPassword] = useState("monarq2026");
-
-  const fillDemo = () => {
-    setEmail("admin@monarqimoveis.com.br");
-    setPassword("monarq2026");
-  };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <div className="flex flex-col gap-6">
@@ -23,28 +17,6 @@ export default function AdminLoginPage() {
           Painel administrativo
         </span>
         <h1 className="font-display text-2xl text-graphite">Entrar no Sistema</h1>
-      </div>
-
-      {/* Dica de Acesso Rápido */}
-      <div className="rounded-xs bg-mineral/5 p-3.5 border border-mineral/15 text-xs text-graphite/80 space-y-1">
-        <div className="flex items-center justify-between font-semibold text-mineral">
-          <span className="inline-flex items-center gap-1.5">
-            <KeyRound className="h-3.5 w-3.5" />
-            Acesso de Demonstração
-          </span>
-          <button
-            type="button"
-            onClick={fillDemo}
-            className="text-[11px] text-terracota underline hover:text-terracota-light cursor-pointer"
-          >
-            Preencher dados
-          </button>
-        </div>
-        <p className="text-[11px] text-graphite/60">
-          <strong>E-mail:</strong> <code className="bg-white/80 px-1 rounded">admin@monarqimoveis.com.br</code>
-          <br />
-          <strong>Senha:</strong> <code className="bg-white/80 px-1 rounded">monarq2026</code>
-        </p>
       </div>
 
       <form action={formAction} className="flex flex-col gap-4">

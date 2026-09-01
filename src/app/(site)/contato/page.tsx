@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { siteConfig, buildWhatsappUrl } from "@/lib/site-config";
+import { submitContactLead } from "./actions";
 import { FacebookIcon, InstagramIcon } from "@/components/ui/SocialIcons";
 import {
   MessageCircle,
@@ -28,17 +29,23 @@ export default function ContatoPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const whatsappDirectUrl = buildWhatsappUrl("Olá! Gostaria de falar com um consultor da MONARQ.");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setSubmitError(null);
 
-    setTimeout(() => {
-      setSubmitting(false);
+    const result = await submitContactLead(formData);
+
+    setSubmitting(false);
+    if (result.success) {
       setSubmitted(true);
-    }, 600);
+    } else {
+      setSubmitError(result.error ?? "Não foi possível enviar sua mensagem.");
+    }
   };
 
   return (
@@ -244,6 +251,12 @@ export default function ContatoPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {submitError && (
+                    <div className="rounded-xs border border-rose-300 bg-rose-50 px-3.5 py-2.5 text-xs text-rose-700">
+                      {submitError}
+                    </div>
+                  )}
+
                   <div>
                     <label htmlFor="form-name" className="block text-xs font-medium text-graphite mb-1">
                       Nome completo *

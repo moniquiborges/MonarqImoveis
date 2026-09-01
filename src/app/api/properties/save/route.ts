@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireStaff } from "@/lib/supabase/require-staff";
 import type { UrbanProperty, Development, RuralProperty } from "@/types";
 
 export async function POST(req: Request) {
+  const staff = await requireStaff();
+  if (!staff) {
+    return NextResponse.json({ success: false, error: "Não autorizado" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const { type, data } = body; // type: 'urban' | 'development' | 'rural'

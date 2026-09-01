@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { mockImages } from "@/lib/mock/images";
+import { submitSellPropertyLead } from "./actions";
 import {
   Camera,
   ShieldCheck,
@@ -31,15 +32,21 @@ export default function VendaSeuImovelPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setSubmitError(null);
 
-    setTimeout(() => {
-      setSubmitting(false);
+    const result = await submitSellPropertyLead(formData);
+
+    setSubmitting(false);
+    if (result.success) {
       setSubmitted(true);
-    }, 600);
+    } else {
+      setSubmitError(result.error ?? "Não foi possível enviar seu cadastro.");
+    }
   };
 
   return (
@@ -203,6 +210,12 @@ export default function VendaSeuImovelPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {submitError && (
+                    <div className="rounded-xs border border-rose-300 bg-rose-50 px-3.5 py-2.5 text-xs text-rose-700">
+                      {submitError}
+                    </div>
+                  )}
+
                   <h3 className="font-display text-xl text-graphite font-medium mb-4">
                     Dados do Proprietário &amp; Imóvel
                   </h3>
