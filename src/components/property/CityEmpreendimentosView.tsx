@@ -53,8 +53,11 @@ export function CityEmpreendimentosView({ city, initialDevelopments }: Props) {
 
   const info = cityData[city];
   const developments = useMemo(() => {
+    if (initialDevelopments && initialDevelopments.length > 0) {
+      return initialDevelopments.filter((d) => d.city === city);
+    }
     return allDevelopments.filter((d) => d.city === city);
-  }, [allDevelopments, city]);
+  }, [allDevelopments, initialDevelopments, city]);
 
   return (
     <main className="py-8 md:py-12">

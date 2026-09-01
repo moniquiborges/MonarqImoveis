@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import { CityEmpreendimentosView } from "@/components/property/CityEmpreendimentosView";
-import { getDevelopmentsByCity } from "@/lib/mock/developments";
+import { fetchDevelopments } from "@/lib/services/propertyService";
 import type { ScCity } from "@/types";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const validCities: ScCity[] = ["porto-belo", "itapema", "balneario-camboriu"];
 
@@ -21,7 +24,8 @@ export default async function CityEmpreendimentosPage({
   }
 
   const typedCity = city as ScCity;
-  const initialDevelopments = getDevelopmentsByCity(typedCity);
+  const allDevs = await fetchDevelopments();
+  const initialDevelopments = allDevs.filter((d) => d.city === typedCity);
 
   return (
     <CityEmpreendimentosView
