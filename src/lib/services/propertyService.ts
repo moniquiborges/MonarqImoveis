@@ -69,9 +69,13 @@ export async function fetchUrbanProperties(): Promise<UrbanProperty[]> {
   }
 }
 
-export async function fetchUrbanPropertyBySlug(slug: string): Promise<UrbanProperty | undefined> {
+export async function fetchUrbanPropertyBySlug(slugOrCode: string): Promise<UrbanProperty | undefined> {
+  const normalized = slugOrCode.trim().toLowerCase();
+
   if (!isSupabaseConfigured()) {
-    return mockUrbanProperties.find((p) => p.slug === slug);
+    return mockUrbanProperties.find(
+      (p) => p.slug.toLowerCase() === normalized || p.code.toLowerCase() === normalized
+    );
   }
 
   try {
@@ -79,11 +83,13 @@ export async function fetchUrbanPropertyBySlug(slug: string): Promise<UrbanPrope
     const { data: row, error } = await supabase
       .from("urban_properties")
       .select("*")
-      .eq("slug", slug)
+      .or(`slug.eq.${slugOrCode},code.ilike.${slugOrCode}`)
       .maybeSingle();
 
     if (error || !row) {
-      return mockUrbanProperties.find((p) => p.slug === slug);
+      return mockUrbanProperties.find(
+        (p) => p.slug.toLowerCase() === normalized || p.code.toLowerCase() === normalized
+      );
     }
 
     const { data: images } = await supabase
@@ -117,8 +123,10 @@ export async function fetchUrbanPropertyBySlug(slug: string): Promise<UrbanPrope
       gallery,
     };
   } catch (err) {
-    console.error("Erro ao buscar imóvel por slug no Supabase:", err);
-    return mockUrbanProperties.find((p) => p.slug === slug);
+    console.error("Erro ao buscar imóvel por slug/código no Supabase:", err);
+    return mockUrbanProperties.find(
+      (p) => p.slug.toLowerCase() === normalized || p.code.toLowerCase() === normalized
+    );
   }
 }
 
@@ -457,3 +465,42 @@ export async function deleteRuralPropertyFromDb(slug: string): Promise<boolean> 
     return false;
   }
 }
+
+/* =========================================================================
+   UNIVERSAL SHORT LINK RESOLVER (MRQ Code / Slug)
+   ========================================================================= */
+
+export async function resolveShortCode(codeOrSlug: string): Promise<string | null> {
+  const code = codeOrSlug.trim();
+  const normalized = code.toLowerCase();
+
+  // 1. Tenta buscar nos imóveis urbanos (MS)
+  const urban = await fetchUrbanPropertyBySlug(code);
+  if (urban) {
+    return `/imoveis/campo-grande/${urban.slug}`;
+  }
+
+  // 2. Tenta buscar nos empreendimentos (SC)
+  const dev = await fetchDevelopmentBySlug(code);
+  if (dev) {
+    return `/empreendimentos/${dev.city}/${dev.slug}`;
+  }
+
+  // 3. Tenta buscar nas propriedades rurais
+  const rural = await fetchRuralPropertyBySlug(code);
+  if (rural) {
+    return `/rural/${rural.slug}`;
+  }
+
+  // 4. Fallback se o código digitado for numérico puro (ex: '102' -> busca por 'MRQ-U102' ou 'MRQ-R102')
+  if (/^\d+$/.test(code)) {
+    const tryUrban = await fetchUrbanPropertyBySlug(`MRQ-U${code}`);
+    if (tryUrban) return `/imoveis/campo-grande/${tryUrban.slug}`;
+
+    const tryRural = await fetchRuralPropertyBySlug(`MRQ-R${code}`);
+    if (tryRural) return `/rural/${tryRural.slug}`;
+  }
+
+  return null;
+}
+

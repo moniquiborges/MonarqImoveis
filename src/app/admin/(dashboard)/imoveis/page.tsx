@@ -20,6 +20,9 @@ import {
   Waves,
   Calendar,
   CheckCircle2,
+  Share2,
+  Copy,
+  Check,
 } from "lucide-react";
 import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockDevelopments } from "@/lib/mock/developments";
@@ -48,6 +51,7 @@ import type { UrbanProperty, Development, ScCity, DevelopmentStage } from "@/typ
 interface UnifiedPropertyItem {
   id: string;
   slug: string;
+  code: string;
   state: "SC" | "MS";
   stateLabel: string;
   city: string;
@@ -107,6 +111,7 @@ export default function AdminImoveisPage() {
   // Form State
   const [formData, setFormData] = useState<{
     state: "SC" | "MS";
+    code: string;
     scCity: ScCity;
     cityMS: string;
     neighborhood: string;
@@ -125,6 +130,7 @@ export default function AdminImoveisPage() {
     gallery: ImageData[];
   }>({
     state: "SC",
+    code: "MRQ-U101",
     scCity: "porto-belo",
     cityMS: "Campo Grande",
     neighborhood: "Perequê",
@@ -148,9 +154,10 @@ export default function AdminImoveisPage() {
 
   // Converte a lista unificada de itens
   const allUnifiedItems: UnifiedPropertyItem[] = useMemo(() => {
-    const scList: UnifiedPropertyItem[] = devItems.map((dev) => ({
+    const scList: UnifiedPropertyItem[] = devItems.map((dev, idx) => ({
       id: `dev-${dev.slug}`,
       slug: dev.slug,
+      code: (dev as any).code || `MRQ-SC${100 + idx + 1}`,
       state: "SC",
       stateLabel: "Santa Catarina",
       city: dev.cityLabel,
@@ -172,9 +179,10 @@ export default function AdminImoveisPage() {
       siteUrl: `/empreendimentos/${dev.city}/${dev.slug}`,
     }));
 
-    const msList: UnifiedPropertyItem[] = urbanItems.map((urban) => ({
+    const msList: UnifiedPropertyItem[] = urbanItems.map((urban, idx) => ({
       id: `urban-${urban.slug}`,
       slug: urban.slug,
+      code: urban.code || `MRQ-U${100 + idx + 1}`,
       state: "MS",
       stateLabel: "Mato Grosso do Sul",
       city: "Campo Grande",
@@ -202,10 +210,11 @@ export default function AdminImoveisPage() {
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchTitle = item.title.toLowerCase().includes(q);
+        const matchCode = item.code.toLowerCase().includes(q);
         const matchCity = item.city.toLowerCase().includes(q);
         const matchNeigh = item.neighborhood.toLowerCase().includes(q);
         const matchType = item.type.toLowerCase().includes(q);
-        if (!matchTitle && !matchCity && !matchNeigh && !matchType) return false;
+        if (!matchTitle && !matchCode && !matchCity && !matchNeigh && !matchType) return false;
       }
       return true;
     });
@@ -221,11 +230,24 @@ export default function AdminImoveisPage() {
     }, 4000);
   };
 
+  const handleCopyShortLink = (code: string) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://www.monarqinvest.com.br";
+    const shortUrl = `${origin}/i/${code}`;
+    navigator.clipboard.writeText(shortUrl);
+    showToast(`✓ Link curto copiado: ${shortUrl}`);
+  };
+
   const handleOpenCreate = (preselectedState?: "SC" | "MS") => {
     const selectedState = preselectedState || (stateFilter === "MS" ? "MS" : "SC");
+    const nextCode =
+      selectedState === "SC"
+        ? `MRQ-SC${100 + devItems.length + 1}`
+        : `MRQ-U${100 + urbanItems.length + 1}`;
+
     setEditingItem(null);
     setFormData({
       state: selectedState,
+      code: nextCode,
       scCity: "porto-belo",
       cityMS: "Campo Grande",
       neighborhood: selectedState === "SC" ? "Perequê" : "Jardim dos Estados",
@@ -253,6 +275,7 @@ export default function AdminImoveisPage() {
     setEditingItem(item);
     setFormData({
       state: item.state,
+      code: item.code,
       scCity: item.scCity || "porto-belo",
       cityMS: item.city || "Campo Grande",
       neighborhood: item.neighborhood,
@@ -386,6 +409,7 @@ export default function AdminImoveisPage() {
             if (item.slug === editingItem.slug) {
               return {
                 ...item,
+                code: formData.code.trim().toUpperCase() || item.code,
                 title: formData.title,
                 type: formData.type,
                 neighborhood: formData.neighborhood,
@@ -409,7 +433,7 @@ export default function AdminImoveisPage() {
         } else {
           const newUrban: UrbanProperty = {
             slug: rawSlug,
-            code: `MRQ-U${100 + urbanItems.length + 1}`,
+            code: formData.code.trim().toUpperCase() || `MRQ-U${100 + urbanItems.length + 1}`,
             title: formData.title,
             type: formData.type,
             neighborhood: formData.neighborhood,
@@ -638,6 +662,15 @@ export default function AdminImoveisPage() {
                     <div className="inline-flex items-center gap-1.5">
                       <button
                         type="button"
+                        onClick={() => handleCopyShortLink(item.code)}
+                        title={`Copiar Link Curto: /i/${item.code}`}
+                        className="rounded-xs p-1.5 text-graphite/60 hover:bg-mineral/10 hover:text-mineral transition-colors cursor-pointer flex items-center gap-1 border border-areia/50 bg-white"
+                      >
+                        <Copy className="h-3.5 w-3.5 text-mineral" />
+                        <span className="font-mono text-[10px] font-semibold">{item.code}</span>
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleOpenEdit(item)}
                         title="Editar anúncio"
                         className="rounded-xs p-1.5 text-graphite/60 hover:bg-areia/50 hover:text-mineral transition-colors cursor-pointer"
@@ -750,23 +783,42 @@ export default function AdminImoveisPage() {
                 </div>
               </div>
 
-              {/* Título do Anúncio */}
-              <div>
-                <label className="block text-xs font-medium text-graphite mb-1">
-                  Título do Anúncio / Nome do Empreendimento *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder={
-                    formData.state === "SC"
-                      ? "Ex: Essenza Residence - Frente Mar em Porto Belo"
-                      : "Ex: Cobertura duplex com vista panorâmica no Jardim dos Estados"
-                  }
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
-                />
+              {/* Título do Anúncio & Código de Referência (Link Curto) */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                <div className="sm:col-span-8">
+                  <label className="block text-xs font-medium text-graphite mb-1">
+                    Título do Anúncio / Nome do Empreendimento *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={
+                      formData.state === "SC"
+                        ? "Ex: Essenza Residence - Frente Mar em Porto Belo"
+                        : "Ex: Cobertura duplex com vista panorâmica no Jardim dos Estados"
+                    }
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                  />
+                </div>
+
+                <div className="sm:col-span-4">
+                  <label className="block text-xs font-medium text-graphite mb-1">
+                    Código de Ref. / Link Curto
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: MRQ-U101"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite font-mono uppercase font-semibold"
+                  />
+                  <span className="text-[10px] text-graphite/50 block mt-0.5">
+                    Gera o link curto: <code className="text-mineral">/i/{formData.code || "CODIGO"}</code>
+                  </span>
+                </div>
               </div>
 
               {/* Fotografias (Galeria com Seleção de Capa por Estrela) */}
