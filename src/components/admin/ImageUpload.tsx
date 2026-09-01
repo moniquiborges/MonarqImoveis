@@ -23,9 +23,10 @@ interface ImageUploadProps {
   label?: string;
   helperText?: string;
   coverImage: ImageData;
-  onCoverChange: (image: ImageData) => void;
+  onCoverChange?: (image: ImageData) => void;
   gallery?: ImageData[];
   onGalleryChange?: (gallery: ImageData[]) => void;
+  onChangeImages?: (cover: ImageData, gallery: ImageData[]) => void;
   allowGallery?: boolean;
   category?: "urban" | "coastal" | "rural" | "blog" | "general";
   className?: string;
@@ -77,6 +78,7 @@ export function ImageUpload({
   onCoverChange,
   gallery = [],
   onGalleryChange,
+  onChangeImages,
   allowGallery = true,
   category = "urban",
   className = "",
@@ -101,13 +103,23 @@ export function ImageUpload({
     });
   }
 
-  // Adiciona novas imagens (seja via upload múltiplo, URL ou banco de sugestões)
+  // Atualiza capa e galeria simultaneamente de forma atômica e segura
+  const updateImages = (newCover: ImageData, newGallery: ImageData[]) => {
+    if (onChangeImages) {
+      onChangeImages(newCover, newGallery);
+    } else {
+      if (onCoverChange) onCoverChange(newCover);
+      if (onGalleryChange) onGalleryChange(newGallery);
+    }
+  };
+
+  // Adiciona novas imagens (via upload múltiplo, URL ou banco de sugestões)
   const addImages = (newImgs: ImageData[]) => {
     if (!newImgs || newImgs.length === 0) return;
 
-    if (!allowGallery || !onGalleryChange) {
+    if (!allowGallery) {
       // Modo imagem única (ex: banner ou blog)
-      onCoverChange(newImgs[0]);
+      updateImages(newImgs[0], []);
       return;
     }
 
@@ -118,19 +130,19 @@ export function ImageUpload({
 
     if (incomingValid.length === 0) return;
 
-    // Se ainda não tem capa definida, a primeira imagem adicionada assume como capa automaticamente
+    // Se ainda não tem capa definida, a primeira imagem assume como capa
     if (!coverImage?.url) {
       const first = incomingValid[0];
       const rest = incomingValid.slice(1);
-      onCoverChange(first);
-      onGalleryChange([...gallery, ...rest]);
+      updateImages(first, rest);
     } else {
       // Já existe capa, adiciona todas as novas na galeria
-      onGalleryChange([...gallery, ...incomingValid]);
+      const existingGallery = gallery.filter((g) => g.url !== coverImage.url);
+      updateImages(coverImage, [...existingGallery, ...incomingValid]);
     }
   };
 
-  // Processa arquivos selecionados pelo input ou drop (suporte a múltiplos arquivos)
+  // Processa múltiplos arquivos selecionados pelo input ou drop
   const handleFiles = (files: FileList | File[]) => {
     const fileArray = Array.from(files).filter((file) => file.type.startsWith("image/"));
     if (fileArray.length === 0) {
@@ -182,13 +194,9 @@ export function ImageUpload({
   const handleSetAsCover = (selectedImg: ImageData) => {
     if (selectedImg.url === coverImage?.url) return;
 
-    onCoverChange(selectedImg);
-
-    if (onGalleryChange && allowGallery) {
-      // A nova galeria conterá todas as outras fotos (incluindo a capa antiga) exceto a nova capa
-      const updatedGallery = allImages.filter((img) => img.url !== selectedImg.url);
-      onGalleryChange(updatedGallery);
-    }
+    // A nova galeria conterá todas as outras fotos (inclusive a capa antiga) exceto a nova capa
+    const updatedGallery = allImages.filter((img) => img.url !== selectedImg.url);
+    updateImages(selectedImg, updatedGallery);
   };
 
   // Remove uma imagem da galeria ou da capa
@@ -201,21 +209,14 @@ export function ImageUpload({
         // O sistema puxa automaticamente a próxima foto para ser a nova capa
         const newCover = remaining[0];
         const newGallery = remaining.slice(1);
-        onCoverChange(newCover);
-        if (onGalleryChange && allowGallery) {
-          onGalleryChange(newGallery);
-        }
+        updateImages(newCover, newGallery);
       } else {
         // Nenhuma imagem restou
-        onCoverChange({ url: "", alt: "" });
-        if (onGalleryChange && allowGallery) {
-          onGalleryChange([]);
-        }
+        updateImages({ url: "", alt: "" }, []);
       }
     } else {
-      if (onGalleryChange && allowGallery) {
-        onGalleryChange(gallery.filter((img) => img.url !== imgToRemove.url));
-      }
+      const updatedGallery = gallery.filter((img) => img.url !== imgToRemove.url);
+      updateImages(coverImage, updatedGallery);
     }
   };
 
