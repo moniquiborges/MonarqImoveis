@@ -62,6 +62,7 @@ export async function fetchUrbanProperties(): Promise<UrbanProperty[]> {
         coverImage,
         gallery,
         description: row.description || undefined,
+        features: row.features || [],
       };
     });
   } catch (err) {
@@ -123,6 +124,7 @@ export async function fetchUrbanPropertyBySlug(slugOrCode: string): Promise<Urba
       coverImage,
       gallery,
       description: row.description || undefined,
+      features: row.features || [],
     };
   } catch (err) {
     console.error("Erro ao buscar imóvel por slug/código no Supabase:", err);

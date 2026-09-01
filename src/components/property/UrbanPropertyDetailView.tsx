@@ -214,25 +214,20 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
               </div>
             )}
 
-            {/* Diferenciais e Conveniências */}
-            <div className="border-t border-areia/40 pt-8">
-              <h3 className="font-display text-xl text-graphite mb-4">Diferenciais e Itens Inclusos</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-graphite/80">
-                {[
-                  "Living com integração para varanda",
-                  "Preparação para ar-condicionado Split em todos os ambientes",
-                  "Pisos e revestimentos em porcelanato de grande formato",
-                  "Banheiros com ventilação natural",
-                  "Portaria e monitoramento 24h",
-                  "Localização com fácil acesso aos melhores colégios, parques e restaurantes",
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2.5">
-                    <CheckCircle className="h-4 w-4 text-mineral shrink-0" />
-                    <span>{item}</span>
-                  </div>
-                ))}
+            {/* Diferenciais e Conveniências (Opcional - exibe apenas se houver itens) */}
+            {property.features && property.features.length > 0 && (
+              <div className="border-t border-areia/40 pt-8">
+                <h3 className="font-display text-xl text-graphite mb-4">Diferenciais e Itens Inclusos</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-graphite/80">
+                  {property.features.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5">
+                      <CheckCircle className="h-4 w-4 text-mineral shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Assessoria Jurídica e Documental */}
             <div className="border-t border-areia/40 pt-8">

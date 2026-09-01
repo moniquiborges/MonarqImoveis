@@ -71,6 +71,7 @@ interface UnifiedPropertyItem {
   deliveryDate?: string;
   shortDescription?: string;
   description?: string;
+  features?: string[];
   siteUrl: string;
 }
 
@@ -108,6 +109,7 @@ export default function AdminImoveisPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [editingItem, setEditingItem] = useState<UnifiedPropertyItem | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [featureInput, setFeatureInput] = useState("");
 
   // Form State
   const [formData, setFormData] = useState<{
@@ -123,6 +125,7 @@ export default function AdminImoveisPage() {
     deliveryDate: string;
     shortDescription: string;
     description: string;
+    features: string[];
     price: number | null;
     bedrooms: number;
     suites: number;
@@ -143,6 +146,7 @@ export default function AdminImoveisPage() {
     deliveryDate: "2028",
     shortDescription: "",
     description: "",
+    features: [],
     price: 1850000,
     bedrooms: 3,
     suites: 3,
@@ -180,6 +184,7 @@ export default function AdminImoveisPage() {
       deliveryDate: dev.deliveryDate,
       shortDescription: dev.shortDescription,
       description: dev.description || dev.shortDescription || "",
+      features: (dev as any).features || [],
       siteUrl: `/empreendimentos/${dev.city}/${dev.slug}`,
     }));
 
@@ -201,6 +206,7 @@ export default function AdminImoveisPage() {
       coverImage: urban.coverImage || { url: "", alt: urban.title },
       gallery: urban.gallery || [],
       description: urban.description || "",
+      features: urban.features || [],
       siteUrl: `/imoveis/campo-grande/${urban.slug}`,
     }));
 
@@ -242,6 +248,71 @@ export default function AdminImoveisPage() {
     showToast(`✓ Link curto copiado: ${shortUrl}`);
   };
 
+  const handleAddFeature = (text?: string) => {
+    const val = (text || featureInput).trim();
+    if (!val) return;
+    if (!formData.features.includes(val)) {
+      setFormData((prev) => ({ ...prev, features: [...prev.features, val] }));
+    }
+    if (!text) setFeatureInput("");
+  };
+
+  const handleRemoveFeature = (idxToRemove: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      features: prev.features.filter((_, idx) => idx !== idxToRemove),
+    }));
+  };
+
+  const handleExtractFeaturesFromDescription = () => {
+    const text = `${formData.title} ${formData.description}`.toLowerCase();
+    const extracted: string[] = [];
+
+    const KEYWORD_MAP: Array<{ regex: RegExp; label: string }> = [
+      { regex: /piscina/i, label: "Piscina Privativa" },
+      { regex: /churrasqueira|gourmet/i, label: "Espaço Gourmet com Churrasqueira" },
+      { regex: /ar[\s-]condicionado|split/i, label: "Preparação para Ar-Condicionado Split" },
+      { regex: /porcelanato/i, label: "Pisos e Revestimentos em Porcelanato" },
+      { regex: /varanda|sacada/i, label: "Living Integrado à Varanda" },
+      { regex: /portaria|seguran[çc]a\s*24/i, label: "Portaria e Monitoramento 24h" },
+      { regex: /solar|fotovoltaic/i, label: "Energia Solar Fotovoltaica" },
+      { regex: /planejado|marcenaria|arm[áa]rio/i, label: "Móveis Planejados / Marcenaria" },
+      { regex: /lavabo/i, label: "Lavabo Social" },
+      { regex: /closet/i, label: "Suíte com Closet" },
+      { regex: /garagem\s*coberta|vagas?\s*cobert/i, label: "Garagem Coberta" },
+      { regex: /vista\s*(mar|livre|panor[âa]mica)/i, label: "Vista Panorâmica Privilegiada" },
+      { regex: /academia|fitness/i, label: "Espaço Fitness / Academia" },
+      { regex: /elevador/i, label: "Elevador Social e de Serviço" },
+      { regex: /jardim|paisagismo/i, label: "Área Verde e Paisagismo" },
+    ];
+
+    // 1. Extrai tópicos explícitos da descrição caso haja listas (ex: "- Item", "• Item", "1. Item")
+    const lines = formData.description.split("\n");
+    for (const line of lines) {
+      const match = line.match(/^[\s*•\-–\d.)]+\s*(.+)$/);
+      if (match && match[1] && match[1].trim().length > 3 && match[1].trim().length < 80) {
+        const item = match[1].trim();
+        if (!extracted.includes(item) && !formData.features.includes(item)) {
+          extracted.push(item);
+        }
+      }
+    }
+
+    // 2. Extrai por detecção de palavras-chave inteligentes
+    KEYWORD_MAP.forEach(({ regex, label }) => {
+      if (regex.test(text) && !extracted.includes(label) && !formData.features.includes(label)) {
+        extracted.push(label);
+      }
+    });
+
+    if (extracted.length > 0) {
+      setFormData((prev) => ({ ...prev, features: [...prev.features, ...extracted] }));
+      showToast(`✓ ${extracted.length} diferenciais adicionados com sucesso!`);
+    } else {
+      showToast("Nenhum novo diferencial detectado na descrição. Você pode digitar abaixo!");
+    }
+  };
+
   const handleOpenCreate = (preselectedState?: "SC" | "MS") => {
     const selectedState = preselectedState || (stateFilter === "MS" ? "MS" : "SC");
     const nextCode =
@@ -263,6 +334,7 @@ export default function AdminImoveisPage() {
       deliveryDate: "2028",
       shortDescription: "",
       description: "",
+      features: [],
       price: selectedState === "SC" ? 2200000 : 1250000,
       bedrooms: 3,
       suites: selectedState === "SC" ? 3 : 2,
@@ -274,6 +346,7 @@ export default function AdminImoveisPage() {
       },
       gallery: [],
     });
+    setFeatureInput("");
     setModalOpen(true);
   };
 
@@ -292,6 +365,7 @@ export default function AdminImoveisPage() {
       deliveryDate: item.deliveryDate || "2028",
       shortDescription: item.shortDescription || "",
       description: item.description || "",
+      features: item.features || [],
       price: item.price,
       bedrooms: item.bedrooms,
       suites: item.suites,
@@ -300,6 +374,7 @@ export default function AdminImoveisPage() {
       coverImage: item.coverImage,
       gallery: item.gallery,
     });
+    setFeatureInput("");
     setModalOpen(true);
   };
 
@@ -349,6 +424,7 @@ export default function AdminImoveisPage() {
                   formData.shortDescription ||
                   `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
                 description: formData.description.trim() || undefined,
+                features: formData.features,
                 priceFrom: formData.price ?? undefined,
                 bedroomsRange: [Number(formData.bedrooms) || 2, Number(formData.bedrooms) + 1],
                 suitesRange: [Number(formData.suites) || 2, Number(formData.suites) + 1],
@@ -380,6 +456,7 @@ export default function AdminImoveisPage() {
               formData.shortDescription ||
               `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
             description: formData.description.trim() || undefined,
+            features: formData.features,
             priceFrom: formData.price ?? undefined,
             bedroomsRange: [Number(formData.bedrooms) || 2, Number(formData.bedrooms) + 1],
             suitesRange: [Number(formData.suites) || 2, Number(formData.suites) + 1],
@@ -428,6 +505,7 @@ export default function AdminImoveisPage() {
                 parking: Number(formData.parking) || 0,
                 area: Number(formData.area) || 0,
                 description: formData.description.trim() || undefined,
+                features: formData.features,
                 coverImage: {
                   url: formData.coverImage.url || mockImages.livingRoom1,
                   alt: formData.coverImage.alt || formData.title,
@@ -454,6 +532,7 @@ export default function AdminImoveisPage() {
             parking: Number(formData.parking) || 2,
             area: Number(formData.area) || 120,
             description: formData.description.trim() || undefined,
+            features: formData.features,
             badges: ["novo", "alto-padrao"],
             coverImage: {
               url: formData.coverImage.url || mockImages.livingRoom1,
@@ -1038,6 +1117,118 @@ export default function AdminImoveisPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40 leading-relaxed"
                 />
+              </div>
+
+              {/* Diferenciais e Itens Inclusos (Editável com Extração Inteligente) */}
+              <div className="rounded-xs border border-areia/60 bg-offwhite/20 p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <label className="block text-xs font-semibold text-graphite flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-terracota" />
+                      Diferenciais e Itens Inclusos ({formData.features.length})
+                    </label>
+                    <span className="text-[11px] text-graphite/60">
+                      Itens com ícone de check exibidos na página do imóvel.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleExtractFeaturesFromDescription}
+                    className="inline-flex items-center gap-1.5 rounded-xs bg-mineral/10 px-3 py-1.5 text-xs font-semibold text-mineral hover:bg-mineral/20 transition-colors cursor-pointer w-fit"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    Puxar da Descrição
+                  </button>
+                </div>
+
+                {/* Input para Adicionar Manual */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ex: Piscina privativa com cascata, Piso porcelanato 120x120..."
+                    value={featureInput}
+                    onChange={(e) => setFeatureInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddFeature();
+                      }
+                    }}
+                    className="focus-ring flex-1 rounded-xs border border-areia/70 bg-white px-3 py-1.5 text-xs text-graphite placeholder:text-graphite/40"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddFeature()}
+                    className="rounded-xs bg-mineral px-4 py-1.5 text-xs font-semibold text-offwhite hover:bg-mineral-light transition-colors cursor-pointer shrink-0"
+                  >
+                    + Adicionar
+                  </button>
+                </div>
+
+                {/* Lista de Diferenciais Adicionados (Chips com Remoção) */}
+                {formData.features.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {formData.features.map((feat, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 rounded-xs bg-white border border-areia/80 px-2.5 py-1 text-xs text-graphite shadow-2xs font-medium group"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 text-mineral shrink-0" />
+                        <span>{feat}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFeature(idx)}
+                          className="text-graphite/40 hover:text-rose-600 ml-1 cursor-pointer transition-colors"
+                          title="Remover este item"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-graphite/50 italic">
+                    Nenhum diferencial adicionado ainda. Digite acima ou clique em &quot;Puxar da Descrição&quot;.
+                  </p>
+                )}
+
+                {/* Sugestões Rápidas de 1 Clique */}
+                <div className="pt-2 border-t border-areia/30">
+                  <span className="text-[10px] uppercase tracking-wider font-semibold text-graphite/50 block mb-1.5">
+                    Sugestões Rápidas (Clique para adicionar):
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {[
+                      "Piscina Privativa",
+                      "Espaço Gourmet com Churrasqueira",
+                      "Preparação para Ar Split",
+                      "Pisos em Porcelanato",
+                      "Portaria e Segurança 24h",
+                      "Móveis Planejados",
+                      "Energia Solar",
+                      "Lavabo Social",
+                      "Garagem Coberta",
+                      "Vista Panorâmica",
+                    ].map((sug, i) => {
+                      const isAdded = formData.features.includes(sug);
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          disabled={isAdded}
+                          onClick={() => handleAddFeature(sug)}
+                          className={`rounded-xs px-2 py-0.5 text-[10px] font-medium border transition-colors cursor-pointer ${
+                            isAdded
+                              ? "bg-areia/30 text-graphite/40 border-areia/40 cursor-not-allowed"
+                              : "bg-white text-graphite/70 border-areia/70 hover:border-mineral hover:text-mineral"
+                          }`}
+                        >
+                          {isAdded ? `✓ ${sug}` : `+ ${sug}`}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               {/* Valor de Venda com CurrencyInput */}

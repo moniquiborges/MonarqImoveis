@@ -43,6 +43,7 @@ export interface Development {
   coverImage: PropertyImage;
   gallery: PropertyImage[];
   description?: string;
+  features?: string[];
 }
 
 export interface UrbanProperty {
@@ -61,6 +62,7 @@ export interface UrbanProperty {
   coverImage: PropertyImage;
   gallery: PropertyImage[];
   description?: string;
+  features?: string[];
 }
 
 export type RuralType = "fazenda" | "chacara" | "sitio" | "rancho";
@@ -100,6 +102,7 @@ export interface RuralProperty {
   coverImage: PropertyImage;
   gallery: PropertyImage[];
   description?: string;
+  features?: string[];
 }
 
 export interface BlogPost {

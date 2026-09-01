@@ -28,6 +28,7 @@ export async function POST(req: Request) {
             parking: prop.parking,
             area: prop.area,
             description: prop.description || null,
+            features: prop.features || [],
             status: "published",
             badges: prop.badges || ["novo", "alto-padrao"],
           },
