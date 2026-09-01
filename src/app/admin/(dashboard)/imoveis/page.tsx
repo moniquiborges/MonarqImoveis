@@ -100,6 +100,7 @@ export default function AdminImoveisPage() {
   const [stateFilter, setStateFilter] = useState<"all" | "SC" | "MS">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editingItem, setEditingItem] = useState<UnifiedPropertyItem | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
@@ -272,7 +273,7 @@ export default function AdminImoveisPage() {
     setModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.title.trim()) {
@@ -280,161 +281,175 @@ export default function AdminImoveisPage() {
       return;
     }
 
-    const isSC = formData.state === "SC";
-    const rawSlug =
-      formData.title
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^\w ]+/g, "")
-        .replace(/ +/g, "-") || `anuncio-${Date.now()}`;
+    setIsSaving(true);
 
-    if (isSC) {
-      // Salva / Atualiza em Empreendimentos SC
-      const cityLabels: Record<ScCity, string> = {
-        "porto-belo": "Porto Belo",
-        itapema: "Itapema",
-        "balneario-camboriu": "Balneário Camboriú",
-      };
+    try {
+      const isSC = formData.state === "SC";
+      const rawSlug =
+        formData.title
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^\w ]+/g, "")
+          .replace(/ +/g, "-") || `anuncio-${Date.now()}`;
 
-      const cityLabel = cityLabels[formData.scCity] || "Porto Belo";
-      let updatedDevs: Development[];
-
-      if (editingItem && editingItem.state === "SC") {
-        updatedDevs = devItems.map((dev) => {
-          if (dev.slug === editingItem.slug) {
-            return {
-              ...dev,
-              name: formData.title,
-              city: formData.scCity,
-              cityLabel,
-              neighborhood: formData.neighborhood,
-              stage: formData.stage,
-              deliveryDate: formData.deliveryDate,
-              shortDescription:
-                formData.shortDescription ||
-                `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
-              priceFrom: formData.price ?? undefined,
-              bedroomsRange: [Number(formData.bedrooms) || 2, Number(formData.bedrooms) + 1],
-              suitesRange: [Number(formData.suites) || 2, Number(formData.suites) + 1],
-              parkingRange: [Number(formData.parking) || 2, Number(formData.parking) + 1],
-              areaRange: [Number(formData.area) || 120, Number(formData.area) + 40],
-              distanceToSea: formData.distanceToSea,
-              coverImage: {
-                url: formData.coverImage.url || mockImages.coastalHouse1,
-                alt: formData.coverImage.alt || formData.title,
-              },
-              gallery: formData.gallery.map((g) => ({
-                url: g.url,
-                alt: g.alt || formData.title,
-              })),
-            };
-          }
-          return dev;
-        });
-      } else {
-        const newDev: Development = {
-          slug: rawSlug,
-          name: formData.title,
-          city: formData.scCity,
-          cityLabel,
-          neighborhood: formData.neighborhood,
-          stage: formData.stage,
-          deliveryDate: formData.deliveryDate,
-          shortDescription:
-            formData.shortDescription ||
-            `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
-          priceFrom: formData.price ?? undefined,
-          bedroomsRange: [Number(formData.bedrooms) || 2, Number(formData.bedrooms) + 1],
-          suitesRange: [Number(formData.suites) || 2, Number(formData.suites) + 1],
-          parkingRange: [Number(formData.parking) || 2, Number(formData.parking) + 1],
-          areaRange: [Number(formData.area) || 120, Number(formData.area) + 40],
-          distanceToSea: formData.distanceToSea,
-          badges: ["lancamento", "alto-padrao"],
-          coverImage: {
-            url: formData.coverImage.url || mockImages.coastalHouse1,
-            alt: formData.coverImage.alt || formData.title,
-          },
-          gallery: formData.gallery.map((g) => ({
-            url: g.url,
-            alt: g.alt || formData.title,
-          })),
+      if (isSC) {
+        // Salva / Atualiza em Empreendimentos SC
+        const cityLabels: Record<ScCity, string> = {
+          "porto-belo": "Porto Belo",
+          itapema: "Itapema",
+          "balneario-camboriu": "Balneário Camboriú",
         };
-        updatedDevs = [newDev, ...devItems];
-      }
 
-      setDevItems(() => updatedDevs);
-      saveStoredDevelopments(updatedDevs);
-      const targetDev = updatedDevs.find((d) => d.slug === (editingItem?.slug || rawSlug));
-      if (targetDev) {
-        saveDevelopmentToDb(targetDev);
-      }
-      showToast(`✓ Imóvel em Santa Catarina (${cityLabel}) salvo com sucesso!`);
-    } else {
-      // Salva / Atualiza em Imóveis Urbanos MS
-      let updatedUrban: UrbanProperty[];
+        const cityLabel = cityLabels[formData.scCity] || "Porto Belo";
+        let updatedDevs: Development[];
 
-      if (editingItem && editingItem.state === "MS") {
-        updatedUrban = urbanItems.map((item) => {
-          if (item.slug === editingItem.slug) {
-            return {
-              ...item,
-              title: formData.title,
-              type: formData.type,
-              neighborhood: formData.neighborhood,
-              price: formData.price,
-              bedrooms: Number(formData.bedrooms) || 0,
-              suites: Number(formData.suites) || 0,
-              parking: Number(formData.parking) || 0,
-              area: Number(formData.area) || 0,
-              coverImage: {
-                url: formData.coverImage.url || mockImages.livingRoom1,
-                alt: formData.coverImage.alt || formData.title,
-              },
-              gallery: formData.gallery.map((g) => ({
-                url: g.url,
-                alt: g.alt || formData.title,
-              })),
-            };
+        if (editingItem && editingItem.state === "SC") {
+          updatedDevs = devItems.map((dev) => {
+            if (dev.slug === editingItem.slug) {
+              return {
+                ...dev,
+                name: formData.title,
+                city: formData.scCity,
+                cityLabel,
+                neighborhood: formData.neighborhood,
+                stage: formData.stage,
+                deliveryDate: formData.deliveryDate,
+                shortDescription:
+                  formData.shortDescription ||
+                  `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
+                priceFrom: formData.price ?? undefined,
+                bedroomsRange: [Number(formData.bedrooms) || 2, Number(formData.bedrooms) + 1],
+                suitesRange: [Number(formData.suites) || 2, Number(formData.suites) + 1],
+                parkingRange: [Number(formData.parking) || 2, Number(formData.parking) + 1],
+                areaRange: [Number(formData.area) || 120, Number(formData.area) + 40],
+                distanceToSea: formData.distanceToSea,
+                coverImage: {
+                  url: formData.coverImage.url || mockImages.coastalHouse1,
+                  alt: formData.coverImage.alt || formData.title,
+                },
+                gallery: formData.gallery.map((g) => ({
+                  url: g.url,
+                  alt: g.alt || formData.title,
+                })),
+              };
+            }
+            return dev;
+          });
+        } else {
+          const newDev: Development = {
+            slug: rawSlug,
+            name: formData.title,
+            city: formData.scCity,
+            cityLabel,
+            neighborhood: formData.neighborhood,
+            stage: formData.stage,
+            deliveryDate: formData.deliveryDate,
+            shortDescription:
+              formData.shortDescription ||
+              `Empreendimento exclusivo de alto padrão em ${cityLabel}, no bairro ${formData.neighborhood}.`,
+            priceFrom: formData.price ?? undefined,
+            bedroomsRange: [Number(formData.bedrooms) || 2, Number(formData.bedrooms) + 1],
+            suitesRange: [Number(formData.suites) || 2, Number(formData.suites) + 1],
+            parkingRange: [Number(formData.parking) || 2, Number(formData.parking) + 1],
+            areaRange: [Number(formData.area) || 120, Number(formData.area) + 40],
+            distanceToSea: formData.distanceToSea,
+            badges: ["lancamento", "alto-padrao"],
+            coverImage: {
+              url: formData.coverImage.url || mockImages.coastalHouse1,
+              alt: formData.coverImage.alt || formData.title,
+            },
+            gallery: formData.gallery.map((g) => ({
+              url: g.url,
+              alt: g.alt || formData.title,
+            })),
+          };
+          updatedDevs = [newDev, ...devItems];
+        }
+
+        setDevItems(() => updatedDevs);
+        saveStoredDevelopments(updatedDevs);
+        const targetDev = updatedDevs.find((d) => d.slug === (editingItem?.slug || rawSlug));
+        if (targetDev) {
+          const res = await saveDevelopmentToDb(targetDev);
+          if (!res.success) {
+            console.error("Erro no salvamento Supabase:", res.error);
           }
-          return item;
-        });
+        }
+        showToast(`✓ Imóvel em Santa Catarina (${cityLabel}) salvo e sincronizado na nuvem!`);
       } else {
-        const newUrban: UrbanProperty = {
-          slug: rawSlug,
-          code: `MRQ-U${100 + urbanItems.length + 1}`,
-          title: formData.title,
-          type: formData.type,
-          neighborhood: formData.neighborhood,
-          city: "Campo Grande",
-          price: formData.price,
-          bedrooms: Number(formData.bedrooms) || 3,
-          suites: Number(formData.suites) || 2,
-          parking: Number(formData.parking) || 2,
-          area: Number(formData.area) || 120,
-          badges: ["novo", "alto-padrao"],
-          coverImage: {
-            url: formData.coverImage.url || mockImages.livingRoom1,
-            alt: formData.coverImage.alt || formData.title,
-          },
-          gallery: formData.gallery.map((g) => ({
-            url: g.url,
-            alt: g.alt || formData.title,
-          })),
-        };
-        updatedUrban = [newUrban, ...urbanItems];
+        // Salva / Atualiza em Imóveis Urbanos MS
+        let updatedUrban: UrbanProperty[];
+
+        if (editingItem && editingItem.state === "MS") {
+          updatedUrban = urbanItems.map((item) => {
+            if (item.slug === editingItem.slug) {
+              return {
+                ...item,
+                title: formData.title,
+                type: formData.type,
+                neighborhood: formData.neighborhood,
+                price: formData.price,
+                bedrooms: Number(formData.bedrooms) || 0,
+                suites: Number(formData.suites) || 0,
+                parking: Number(formData.parking) || 0,
+                area: Number(formData.area) || 0,
+                coverImage: {
+                  url: formData.coverImage.url || mockImages.livingRoom1,
+                  alt: formData.coverImage.alt || formData.title,
+                },
+                gallery: formData.gallery.map((g) => ({
+                  url: g.url,
+                  alt: g.alt || formData.title,
+                })),
+              };
+            }
+            return item;
+          });
+        } else {
+          const newUrban: UrbanProperty = {
+            slug: rawSlug,
+            code: `MRQ-U${100 + urbanItems.length + 1}`,
+            title: formData.title,
+            type: formData.type,
+            neighborhood: formData.neighborhood,
+            city: "Campo Grande",
+            price: formData.price,
+            bedrooms: Number(formData.bedrooms) || 3,
+            suites: Number(formData.suites) || 2,
+            parking: Number(formData.parking) || 2,
+            area: Number(formData.area) || 120,
+            badges: ["novo", "alto-padrao"],
+            coverImage: {
+              url: formData.coverImage.url || mockImages.livingRoom1,
+              alt: formData.coverImage.alt || formData.title,
+            },
+            gallery: formData.gallery.map((g) => ({
+              url: g.url,
+              alt: g.alt || formData.title,
+            })),
+          };
+          updatedUrban = [newUrban, ...urbanItems];
+        }
+
+        setUrbanItems(() => updatedUrban);
+        saveStoredUrbanProperties(updatedUrban);
+        const targetUrban = updatedUrban.find((u) => u.slug === (editingItem?.slug || rawSlug));
+        if (targetUrban) {
+          const res = await saveUrbanPropertyToDb(targetUrban);
+          if (!res.success) {
+            console.error("Erro no salvamento Supabase:", res.error);
+          }
+        }
+        showToast("✓ Imóvel em Campo Grande / MS salvo e sincronizado na nuvem!");
       }
 
-      setUrbanItems(() => updatedUrban);
-      saveStoredUrbanProperties(updatedUrban);
-      const targetUrban = updatedUrban.find((u) => u.slug === (editingItem?.slug || rawSlug));
-      if (targetUrban) {
-        saveUrbanPropertyToDb(targetUrban);
-      }
-      showToast("✓ Imóvel em Campo Grande / MS salvo com sucesso!");
+      setModalOpen(false);
+    } catch (err: any) {
+      alert("Erro ao salvar: " + err.message);
+    } finally {
+      setIsSaving(false);
     }
-
-    setModalOpen(false);
   };
 
   const handleDelete = (item: UnifiedPropertyItem) => {
@@ -964,9 +979,10 @@ export default function AdminImoveisPage() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xs bg-mineral px-6 py-2 text-xs font-semibold uppercase tracking-wider text-offwhite hover:bg-mineral-light transition-colors cursor-pointer shadow-xs"
+                  disabled={isSaving}
+                  className="rounded-xs bg-mineral px-6 py-2 text-xs font-semibold uppercase tracking-wider text-offwhite hover:bg-mineral-light transition-colors cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  {editingItem ? "Atualizar Anúncio" : "Salvar Anúncio"}
+                  {isSaving ? "Sincronizando na Nuvem..." : editingItem ? "Atualizar Anúncio" : "Salvar Anúncio"}
                 </button>
               </div>
             </form>
