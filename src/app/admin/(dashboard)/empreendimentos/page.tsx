@@ -76,6 +76,7 @@ export default function AdminEmpreendimentosPage() {
     bedroomsMax: string | number;
     areaMin: string | number;
     areaMax: string | number;
+    leisureArea: string | number;
     distanceToSea: string;
     coverImage: ImageData;
     gallery: ImageData[];
@@ -94,6 +95,7 @@ export default function AdminEmpreendimentosPage() {
     bedroomsMax: "",
     areaMin: "",
     areaMax: "",
+    leisureArea: "",
     distanceToSea: "",
     coverImage: {
       url: "",
@@ -212,6 +214,7 @@ export default function AdminEmpreendimentosPage() {
       bedroomsMax: "",
       areaMin: "",
       areaMax: "",
+      leisureArea: "",
       distanceToSea: "",
       coverImage: {
         url: "",
@@ -240,6 +243,7 @@ export default function AdminEmpreendimentosPage() {
       bedroomsMax: dev.bedroomsRange ? dev.bedroomsRange[1] : "",
       areaMin: dev.areaRange ? dev.areaRange[0] : "",
       areaMax: dev.areaRange ? dev.areaRange[1] : "",
+      leisureArea: dev.leisureArea || "",
       distanceToSea: dev.distanceToSea || "",
       coverImage: dev.coverImage || { url: "", alt: dev.name },
       gallery: dev.gallery || [],
@@ -301,6 +305,7 @@ export default function AdminEmpreendimentosPage() {
         areaRange = [aMax, aMax];
       }
 
+      const leisureArea = formData.leisureArea !== "" && formData.leisureArea !== null && Number(formData.leisureArea) > 0 ? Number(formData.leisureArea) : undefined;
       const distanceToSea = formData.distanceToSea.trim() ? formData.distanceToSea.trim() : undefined;
       const deliveryDate = formData.deliveryDate.trim() ? formData.deliveryDate.trim() : undefined;
 
@@ -324,6 +329,7 @@ export default function AdminEmpreendimentosPage() {
               priceFrom: formData.priceFrom ?? undefined,
               bedroomsRange,
               areaRange,
+              leisureArea,
               distanceToSea,
               coverImage: {
                 url: formData.coverImage.url || "",
@@ -355,6 +361,7 @@ export default function AdminEmpreendimentosPage() {
           priceFrom: formData.priceFrom ?? undefined,
           bedroomsRange,
           areaRange,
+          leisureArea,
           distanceToSea,
           badges: ["lancamento", "alto-padrao"],
           coverImage: {
@@ -759,7 +766,7 @@ export default function AdminEmpreendimentosPage() {
 
                 <div>
                   <label className="block text-xs font-medium text-graphite mb-1">
-                    Área Mínima (m²) <span className="text-graphite/40 font-normal">(Opcional)</span>
+                    Área Privativa Mín. (m²) <span className="text-graphite/40 font-normal">(Opcional)</span>
                   </label>
                   <input
                     type="number"
@@ -775,7 +782,7 @@ export default function AdminEmpreendimentosPage() {
 
                 <div>
                   <label className="block text-xs font-medium text-graphite mb-1">
-                    Área Máxima (m²) <span className="text-graphite/40 font-normal">(Opcional)</span>
+                    Área Privativa Máx. (m²) <span className="text-graphite/40 font-normal">(Opcional)</span>
                   </label>
                   <input
                     type="number"
@@ -788,6 +795,21 @@ export default function AdminEmpreendimentosPage() {
                     className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40"
                   />
                 </div>
+              </div>
+
+              {/* Área de Lazer (m²) */}
+              <div>
+                <label className="block text-xs font-medium text-graphite mb-1">
+                  Área de Lazer / Estrutura Comum (m²) <span className="text-graphite/40 font-normal">(Opcional)</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Ex: 850 (Se preenchido, exibe bloco com ícone no anúncio)"
+                  value={formData.leisureArea}
+                  onChange={(e) => setFormData({ ...formData, leisureArea: e.target.value })}
+                  className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite placeholder:text-graphite/40"
+                />
               </div>
 
               {/* Descrição Detalhada do Empreendimento (Opcional) */}

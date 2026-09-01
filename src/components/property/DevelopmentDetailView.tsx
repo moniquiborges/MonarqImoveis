@@ -24,6 +24,7 @@ import {
   Building2,
   CheckCircle,
   Sparkles,
+  Palmtree,
   MapPin,
   Loader2,
 } from "lucide-react";
@@ -232,6 +233,20 @@ export function DevelopmentDetailView({
                           {development.parkingRange[0] === development.parkingRange[1]
                             ? `${development.parkingRange[0]} vagas`
                             : `${development.parkingRange[0]} a ${development.parkingRange[1]} vagas`}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
+
+                  {development.leisureArea && development.leisureArea > 0 && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Palmtree className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Área de Lazer</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {development.leisureArea} m²
                         </strong>
                       </div>
                     </div>

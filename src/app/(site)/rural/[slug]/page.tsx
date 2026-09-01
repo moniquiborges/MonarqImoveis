@@ -4,6 +4,8 @@ import { fetchRuralPropertyBySlug } from "@/lib/services/propertyService";
 import { ruralActivityLabels } from "@/lib/labels";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export const dynamicParams = true;
 
 export function generateStaticParams() {

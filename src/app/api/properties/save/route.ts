@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { UrbanProperty, Development, RuralProperty } from "@/types";
 
@@ -69,6 +70,11 @@ export async function POST(req: Request) {
         await supabase.from("property_images").insert(imageInserts);
       }
 
+      revalidatePath("/imoveis/campo-grande");
+      revalidatePath(`/imoveis/campo-grande/${prop.slug}`);
+      revalidatePath(`/i/${prop.code}`);
+      revalidatePath("/");
+
       return NextResponse.json({ success: true, id: entityId });
     }
 
@@ -138,6 +144,12 @@ export async function POST(req: Request) {
         await supabase.from("property_images").insert(imageInserts);
       }
 
+      revalidatePath("/empreendimentos");
+      revalidatePath(`/empreendimentos/${dev.city}`);
+      revalidatePath(`/empreendimentos/${dev.city}/${dev.slug}`);
+      if (dev.code) revalidatePath(`/i/${dev.code}`);
+      revalidatePath("/");
+
       return NextResponse.json({ success: true, id: entityId });
     }
 
@@ -197,6 +209,11 @@ export async function POST(req: Request) {
       if (imageInserts.length > 0) {
         await supabase.from("property_images").insert(imageInserts);
       }
+
+      revalidatePath("/rural");
+      revalidatePath(`/rural/${rural.slug}`);
+      revalidatePath(`/i/${rural.code}`);
+      revalidatePath("/");
 
       return NextResponse.json({ success: true, id: entityId });
     }

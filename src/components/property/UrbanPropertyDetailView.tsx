@@ -22,6 +22,7 @@ import {
   MapPin,
   ShieldCheck,
   CheckCircle,
+  Palmtree,
   Loader2,
 } from "lucide-react";
 
@@ -148,7 +149,7 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
           {/* Coluna Esquerda: Especificações e Descrição */}
           <div className="lg:col-span-8 space-y-10">
             {/* Grid de Especificações Técnicas */}
-            {(property.area > 0 || property.bedrooms > 0 || property.suites > 0 || property.parking > 0) && (
+            {(property.area > 0 || (property.leisureArea && property.leisureArea > 0) || property.bedrooms > 0 || property.suites > 0 || property.parking > 0) && (
               <div className="rounded-sm border border-areia/60 bg-white p-6 shadow-xs">
                 <h3 className="text-xs uppercase tracking-[0.15em] text-terracota font-semibold mb-4">
                   Visão Geral do Imóvel
@@ -161,9 +162,23 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
                         <Ruler className="h-5 w-5" />
                       </div>
                       <div>
-                        <span className="text-xs text-graphite/50 block">Área Útil</span>
+                        <span className="text-xs text-graphite/50 block">Área Privativa</span>
                         <strong className="text-graphite font-medium text-sm md:text-base">
                           {formatArea(property.area)}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
+
+                  {property.leisureArea && property.leisureArea > 0 && (
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xs bg-offwhite p-2.5 text-mineral border border-areia/40">
+                        <Palmtree className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-graphite/50 block">Área de Lazer</span>
+                        <strong className="text-graphite font-medium text-sm md:text-base">
+                          {formatArea(property.leisureArea)}
                         </strong>
                       </div>
                     </div>

@@ -45,6 +45,7 @@ export interface Development {
   gallery: PropertyImage[];
   description?: string;
   features?: string[];
+  leisureArea?: number;
 }
 
 export interface UrbanProperty {
@@ -59,6 +60,7 @@ export interface UrbanProperty {
   suites: number;
   parking: number;
   area: number;
+  leisureArea?: number;
   badges: PropertyBadge[];
   coverImage: PropertyImage;
   gallery: PropertyImage[];
