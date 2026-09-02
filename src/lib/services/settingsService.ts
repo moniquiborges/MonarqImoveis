@@ -2,6 +2,12 @@ import { createClient as createBrowserSupabaseClient } from "@/lib/supabase/clie
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { siteConfig } from "@/lib/site-config";
 
+export interface SocialLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 export interface ResolvedSiteConfig {
   name: string;
   tagline: string;
@@ -18,9 +24,10 @@ export interface ResolvedSiteConfig {
   instagramUrl: string;
   instagramHandle: string;
   facebookUrl: string;
+  socialLinks: SocialLink[];
 }
 
-const DEFAULT_SITE_CONFIG: ResolvedSiteConfig = { ...siteConfig };
+const DEFAULT_SITE_CONFIG: ResolvedSiteConfig = { ...siteConfig, socialLinks: [] };
 
 /**
  * Campos editáveis em /admin/configuracoes. Os demais campos de
@@ -38,7 +45,26 @@ type EditableSiteConfigFields = Pick<
   | "cnpj"
   | "instagramUrl"
   | "facebookUrl"
+  | "socialLinks"
 >;
+
+function sanitizeSocialLinks(value: unknown): SocialLink[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter(
+      (item): item is Partial<SocialLink> =>
+        !!item &&
+        typeof item === "object" &&
+        typeof (item as SocialLink).label === "string" &&
+        typeof (item as SocialLink).url === "string"
+    )
+    .map((item) => ({
+      id: typeof item.id === "string" && item.id ? item.id : crypto.randomUUID(),
+      label: (item.label ?? "").trim(),
+      url: (item.url ?? "").trim(),
+    }))
+    .filter((item) => item.label && item.url);
+}
 
 export async function fetchSiteConfig(): Promise<ResolvedSiteConfig> {
   if (!isSupabaseConfigured()) {
@@ -69,6 +95,7 @@ export async function fetchSiteConfig(): Promise<ResolvedSiteConfig> {
       cnpj: saved.cnpj?.trim() || DEFAULT_SITE_CONFIG.cnpj,
       instagramUrl: saved.instagramUrl?.trim() || DEFAULT_SITE_CONFIG.instagramUrl,
       facebookUrl: saved.facebookUrl?.trim() || DEFAULT_SITE_CONFIG.facebookUrl,
+      socialLinks: sanitizeSocialLinks(saved.socialLinks),
     };
   } catch (err) {
     console.error("Erro ao buscar configurações institucionais do Supabase:", err);

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { FacebookIcon, InstagramIcon } from "@/components/ui/SocialIcons";
+import { FacebookIcon, InstagramIcon, resolveSocialIcon } from "@/components/ui/SocialIcons";
 import { buildWhatsappUrlFor } from "@/lib/site-config";
 import type { ResolvedSiteConfig } from "@/lib/services/settingsService";
 import { scCities } from "./nav-data";
@@ -29,6 +29,11 @@ export function Footer({ config }: FooterProps) {
   const socialLinks = [
     { icon: InstagramIcon, url: config.instagramUrl, label: "Instagram" },
     { icon: FacebookIcon, url: config.facebookUrl, label: "Facebook" },
+    ...config.socialLinks.map((link) => ({
+      icon: resolveSocialIcon(link.label),
+      url: link.url,
+      label: link.label,
+    })),
   ].filter((s) => s.url);
   const whatsappUrl = buildWhatsappUrlFor(
     config.whatsappNumber,
@@ -51,7 +56,7 @@ export function Footer({ config }: FooterProps) {
             <div className="flex gap-3 pt-1">
               {socialLinks.map((s) => (
                 <a
-                  key={s.label}
+                  key={`${s.label}-${s.url}`}
                   href={s.url!}
                   target="_blank"
                   rel="noopener noreferrer"

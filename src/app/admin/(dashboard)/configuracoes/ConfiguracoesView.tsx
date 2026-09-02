@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Save, CheckCircle2, Globe, Share2, BarChart3 } from "lucide-react";
+import { Save, CheckCircle2, Globe, Share2, BarChart3, Plus, Trash2 } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
+import { resolveSocialIcon } from "@/components/ui/SocialIcons";
 import { saveSettings, type AnalyticsSettingsInput, type SiteConfigSettings } from "./actions";
 
 interface ConfiguracoesViewProps {
@@ -21,6 +22,7 @@ const defaultSiteConfig = (): SiteConfigSettings => ({
   cnpj: siteConfig.cnpj || "",
   instagramUrl: siteConfig.instagramUrl || "",
   facebookUrl: siteConfig.facebookUrl || "",
+  socialLinks: [],
 });
 
 const emptyAnalytics: AnalyticsSettingsInput = { gtmId: "", ga4Id: "", metaPixelId: "" };
@@ -30,7 +32,11 @@ export function ConfiguracoesView({
   initialAnalytics,
   initialError,
 }: ConfiguracoesViewProps) {
-  const [config, setConfig] = useState<SiteConfigSettings>(initialSiteConfig ?? defaultSiteConfig());
+  const [config, setConfig] = useState<SiteConfigSettings>(
+    initialSiteConfig
+      ? { ...initialSiteConfig, socialLinks: initialSiteConfig.socialLinks ?? [] }
+      : defaultSiteConfig()
+  );
   const [analytics, setAnalytics] = useState<AnalyticsSettingsInput>(
     initialAnalytics ?? emptyAnalytics
   );
@@ -38,16 +44,48 @@ export function ConfiguracoesView({
   const [saved, setSaved] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const addSocialLink = () => {
+    setConfig({
+      ...config,
+      socialLinks: [
+        ...config.socialLinks,
+        { id: crypto.randomUUID(), label: "", url: "" },
+      ],
+    });
+  };
+
+  const updateSocialLink = (id: string, field: "label" | "url", value: string) => {
+    setConfig({
+      ...config,
+      socialLinks: config.socialLinks.map((link) =>
+        link.id === id ? { ...link, [field]: value } : link
+      ),
+    });
+  };
+
+  const removeSocialLink = (id: string) => {
+    setConfig({
+      ...config,
+      socialLinks: config.socialLinks.filter((link) => link.id !== id),
+    });
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setFormError(null);
     setSaved(false);
 
-    const result = await saveSettings({ siteConfig: config, analytics });
+    const cleanedConfig: SiteConfigSettings = {
+      ...config,
+      socialLinks: config.socialLinks.filter((link) => link.label.trim() && link.url.trim()),
+    };
+
+    const result = await saveSettings({ siteConfig: cleanedConfig, analytics });
 
     setIsSubmitting(false);
     if (result.success) {
+      setConfig(cleanedConfig);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } else {
@@ -219,6 +257,62 @@ export function ConfiguracoesView({
                 className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
               />
             </div>
+          </div>
+
+          <div className="border-t border-areia/30 pt-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-medium text-graphite">Outras Redes Sociais</label>
+              <button
+                type="button"
+                onClick={addSocialLink}
+                className="focus-ring inline-flex items-center gap-1.5 rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-graphite hover:bg-offwhite cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Nova Rede Social
+              </button>
+            </div>
+
+            {config.socialLinks.length > 0 ? (
+              <div className="space-y-3">
+                {config.socialLinks.map((link) => {
+                  const Icon = resolveSocialIcon(link.label || "?");
+                  return (
+                    <div key={link.id} className="flex items-start gap-2">
+                      <div className="mt-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-areia/70 bg-offwhite/50 text-graphite/60">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Ex: TikTok"
+                        value={link.label}
+                        onChange={(e) => updateSocialLink(link.id, "label", e.target.value)}
+                        className="focus-ring w-36 shrink-0 rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                      />
+                      <input
+                        type="url"
+                        placeholder="https://tiktok.com/@monarqimoveis"
+                        value={link.url}
+                        onChange={(e) => updateSocialLink(link.id, "url", e.target.value)}
+                        className="focus-ring flex-1 rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeSocialLink(link.id)}
+                        title="Remover"
+                        className="mt-1 rounded-xs p-1.5 text-graphite/40 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-[11px] text-graphite/50">
+                Nenhuma rede adicional cadastrada. Clique em &ldquo;Nova Rede Social&rdquo; para
+                adicionar TikTok, YouTube, LinkedIn e outras.
+              </p>
+            )}
           </div>
         </div>
 

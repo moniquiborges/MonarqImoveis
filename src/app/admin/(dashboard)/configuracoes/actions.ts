@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/supabase/require-staff";
+import type { SocialLink } from "@/lib/services/settingsService";
 
 export interface SiteConfigSettings {
   name: string;
@@ -14,6 +15,7 @@ export interface SiteConfigSettings {
   cnpj: string;
   instagramUrl: string;
   facebookUrl: string;
+  socialLinks: SocialLink[];
 }
 
 export interface AnalyticsSettingsInput {
