@@ -7,15 +7,21 @@ import { CoverageSection } from "@/components/home/CoverageSection";
 import { AboutSection } from "@/components/home/AboutSection";
 import { EditorialSection } from "@/components/home/EditorialSection";
 import { CTASection } from "@/components/home/CTASection";
+import { fetchActiveBanners } from "@/lib/services/bannerService";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export default async function Home() {
+  const banners = await fetchActiveBanners();
+
   return (
     <>
-      <Hero />
+      <Hero banner={banners.hero} />
       <DestinationGrid />
-      <FeaturedDevelopments />
-      <CampoGrandeSection />
-      <RuralSection />
+      <FeaturedDevelopments banner={banners["destaque-sc"]} />
+      <CampoGrandeSection banner={banners["campo-grande"]} />
+      <RuralSection banner={banners.rural} />
       <CoverageSection />
       <AboutSection />
       <EditorialSection />

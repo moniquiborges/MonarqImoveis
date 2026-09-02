@@ -10,8 +10,13 @@ import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockImages } from "@/lib/mock/images";
 import { getStoredUrbanProperties, useLiveStoredData } from "@/lib/storage";
 import type { UrbanProperty } from "@/types";
+import type { HomeBanner } from "@/lib/services/bannerService";
 
-export function CampoGrandeSection() {
+interface CampoGrandeSectionProps {
+  banner?: HomeBanner;
+}
+
+export function CampoGrandeSection({ banner }: CampoGrandeSectionProps) {
   const [properties] = useLiveStoredData<UrbanProperty[]>(
     getStoredUrbanProperties,
     mockUrbanProperties,
@@ -24,8 +29,8 @@ export function CampoGrandeSection() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
           <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
             <Image
-              src={mockImages.urbanBuilding1}
-              alt="Imóvel de alto padrão em Campo Grande"
+              src={banner?.imageUrl || mockImages.urbanBuilding1}
+              alt={banner?.title || "Imóvel de alto padrão em Campo Grande"}
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="object-cover"
@@ -34,11 +39,14 @@ export function CampoGrandeSection() {
           <div className="flex flex-col gap-6">
             <SectionHeading
               eyebrow="Mato Grosso do Sul"
-              title="Oportunidades urbanas em Campo Grande"
-              description="Apartamentos, casas, condomínios fechados e imóveis comerciais em uma das capitais que mais crescem no Centro-Oeste."
+              title={banner?.title || "Oportunidades urbanas em Campo Grande"}
+              description={
+                banner?.subtitle ||
+                "Apartamentos, casas, condomínios fechados e imóveis comerciais em uma das capitais que mais crescem no Centro-Oeste."
+              }
             />
-            <ButtonLink href="/imoveis/campo-grande" variant="secondary" className="w-fit">
-              Ver imóveis em Campo Grande
+            <ButtonLink href={banner?.ctaLink || "/imoveis/campo-grande"} variant="secondary" className="w-fit">
+              {banner?.ctaText || "Ver imóveis em Campo Grande"}
             </ButtonLink>
           </div>
         </div>

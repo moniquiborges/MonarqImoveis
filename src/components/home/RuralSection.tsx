@@ -10,8 +10,13 @@ import { formatBRL } from "@/lib/utils";
 import { mockRuralProperties } from "@/lib/mock/rural";
 import { getStoredRuralProperties, useLiveStoredData } from "@/lib/storage";
 import type { RuralProperty } from "@/types";
+import type { HomeBanner } from "@/lib/services/bannerService";
 
-export function RuralSection() {
+interface RuralSectionProps {
+  banner?: HomeBanner;
+}
+
+export function RuralSection({ banner }: RuralSectionProps) {
   const [ruralProperties] = useLiveStoredData<RuralProperty[]>(
     getStoredRuralProperties,
     mockRuralProperties,
@@ -21,15 +26,31 @@ export function RuralSection() {
   return (
     <section className="bg-mineral py-24 text-offwhite">
       <Container className="flex flex-col gap-12">
+        {banner?.imageUrl && (
+          <div className="relative aspect-[21/9] overflow-hidden rounded-sm">
+            <Image
+              src={banner.imageUrl}
+              alt={banner.title}
+              fill
+              sizes="100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-mineral/90 via-mineral/10 to-transparent" />
+          </div>
+        )}
+
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <SectionHeading
             eyebrow="Inteligência rural"
-            title="Oportunidades rurais em MS e MT"
-            description="Fazendas e propriedades rurais com dados técnicos completos para decisões de investimento."
+            title={banner?.title || "Oportunidades rurais em MS e MT"}
+            description={
+              banner?.subtitle ||
+              "Fazendas e propriedades rurais com dados técnicos completos para decisões de investimento."
+            }
             light
           />
-          <ButtonLink href="/rural" variant="outline-light" className="shrink-0">
-            Ver propriedades rurais
+          <ButtonLink href={banner?.ctaLink || "/rural"} variant="outline-light" className="shrink-0">
+            {banner?.ctaText || "Ver propriedades rurais"}
           </ButtonLink>
         </div>
 
