@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { MessageCircle, Send, CheckCircle2, ShieldCheck } from "lucide-react";
 import { formatBRL } from "@/lib/utils";
 import { siteConfig, buildWhatsappUrl } from "@/lib/site-config";
+import { submitPropertyLead, type LeadEntityType } from "@/lib/actions/property-lead";
 import type { LeadInterest } from "@/types";
 
 export interface LeadContactCardProps {
@@ -12,6 +14,7 @@ export interface LeadContactCardProps {
   slug: string;
   price?: number | null;
   interest: LeadInterest;
+  entityType: LeadEntityType;
   pricePrefix?: string;
   priceSuffix?: string;
 }
@@ -22,9 +25,11 @@ export function LeadContactCard({
   slug,
   price,
   interest,
+  entityType,
   pricePrefix,
   priceSuffix,
 }: LeadContactCardProps) {
+  const pathname = usePathname();
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -33,19 +38,30 @@ export function LeadContactCard({
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const defaultWhatsappMessage = `Olá! Gostaria de atendimento exclusivo sobre o imóvel "${title}"${code ? ` (Cód: ${code})` : ""}. Link: /imoveis/${slug}`;
   const whatsappUrl = buildWhatsappUrl(defaultWhatsappMessage);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setSubmitError(null);
 
-    // Simula envio do lead
-    setTimeout(() => {
-      setSubmitting(false);
+    const result = await submitPropertyLead({
+      ...formData,
+      interest,
+      entityType,
+      slug,
+      originPage: pathname,
+    });
+
+    setSubmitting(false);
+    if (result.success) {
       setSubmitted(true);
-    }, 600);
+    } else {
+      setSubmitError(result.error ?? "Não foi possível enviar seu contato.");
+    }
   };
 
   return (
@@ -104,6 +120,12 @@ export function LeadContactCard({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
+            {submitError && (
+              <div className="rounded-xs border border-rose-300 bg-rose-50 px-3 py-2 text-[11px] text-rose-700">
+                {submitError}
+              </div>
+            )}
+
             <div>
               <label htmlFor="lead-name" className="sr-only">
                 Nome completo

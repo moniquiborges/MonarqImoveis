@@ -279,6 +279,7 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
               slug={property.slug}
               price={property.price}
               interest="campo-grande"
+              entityType="urban"
             />
           </div>
         </div>

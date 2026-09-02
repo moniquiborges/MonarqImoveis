@@ -4,12 +4,28 @@ import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Search, MessageCircle, Calendar } from "lucide-react";
 import { updateLeadStatus, type LeadListItem } from "./actions";
-import type { LeadStatusDb } from "@/types/database";
+import type { LeadStatusDb, LeadTypeDb } from "@/types/database";
 
 interface LeadsViewProps {
   initialLeads: LeadListItem[];
   initialError: string | null;
 }
+
+const typeOptions: { value: LeadTypeDb | "all"; label: string }[] = [
+  { value: "all", label: "Todos" },
+  { value: "compra", label: "Interesse em Compra" },
+  { value: "venda", label: "Interesse em Venda" },
+];
+
+const typeBadge: Record<LeadTypeDb, string> = {
+  compra: "bg-sky-500/15 text-sky-700 border-sky-500/30",
+  venda: "bg-orange-500/15 text-orange-700 border-orange-500/30",
+};
+
+const typeLabel: Record<LeadTypeDb, string> = {
+  compra: "Compra",
+  venda: "Venda",
+};
 
 const statusOptions: { value: LeadStatusDb | "all"; label: string; color: string }[] = [
   { value: "all", label: "Todos os Leads", color: "" },
@@ -35,6 +51,7 @@ export function LeadsView({ initialLeads, initialError }: LeadsViewProps) {
   const [isPending, startTransition] = useTransition();
 
   const [selectedStatus, setSelectedStatus] = useState<LeadStatusDb | "all">("all");
+  const [selectedType, setSelectedType] = useState<LeadTypeDb | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -53,6 +70,7 @@ export function LeadsView({ initialLeads, initialError }: LeadsViewProps) {
   const filteredLeads = useMemo(() => {
     return initialLeads.filter((lead) => {
       if (selectedStatus !== "all" && lead.status !== selectedStatus) return false;
+      if (selectedType !== "all" && lead.leadType !== selectedType) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchName = lead.name.toLowerCase().includes(q);
@@ -63,7 +81,7 @@ export function LeadsView({ initialLeads, initialError }: LeadsViewProps) {
       }
       return true;
     });
-  }, [initialLeads, selectedStatus, searchQuery]);
+  }, [initialLeads, selectedStatus, selectedType, searchQuery]);
 
   return (
     <div className="flex flex-col gap-8 max-w-7xl mx-auto">
@@ -101,6 +119,41 @@ export function LeadsView({ initialLeads, initialError }: LeadsViewProps) {
           {actionError}
         </div>
       )}
+
+      {/* Filtro por tipo de lead */}
+      <div className="rounded-sm border border-areia/60 bg-white p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-graphite/50">
+            Tipo de Lead
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {typeOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setSelectedType(opt.value)}
+                className={`rounded-xs px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
+                  selectedType === opt.value
+                    ? "bg-graphite text-offwhite"
+                    : "bg-offwhite/50 text-graphite/70 hover:bg-areia/30 border border-areia/40"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 text-[11px] text-graphite/60">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-sky-500" />
+            Compra: {initialLeads.filter((l) => l.leadType === "compra").length}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-orange-500" />
+            Venda: {initialLeads.filter((l) => l.leadType === "venda").length}
+          </span>
+        </div>
+      </div>
 
       {/* Filtros e Busca */}
       <div className="rounded-sm border border-areia/60 bg-white p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
@@ -154,7 +207,14 @@ export function LeadsView({ initialLeads, initialError }: LeadsViewProps) {
                   return (
                     <tr key={lead.id} className="hover:bg-offwhite/30 transition-colors">
                       <td className="p-4">
-                        <div className="font-semibold text-graphite text-sm">{lead.name}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-graphite text-sm">{lead.name}</span>
+                          <span
+                            className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${typeBadge[lead.leadType]}`}
+                          >
+                            {typeLabel[lead.leadType]}
+                          </span>
+                        </div>
                         <div className="text-graphite/70 text-xs mt-0.5">{lead.email}</div>
                         <div className="font-mono text-graphite/50 text-[11px] mt-0.5">{lead.phone}</div>
                       </td>

@@ -69,6 +69,7 @@ export async function submitSellPropertyLead(
     email,
     interest: CITY_INTEREST_MAP[input.cityState] ?? null,
     message: `[Cadastro para venda] ${details}`,
+    lead_type: "venda",
     origin_page: "/venda-seu-imovel",
   });
 

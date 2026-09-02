@@ -52,6 +52,7 @@ export async function submitContactLead(input: ContactLeadInput): Promise<Contac
     email,
     interest: INTEREST_MAP[input.interest] ?? null,
     message,
+    lead_type: "compra",
     origin_page: "/contato",
   });
 

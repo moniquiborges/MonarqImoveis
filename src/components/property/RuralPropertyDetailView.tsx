@@ -297,6 +297,7 @@ export function RuralPropertyDetailView({ initialSlug, initialProperty }: Props)
               slug={property.slug}
               price={property.price}
               interest="rural"
+              entityType="rural"
               pricePrefix="Valor da Fazenda"
             />
           </div>

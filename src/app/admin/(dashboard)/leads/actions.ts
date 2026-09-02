@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/supabase/require-staff";
-import type { LeadInterestDb, LeadStatusDb } from "@/types/database";
+import type { LeadInterestDb, LeadStatusDb, LeadTypeDb } from "@/types/database";
 
 export interface LeadListItem {
   id: string;
@@ -13,6 +13,7 @@ export interface LeadListItem {
   interest: LeadInterestDb | null;
   message: string | null;
   status: LeadStatusDb;
+  leadType: LeadTypeDb;
   createdAt: string;
   notes: string | null;
 }
@@ -39,7 +40,7 @@ export async function listLeads(): Promise<ListLeadsResult> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("leads")
-    .select("id, name, phone, email, interest, message, status, notes, created_at")
+    .select("id, name, phone, email, interest, message, status, lead_type, notes, created_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -54,6 +55,7 @@ export async function listLeads(): Promise<ListLeadsResult> {
     interest: row.interest,
     message: row.message,
     status: row.status,
+    leadType: row.lead_type,
     notes: row.notes,
     createdAt: formatDateTime(row.created_at),
   }));

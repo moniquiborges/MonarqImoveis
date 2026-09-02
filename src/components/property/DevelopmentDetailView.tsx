@@ -332,7 +332,8 @@ export function DevelopmentDetailView({
               title={development.name}
               slug={development.slug}
               price={development.priceFrom}
-              interest={development.city as any}
+              interest={development.city}
+              entityType="development"
               pricePrefix="A partir de"
             />
           </div>

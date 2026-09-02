@@ -188,7 +188,18 @@ export default async function AdminDashboardPage() {
                   recentLeads.map((lead) => (
                     <tr key={lead.id} className="hover:bg-offwhite/40 transition-colors">
                       <td className="py-3.5 pr-3">
-                        <div className="font-medium text-graphite">{lead.name}</div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium text-graphite">{lead.name}</span>
+                          <span
+                            className={`inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${
+                              lead.leadType === "venda"
+                                ? "bg-orange-500/15 text-orange-700 border-orange-500/30"
+                                : "bg-sky-500/15 text-sky-700 border-sky-500/30"
+                            }`}
+                          >
+                            {lead.leadType === "venda" ? "Venda" : "Compra"}
+                          </span>
+                        </div>
                         <div className="text-[11px] text-graphite/50">{lead.createdAt}</div>
                       </td>
                       <td className="py-3.5 pr-3">

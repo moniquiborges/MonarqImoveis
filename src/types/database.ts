@@ -31,6 +31,7 @@ export type LeadInterestDb =
   | "rural"
   | "investimento";
 export type LeadStatusDb = "novo" | "contatado" | "qualificado" | "negociacao" | "convertido" | "perdido";
+export type LeadTypeDb = "compra" | "venda";
 
 type Timestamps = {
   created_at: string;
@@ -231,6 +232,7 @@ export type LeadRow = Timestamps & {
   utm_campaign: string | null;
   utm_content: string | null;
   status: LeadStatusDb;
+  lead_type: LeadTypeDb;
   notes: string | null;
 };
 
