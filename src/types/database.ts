@@ -47,6 +47,7 @@ export type ProfileRow = Timestamps & {
 export type AgentRow = Timestamps & {
   id: string;
   full_name: string;
+  role_title: string | null;
   email: string | null;
   phone: string | null;
   creci: string | null;
