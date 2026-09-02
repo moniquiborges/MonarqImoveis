@@ -16,6 +16,7 @@ import {
 import { StatCard } from "@/components/admin/StatCard";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { createClient } from "@/lib/supabase/server";
+import { listLeads } from "../leads/actions";
 import { mockDevelopments } from "@/lib/mock/developments";
 import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockRuralProperties } from "@/lib/mock/rural";
@@ -23,50 +24,6 @@ import { mockBlogPosts } from "@/lib/mock/posts";
 import { formatBRL } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-// Mock de leads recentes para demonstração quando Supabase estiver desconectado
-const mockRecentLeads = [
-  {
-    id: "1",
-    name: "Dr. Marcelo Arantes",
-    phone: "67999887766",
-    email: "marcelo.arantes@email.com",
-    interest: "rural",
-    propertyName: "Fazenda Boa Vista (1.240 ha)",
-    status: "novo",
-    createdAt: "Hoje, às 14:32",
-  },
-  {
-    id: "2",
-    name: "Dra. Juliana Vasconcelos",
-    phone: "47988776655",
-    email: "juliana.vasc@email.com",
-    interest: "porto-belo",
-    propertyName: "Essenza Residence",
-    status: "qualificado",
-    createdAt: "Ontem, às 18:10",
-  },
-  {
-    id: "3",
-    name: "Rodrigo Mendonça",
-    phone: "67981122334",
-    email: "rodrigo.mendonca@email.com",
-    interest: "campo-grande",
-    propertyName: "Cobertura Jardim dos Estados",
-    status: "contatado",
-    createdAt: "22 de fev, 09:45",
-  },
-  {
-    id: "4",
-    name: "Camila Guimarães",
-    phone: "47991234567",
-    email: "camila.guimaraes@email.com",
-    interest: "balneario-camboriu",
-    propertyName: "Alto Camboriú Residence",
-    status: "negociacao",
-    createdAt: "20 de fev, 11:20",
-  },
-];
 
 const statusColors: Record<string, string> = {
   novo: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30",
@@ -80,12 +37,15 @@ const statusColors: Record<string, string> = {
 export default async function AdminDashboardPage() {
   const configured = isSupabaseConfigured();
 
+  const { leads: allLeads } = await listLeads();
+  const recentLeads = allLeads.slice(0, 5);
+
   let counts = {
     developments: mockDevelopments.length,
     urbanProperties: mockUrbanProperties.length,
     ruralProperties: mockRuralProperties.length,
     posts: mockBlogPosts.length,
-    newLeads: mockRecentLeads.filter((l) => l.status === "novo").length,
+    newLeads: allLeads.filter((l) => l.status === "novo").length,
   };
 
   if (configured) {
@@ -224,42 +184,50 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-areia/20">
-                {mockRecentLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-offwhite/40 transition-colors">
-                    <td className="py-3.5 pr-3">
-                      <div className="font-medium text-graphite">{lead.name}</div>
-                      <div className="text-[11px] text-graphite/50">{lead.createdAt}</div>
-                    </td>
-                    <td className="py-3.5 pr-3">
-                      <div className="text-graphite line-clamp-1">{lead.propertyName}</div>
-                      <div className="text-[11px] text-graphite/50 font-mono">{lead.phone}</div>
-                    </td>
-                    <td className="py-3.5 pr-3">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                          statusColors[lead.status] || "bg-graphite/10 text-graphite"
-                        }`}
-                      >
-                        {lead.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="py-3.5 text-right">
-                      <a
-                        href={`https://wa.me/55${lead.phone.replace(/\D/g, "")}?text=Olá ${encodeURIComponent(
-                          lead.name
-                        )}, sou da MONARQ Imóveis. Recebi seu interesse no imóvel ${encodeURIComponent(
-                          lead.propertyName
-                        )}.`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all font-semibold text-[11px]"
-                      >
-                        <MessageCircle className="h-3 w-3" />
-                        WhatsApp
-                      </a>
+                {recentLeads.length > 0 ? (
+                  recentLeads.map((lead) => (
+                    <tr key={lead.id} className="hover:bg-offwhite/40 transition-colors">
+                      <td className="py-3.5 pr-3">
+                        <div className="font-medium text-graphite">{lead.name}</div>
+                        <div className="text-[11px] text-graphite/50">{lead.createdAt}</div>
+                      </td>
+                      <td className="py-3.5 pr-3">
+                        <div className="text-graphite line-clamp-1">
+                          {lead.message || lead.interest || "—"}
+                        </div>
+                        <div className="text-[11px] text-graphite/50 font-mono">{lead.phone}</div>
+                      </td>
+                      <td className="py-3.5 pr-3">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                            statusColors[lead.status] || "bg-graphite/10 text-graphite"
+                          }`}
+                        >
+                          {lead.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="py-3.5 text-right">
+                        <a
+                          href={`https://wa.me/55${lead.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                            `Olá ${lead.name}, sou da MONARQ Imóveis. Recebi seu contato.`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all font-semibold text-[11px]"
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                          WhatsApp
+                        </a>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-graphite/50">
+                      Nenhum lead capturado ainda.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
