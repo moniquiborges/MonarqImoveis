@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { FacebookIcon, InstagramIcon } from "@/components/ui/SocialIcons";
-import { buildWhatsappUrl, siteConfig } from "@/lib/site-config";
+import { buildWhatsappUrlFor } from "@/lib/site-config";
+import type { ResolvedSiteConfig } from "@/lib/services/settingsService";
 import { scCities } from "./nav-data";
 
 const institutionalLinks = [
@@ -19,13 +20,18 @@ const legalLinks = [
   { label: "Termos de uso", href: "/termos" },
 ];
 
-export function Footer() {
+interface FooterProps {
+  config: ResolvedSiteConfig;
+}
+
+export function Footer({ config }: FooterProps) {
   const year = new Date().getFullYear();
   const socialLinks = [
-    { icon: InstagramIcon, url: siteConfig.instagramUrl, label: "Instagram" },
-    { icon: FacebookIcon, url: siteConfig.facebookUrl, label: "Facebook" },
+    { icon: InstagramIcon, url: config.instagramUrl, label: "Instagram" },
+    { icon: FacebookIcon, url: config.facebookUrl, label: "Facebook" },
   ].filter((s) => s.url);
-  const whatsappUrl = buildWhatsappUrl(
+  const whatsappUrl = buildWhatsappUrlFor(
+    config.whatsappNumber,
     "Olá, gostaria de falar com um especialista da MONARQ sobre oportunidades imobiliárias.",
   );
 
@@ -40,7 +46,7 @@ export function Footer() {
             height={94}
             className="h-auto w-36"
           />
-          <p className="text-[13px] leading-relaxed text-offwhite/60">{siteConfig.tagline}</p>
+          <p className="text-[13px] leading-relaxed text-offwhite/60">{config.tagline}</p>
           {socialLinks.length > 0 ? (
             <div className="flex gap-3 pt-1">
               {socialLinks.map((s) => (
@@ -104,40 +110,40 @@ export function Footer() {
               className="focus-ring flex items-center gap-2 text-[14px] text-offwhite/75 hover:text-offwhite"
             >
               <MessageCircle className="h-4 w-4" />
-              {siteConfig.whatsappDisplay}
+              {config.whatsappDisplay}
             </a>
           ) : null}
 
-          {siteConfig.contactPhone ? (
+          {config.contactPhone ? (
             <a
-              href={`tel:${siteConfig.contactPhone.replace(/\D/g, "")}`}
+              href={`tel:${config.contactPhone.replace(/\D/g, "")}`}
               className="focus-ring flex items-center gap-2 text-[14px] text-offwhite/75 hover:text-offwhite"
             >
               <Phone className="h-4 w-4" />
-              {siteConfig.contactPhone}
+              {config.contactPhone}
             </a>
           ) : null}
 
-          {siteConfig.contactEmail ? (
+          {config.contactEmail ? (
             <a
-              href={`mailto:${siteConfig.contactEmail}`}
+              href={`mailto:${config.contactEmail}`}
               className="focus-ring flex items-center gap-2 text-[14px] text-offwhite/75 hover:text-offwhite"
             >
               <Mail className="h-4 w-4" />
-              {siteConfig.contactEmail}
+              {config.contactEmail}
             </a>
           ) : null}
 
-          {siteConfig.address ? (
+          {config.address ? (
             <p className="flex items-start gap-2 text-[13px] leading-relaxed text-offwhite/60">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-              {siteConfig.address}
+              {config.address}
             </p>
           ) : null}
 
           {!whatsappUrl &&
-          !siteConfig.contactPhone &&
-          !siteConfig.contactEmail ? (
+          !config.contactPhone &&
+          !config.contactEmail ? (
             <p className="text-[13px] text-offwhite/40">
               Canais de contato a configurar.
             </p>
@@ -149,7 +155,7 @@ export function Footer() {
         <Container className="flex flex-col gap-4 py-6 text-[12px] text-offwhite/50 md:flex-row md:items-center md:justify-between">
           <p>
             © {year} MONARQ Imóveis & Investimentos. Todos os direitos reservados.
-            {siteConfig.cnpj ? ` · CNPJ ${siteConfig.cnpj}` : ""}
+            {config.cnpj ? ` · CNPJ ${config.cnpj}` : ""}
           </p>
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex gap-5">

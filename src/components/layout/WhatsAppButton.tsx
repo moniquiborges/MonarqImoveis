@@ -1,8 +1,14 @@
 import { MessageCircle } from "lucide-react";
-import { buildWhatsappUrl } from "@/lib/site-config";
+import { buildWhatsappUrlFor } from "@/lib/site-config";
+import type { ResolvedSiteConfig } from "@/lib/services/settingsService";
 
-export function WhatsAppButton() {
-  const url = buildWhatsappUrl(
+interface WhatsAppButtonProps {
+  config: ResolvedSiteConfig;
+}
+
+export function WhatsAppButton({ config }: WhatsAppButtonProps) {
+  const url = buildWhatsappUrlFor(
+    config.whatsappNumber,
     "Olá, gostaria de falar com um especialista da MONARQ sobre oportunidades imobiliárias.",
   );
 

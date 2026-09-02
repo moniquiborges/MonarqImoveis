@@ -23,7 +23,11 @@ export const siteConfig = {
 };
 
 export function buildWhatsappUrl(message: string) {
-  if (!siteConfig.whatsappNumber) return null;
+  return buildWhatsappUrlFor(siteConfig.whatsappNumber, message);
+}
+
+export function buildWhatsappUrlFor(whatsappNumber: string, message: string) {
+  if (!whatsappNumber) return null;
   const params = new URLSearchParams({ text: message });
-  return `https://wa.me/${siteConfig.whatsappNumber}?${params.toString()}`;
+  return `https://wa.me/${whatsappNumber}?${params.toString()}`;
 }

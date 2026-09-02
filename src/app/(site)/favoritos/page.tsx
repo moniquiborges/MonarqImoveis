@@ -20,10 +20,11 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { ButtonLink } from "@/components/ui/Button";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { formatBRL } from "@/lib/utils";
-import { buildWhatsappUrl } from "@/lib/site-config";
+import { useSiteConfig } from "@/contexts/SiteConfigContext";
 
 export default function FavoritosPage() {
   const { favorites, removeFavorite, clearFavorites } = useFavorites();
+  const { buildWhatsappUrl } = useSiteConfig();
 
   const allPropertiesMessage = `Olá! Gostaria de receber consultoria sobre os seguintes imóveis que salvei na MONARQ:\n${favorites
     .map(

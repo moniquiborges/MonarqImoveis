@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { MessageCircle, Send, CheckCircle2, ShieldCheck } from "lucide-react";
 import { formatBRL } from "@/lib/utils";
-import { siteConfig, buildWhatsappUrl } from "@/lib/site-config";
+import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { submitPropertyLead, type LeadEntityType } from "@/lib/actions/property-lead";
 import type { LeadInterest } from "@/types";
 
@@ -39,6 +39,7 @@ export function LeadContactCard({
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const { buildWhatsappUrl } = useSiteConfig();
 
   const defaultWhatsappMessage = `Olá! Gostaria de atendimento exclusivo sobre o imóvel "${title}"${code ? ` (Cód: ${code})` : ""}. Link: /imoveis/${slug}`;
   const whatsappUrl = buildWhatsappUrl(defaultWhatsappMessage);

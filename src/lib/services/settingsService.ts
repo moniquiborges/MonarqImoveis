@@ -1,5 +1,80 @@
 import { createClient as createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { siteConfig } from "@/lib/site-config";
+
+export interface ResolvedSiteConfig {
+  name: string;
+  tagline: string;
+  secondaryTagline: string;
+  manifesto: string;
+  address: string;
+  whatsappNumber: string;
+  whatsappDisplay: string;
+  contactEmail: string;
+  contactPhone: string;
+  phoneScDisplay: string;
+  phoneMsDisplay: string;
+  cnpj: string;
+  instagramUrl: string;
+  instagramHandle: string;
+  facebookUrl: string;
+}
+
+const DEFAULT_SITE_CONFIG: ResolvedSiteConfig = { ...siteConfig };
+
+/**
+ * Campos editáveis em /admin/configuracoes. Os demais campos de
+ * ResolvedSiteConfig (address, instagramHandle, etc.) não têm campo no
+ * formulário e sempre vêm do padrão estático.
+ */
+type EditableSiteConfigFields = Pick<
+  ResolvedSiteConfig,
+  | "name"
+  | "tagline"
+  | "whatsappNumber"
+  | "whatsappDisplay"
+  | "contactEmail"
+  | "contactPhone"
+  | "cnpj"
+  | "instagramUrl"
+  | "facebookUrl"
+>;
+
+export async function fetchSiteConfig(): Promise<ResolvedSiteConfig> {
+  if (!isSupabaseConfigured()) {
+    return DEFAULT_SITE_CONFIG;
+  }
+
+  try {
+    const supabase = createBrowserSupabaseClient();
+    const { data, error } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "site_config")
+      .maybeSingle();
+
+    if (error || !data) {
+      return DEFAULT_SITE_CONFIG;
+    }
+
+    const saved = data.value as Partial<EditableSiteConfigFields>;
+    return {
+      ...DEFAULT_SITE_CONFIG,
+      name: saved.name?.trim() || DEFAULT_SITE_CONFIG.name,
+      tagline: saved.tagline?.trim() || DEFAULT_SITE_CONFIG.tagline,
+      whatsappNumber: saved.whatsappNumber?.trim() || DEFAULT_SITE_CONFIG.whatsappNumber,
+      whatsappDisplay: saved.whatsappDisplay?.trim() || DEFAULT_SITE_CONFIG.whatsappDisplay,
+      contactEmail: saved.contactEmail?.trim() || DEFAULT_SITE_CONFIG.contactEmail,
+      contactPhone: saved.contactPhone?.trim() || DEFAULT_SITE_CONFIG.contactPhone,
+      cnpj: saved.cnpj?.trim() || DEFAULT_SITE_CONFIG.cnpj,
+      instagramUrl: saved.instagramUrl?.trim() || DEFAULT_SITE_CONFIG.instagramUrl,
+      facebookUrl: saved.facebookUrl?.trim() || DEFAULT_SITE_CONFIG.facebookUrl,
+    };
+  } catch (err) {
+    console.error("Erro ao buscar configurações institucionais do Supabase:", err);
+    return DEFAULT_SITE_CONFIG;
+  }
+}
 
 export interface AnalyticsSettings {
   gtmId: string;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { siteConfig, buildWhatsappUrl } from "@/lib/site-config";
+import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { submitContactLead } from "./actions";
 import { FacebookIcon, InstagramIcon } from "@/components/ui/SocialIcons";
 import {
@@ -30,6 +30,7 @@ export default function ContatoPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const { config: siteConfig, buildWhatsappUrl } = useSiteConfig();
 
   const whatsappDirectUrl = buildWhatsappUrl("Olá! Gostaria de falar com um consultor da MONARQ.");
 

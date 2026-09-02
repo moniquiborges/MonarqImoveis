@@ -6,11 +6,12 @@ import Link from "next/link";
 import { X, Trash2, Heart, MessageCircle, ArrowRight, Layers } from "lucide-react";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { formatBRL } from "@/lib/utils";
-import { buildWhatsappUrl } from "@/lib/site-config";
+import { useSiteConfig } from "@/contexts/SiteConfigContext";
 
 export function FavoritesDrawer() {
   const { favorites, isDrawerOpen, setIsDrawerOpen, removeFavorite, clearFavorites } =
     useFavorites();
+  const { buildWhatsappUrl } = useSiteConfig();
 
   useEffect(() => {
     if (isDrawerOpen) {
