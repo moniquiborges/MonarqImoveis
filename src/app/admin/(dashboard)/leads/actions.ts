@@ -85,3 +85,23 @@ export async function updateLeadStatus(
   revalidatePath("/admin/leads");
   return { success: true };
 }
+
+export interface DeleteLeadResult {
+  success: boolean;
+  error?: string;
+}
+
+export async function deleteLead(id: string): Promise<DeleteLeadResult> {
+  const staff = await requireStaff();
+  if (!staff) return { success: false, error: "Não autorizado." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("leads").delete().eq("id", id);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/admin/leads");
+  return { success: true };
+}

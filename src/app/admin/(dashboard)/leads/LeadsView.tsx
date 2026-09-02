@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search, MessageCircle, Calendar } from "lucide-react";
-import { updateLeadStatus, type LeadListItem } from "./actions";
+import { Search, MessageCircle, Calendar, Trash2 } from "lucide-react";
+import { deleteLead, updateLeadStatus, type LeadListItem } from "./actions";
 import type { LeadStatusDb, LeadTypeDb } from "@/types/database";
 
 interface LeadsViewProps {
@@ -63,6 +63,20 @@ export function LeadsView({ initialLeads, initialError }: LeadsViewProps) {
         router.refresh();
       } else {
         setActionError(result.error ?? "Não foi possível atualizar o status.");
+      }
+    });
+  };
+
+  const handleDelete = (lead: LeadListItem) => {
+    if (!confirm(`Tem certeza que deseja excluir o lead de "${lead.name}"?`)) return;
+
+    setActionError(null);
+    startTransition(async () => {
+      const result = await deleteLead(lead.id);
+      if (result.success) {
+        router.refresh();
+      } else {
+        setActionError(result.error ?? "Não foi possível excluir o lead.");
       }
     });
   };
@@ -254,17 +268,28 @@ export function LeadsView({ initialLeads, initialError }: LeadsViewProps) {
                       </td>
 
                       <td className="p-4 text-right">
-                        <a
-                          href={`https://wa.me/55${lead.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                            `Olá ${lead.name}, sou da MONARQ Imóveis. Recebi seu contato.`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="focus-ring inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xs bg-[#25D366] text-white hover:brightness-105 transition-all font-semibold text-xs shadow-xs"
-                        >
-                          <MessageCircle className="h-3.5 w-3.5 fill-current" />
-                          WhatsApp
-                        </a>
+                        <div className="inline-flex items-center gap-2">
+                          <a
+                            href={`https://wa.me/55${lead.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                              `Olá ${lead.name}, sou da MONARQ Imóveis. Recebi seu contato.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="focus-ring inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xs bg-[#25D366] text-white hover:brightness-105 transition-all font-semibold text-xs shadow-xs"
+                          >
+                            <MessageCircle className="h-3.5 w-3.5 fill-current" />
+                            WhatsApp
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(lead)}
+                            disabled={isPending}
+                            title="Excluir lead"
+                            className="rounded-xs p-1.5 text-graphite/40 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer disabled:opacity-40"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
