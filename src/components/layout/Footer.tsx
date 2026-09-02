@@ -34,11 +34,11 @@ export function Footer() {
       <Container className="grid grid-cols-1 gap-12 py-16 md:grid-cols-2 lg:grid-cols-4">
         <div className="flex flex-col gap-4">
           <Image
-            src="/brand/monarq-logo-vertical.jpg"
+            src="/brand/monarq-logo-white.png"
             alt="MONARQ Imóveis & Investimentos"
-            width={140}
-            height={105}
-            className="h-auto w-32 rounded-sm"
+            width={160}
+            height={94}
+            className="h-auto w-36"
           />
           <p className="text-[13px] leading-relaxed text-offwhite/60">{siteConfig.tagline}</p>
           {socialLinks.length > 0 ? (

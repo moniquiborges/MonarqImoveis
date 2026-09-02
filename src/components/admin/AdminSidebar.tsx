@@ -13,11 +13,11 @@ export function AdminSidebar() {
     <aside className="hidden w-64 shrink-0 flex-col border-r border-offwhite/10 bg-graphite text-offwhite lg:flex">
       <div className="flex items-center gap-3 border-b border-offwhite/10 px-6 py-6">
         <Image
-          src="/brand/monarq-logo-vertical.jpg"
+          src="/brand/monarq-symbol.png"
           alt="MONARQ"
-          width={40}
-          height={30}
-          className="h-8 w-auto rounded-sm"
+          width={32}
+          height={32}
+          className="h-8 w-8 object-contain"
         />
         <span className="text-[12px] font-medium uppercase tracking-[0.15em] text-areia">Admin</span>
       </div>
