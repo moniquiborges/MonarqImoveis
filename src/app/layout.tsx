@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { AnalyticsScripts } from "@/components/layout/AnalyticsScripts";
+import { fetchAnalyticsSettings } from "@/lib/services/settingsService";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -96,10 +98,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const analytics = await fetchAnalyticsSettings();
+
   return (
     <html lang="pt-BR" className={`${fraunces.variable} ${manrope.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        <AnalyticsScripts settings={analytics} />
         {children}
         <SpeedInsights />
       </body>
