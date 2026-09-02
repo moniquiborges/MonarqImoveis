@@ -22,6 +22,12 @@ export interface PropertyImage {
   alt: string;
 }
 
+export interface PropertyVideo {
+  url: string;
+  kind: "upload" | "external";
+  alt?: string;
+}
+
 export interface Development {
   slug: string;
   code?: string;
@@ -43,6 +49,7 @@ export interface Development {
   badges: PropertyBadge[];
   coverImage: PropertyImage;
   gallery: PropertyImage[];
+  videos?: PropertyVideo[];
   description?: string;
   features?: string[];
   leisureArea?: number;
@@ -64,6 +71,7 @@ export interface UrbanProperty {
   badges: PropertyBadge[];
   coverImage: PropertyImage;
   gallery: PropertyImage[];
+  videos?: PropertyVideo[];
   description?: string;
   features?: string[];
 }
@@ -104,6 +112,7 @@ export interface RuralProperty {
   badges: PropertyBadge[];
   coverImage: PropertyImage;
   gallery: PropertyImage[];
+  videos?: PropertyVideo[];
   description?: string;
   features?: string[];
 }

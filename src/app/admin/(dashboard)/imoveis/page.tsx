@@ -46,6 +46,7 @@ import {
 } from "@/lib/services/propertyService";
 import { CurrencyInput } from "@/components/admin/CurrencyInput";
 import { ImageUpload, ImageData } from "@/components/admin/ImageUpload";
+import { VideoUpload, VideoData } from "@/components/admin/VideoUpload";
 import type { UrbanProperty, Development, ScCity, DevelopmentStage } from "@/types";
 
 interface UnifiedPropertyItem {
@@ -67,6 +68,7 @@ interface UnifiedPropertyItem {
   leisureArea?: number;
   coverImage: ImageData;
   gallery: ImageData[];
+  videos?: VideoData[];
   stage?: DevelopmentStage;
   distanceToSea?: string;
   deliveryDate?: string;
@@ -135,6 +137,7 @@ export default function AdminImoveisPage() {
     leisureArea: string | number;
     coverImage: ImageData;
     gallery: ImageData[];
+    videos: VideoData[];
   }>({
     state: "SC",
     code: "MRQ-U101",
@@ -160,6 +163,7 @@ export default function AdminImoveisPage() {
       alt: "",
     },
     gallery: [],
+    videos: [],
   });
 
   // Converte a lista unificada de itens
@@ -183,6 +187,7 @@ export default function AdminImoveisPage() {
       leisureArea: dev.leisureArea,
       coverImage: dev.coverImage || { url: "", alt: dev.name },
       gallery: dev.gallery || [],
+      videos: dev.videos || [],
       stage: dev.stage,
       distanceToSea: dev.distanceToSea,
       deliveryDate: dev.deliveryDate,
@@ -210,6 +215,7 @@ export default function AdminImoveisPage() {
       leisureArea: urban.leisureArea,
       coverImage: urban.coverImage || { url: "", alt: urban.title },
       gallery: urban.gallery || [],
+      videos: urban.videos || [],
       description: urban.description || "",
       features: urban.features || [],
       siteUrl: `/imoveis/campo-grande/${urban.slug}`,
@@ -351,6 +357,7 @@ export default function AdminImoveisPage() {
         alt: "",
       },
       gallery: [],
+      videos: [],
     });
     setFeatureInput("");
     setModalOpen(true);
@@ -380,6 +387,7 @@ export default function AdminImoveisPage() {
       leisureArea: item.leisureArea || "",
       coverImage: item.coverImage,
       gallery: item.gallery,
+      videos: item.videos || [],
     });
     setFeatureInput("");
     setModalOpen(true);
@@ -460,6 +468,7 @@ export default function AdminImoveisPage() {
                   url: g.url,
                   alt: g.alt || formData.title,
                 })),
+                videos: formData.videos,
               };
             }
             return dev;
@@ -494,6 +503,7 @@ export default function AdminImoveisPage() {
               url: g.url,
               alt: g.alt || formData.title,
             })),
+            videos: formData.videos,
           };
           updatedDevs = [newDev, ...devItems];
         }
@@ -537,6 +547,7 @@ export default function AdminImoveisPage() {
                   url: g.url,
                   alt: g.alt || formData.title,
                 })),
+                videos: formData.videos,
               };
             }
             return item;
@@ -566,6 +577,7 @@ export default function AdminImoveisPage() {
               url: g.url,
               alt: g.alt || formData.title,
             })),
+            videos: formData.videos,
           };
           updatedUrban = [newUrban, ...urbanItems];
         }
@@ -950,6 +962,14 @@ export default function AdminImoveisPage() {
                   }))
                 }
                 allowGallery={true}
+              />
+
+              {/* Vídeos do Imóvel */}
+              <VideoUpload
+                label="Vídeos do Imóvel"
+                helperText="Envie um arquivo de vídeo ou cole um link (YouTube, Vimeo ou link direto)."
+                videos={formData.videos}
+                onChange={(videos) => setFormData((prev) => ({ ...prev, videos }))}
               />
 
               {/* Campos Específicos para Santa Catarina (SC) */}

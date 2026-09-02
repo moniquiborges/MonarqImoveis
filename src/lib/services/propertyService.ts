@@ -4,7 +4,7 @@ import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockDevelopments } from "@/lib/mock/developments";
 import { mockRuralProperties } from "@/lib/mock/rural";
 import { mockImages } from "@/lib/mock/images";
-import type { UrbanProperty, Development, RuralProperty, PropertyImage, ScCity, DevelopmentStage, RuralActivity } from "@/types";
+import type { UrbanProperty, Development, RuralProperty, PropertyImage, PropertyVideo, ScCity, DevelopmentStage, RuralActivity } from "@/types";
 
 /* =========================================================================
    URBAN PROPERTIES (Campo Grande / MS)
@@ -41,6 +41,19 @@ export async function fetchUrbanProperties(): Promise<UrbanProperty[]> {
       imageMap.set(img.entity_id, list);
     });
 
+    const { data: videos } = await supabase
+      .from("property_videos")
+      .select("*")
+      .eq("entity_type", "urban_property")
+      .order("position", { ascending: true });
+
+    const videoMap = new Map<string, PropertyVideo[]>();
+    (videos || []).forEach((vid: any) => {
+      const list = videoMap.get(vid.entity_id) || [];
+      list.push({ url: vid.url, kind: vid.kind, alt: vid.alt || "" });
+      videoMap.set(vid.entity_id, list);
+    });
+
     return urbanRows.map((row: any) => {
       const propImgs = imageMap.get(row.id) || [];
       const coverImage = propImgs[0] || { url: mockImages.livingRoom1, alt: row.title };
@@ -62,6 +75,7 @@ export async function fetchUrbanProperties(): Promise<UrbanProperty[]> {
         badges: row.badges || ["novo", "alto-padrao"],
         coverImage,
         gallery,
+        videos: videoMap.get(row.id) || [],
         description: row.description || undefined,
         features: row.features || [],
       };
@@ -109,6 +123,18 @@ export async function fetchUrbanPropertyBySlug(slugOrCode: string): Promise<Urba
     const coverImage = propImgs[0] || { url: mockImages.livingRoom1, alt: row.title };
     const gallery = propImgs.slice(1);
 
+    const { data: videos } = await supabase
+      .from("property_videos")
+      .select("*")
+      .eq("entity_id", row.id)
+      .order("position", { ascending: true });
+
+    const propVideos: PropertyVideo[] = (videos || []).map((vid: any) => ({
+      url: vid.url,
+      kind: vid.kind,
+      alt: vid.alt || row.title,
+    }));
+
     return {
       slug: row.slug,
       code: row.code,
@@ -125,6 +151,7 @@ export async function fetchUrbanPropertyBySlug(slugOrCode: string): Promise<Urba
       badges: row.badges || ["novo", "alto-padrao"],
       coverImage,
       gallery,
+      videos: propVideos,
       description: row.description || undefined,
       features: row.features || [],
     };
@@ -200,6 +227,19 @@ export async function fetchDevelopments(): Promise<Development[]> {
       imageMap.set(img.entity_id, list);
     });
 
+    const { data: videos } = await supabase
+      .from("property_videos")
+      .select("*")
+      .eq("entity_type", "development")
+      .order("position", { ascending: true });
+
+    const videoMap = new Map<string, PropertyVideo[]>();
+    (videos || []).forEach((vid: any) => {
+      const list = videoMap.get(vid.entity_id) || [];
+      list.push({ url: vid.url, kind: vid.kind, alt: vid.alt || "" });
+      videoMap.set(vid.entity_id, list);
+    });
+
     const cityLabels: Record<string, string> = {
       "porto-belo": "Porto Belo",
       itapema: "Itapema",
@@ -240,6 +280,7 @@ export async function fetchDevelopments(): Promise<Development[]> {
         badges: row.badges || ["lancamento", "alto-padrao"],
         coverImage,
         gallery,
+        videos: videoMap.get(row.id) || [],
         description: row.description || undefined,
         features: row.amenities || row.features || [],
       };
@@ -281,6 +322,18 @@ export async function fetchDevelopmentBySlug(slug: string): Promise<Development 
     const coverImage = propImgs[0] || { url: mockImages.coastalHouse1, alt: row.name };
     const gallery = propImgs.slice(1);
 
+    const { data: videos } = await supabase
+      .from("property_videos")
+      .select("*")
+      .eq("entity_id", row.id)
+      .order("position", { ascending: true });
+
+    const propVideos: PropertyVideo[] = (videos || []).map((vid: any) => ({
+      url: vid.url,
+      kind: vid.kind,
+      alt: vid.alt || row.name,
+    }));
+
     const cityLabels: Record<string, string> = {
       "porto-belo": "Porto Belo",
       itapema: "Itapema",
@@ -317,6 +370,7 @@ export async function fetchDevelopmentBySlug(slug: string): Promise<Development 
       badges: row.badges || ["lancamento", "alto-padrao"],
       coverImage,
       gallery,
+      videos: propVideos,
       features: row.amenities || row.features || [],
     };
   } catch (err) {
@@ -389,6 +443,19 @@ export async function fetchRuralProperties(): Promise<RuralProperty[]> {
       imageMap.set(img.entity_id, list);
     });
 
+    const { data: videos } = await supabase
+      .from("property_videos")
+      .select("*")
+      .eq("entity_type", "rural_property")
+      .order("position", { ascending: true });
+
+    const videoMap = new Map<string, PropertyVideo[]>();
+    (videos || []).forEach((vid: any) => {
+      const list = videoMap.get(vid.entity_id) || [];
+      list.push({ url: vid.url, kind: vid.kind, alt: vid.alt || "" });
+      videoMap.set(vid.entity_id, list);
+    });
+
     return ruralRows.map((row: any) => {
       const propImgs = imageMap.get(row.id) || [];
       const coverImage = propImgs[0] || { url: mockImages.ruralLandscape1, alt: row.title };
@@ -407,6 +474,7 @@ export async function fetchRuralProperties(): Promise<RuralProperty[]> {
         badges: row.badges || ["oportunidade"],
         coverImage,
         gallery,
+        videos: videoMap.get(row.id) || [],
         description: row.description || undefined,
         features: row.water_sources || row.features || [],
       };
@@ -454,6 +522,18 @@ export async function fetchRuralPropertyBySlug(slugOrCode: string): Promise<Rura
     const coverImage = propImgs[0] || { url: mockImages.ruralLandscape1, alt: row.title };
     const gallery = propImgs.slice(1);
 
+    const { data: videos } = await supabase
+      .from("property_videos")
+      .select("*")
+      .eq("entity_id", row.id)
+      .order("position", { ascending: true });
+
+    const propVideos: PropertyVideo[] = (videos || []).map((vid: any) => ({
+      url: vid.url,
+      kind: vid.kind,
+      alt: vid.alt || row.title,
+    }));
+
     return {
       slug: row.slug,
       code: row.code,
@@ -467,6 +547,7 @@ export async function fetchRuralPropertyBySlug(slugOrCode: string): Promise<Rura
       badges: row.badges || ["oportunidade"],
       coverImage,
       gallery,
+      videos: propVideos,
       description: row.description || undefined,
       features: row.water_sources || row.features || [],
     };

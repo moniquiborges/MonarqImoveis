@@ -196,6 +196,19 @@ export type PropertyImageRow = {
   created_at: string;
 };
 
+export type PropertyVideoKind = "upload" | "external";
+
+export type PropertyVideoRow = {
+  id: string;
+  entity_type: ImageEntityType;
+  entity_id: string;
+  kind: PropertyVideoKind;
+  url: string;
+  alt: string;
+  position: number;
+  created_at: string;
+};
+
 export type BlogCategoryRow = {
   id: string;
   slug: string;
@@ -281,6 +294,7 @@ export type Database = {
       urban_properties: TableDef<UrbanPropertyRow>;
       rural_properties: TableDef<RuralPropertyRow>;
       property_images: TableDef<PropertyImageRow>;
+      property_videos: TableDef<PropertyVideoRow>;
       blog_categories: TableDef<BlogCategoryRow>;
       blog_posts: TableDef<BlogPostRow>;
       leads: TableDef<LeadRow>;

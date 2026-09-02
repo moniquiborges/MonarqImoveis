@@ -35,6 +35,7 @@ import {
 } from "@/lib/services/propertyService";
 import { CurrencyInput } from "@/components/admin/CurrencyInput";
 import { ImageUpload, ImageData } from "@/components/admin/ImageUpload";
+import { VideoUpload, VideoData } from "@/components/admin/VideoUpload";
 import type { Development, ScCity, DevelopmentStage } from "@/types";
 
 export default function AdminEmpreendimentosPage() {
@@ -80,6 +81,7 @@ export default function AdminEmpreendimentosPage() {
     distanceToSea: string;
     coverImage: ImageData;
     gallery: ImageData[];
+    videos: VideoData[];
   }>({
     code: "MRQ-SC101",
     name: "",
@@ -102,6 +104,7 @@ export default function AdminEmpreendimentosPage() {
       alt: "",
     },
     gallery: [],
+    videos: [],
   });
 
   const showToast = (msg: string) => {
@@ -221,6 +224,7 @@ export default function AdminEmpreendimentosPage() {
         alt: "",
       },
       gallery: [],
+      videos: [],
     });
     setFeatureInput("");
     setModalOpen(true);
@@ -247,6 +251,7 @@ export default function AdminEmpreendimentosPage() {
       distanceToSea: dev.distanceToSea || "",
       coverImage: dev.coverImage || { url: "", alt: dev.name },
       gallery: dev.gallery || [],
+      videos: dev.videos || [],
     });
     setFeatureInput("");
     setModalOpen(true);
@@ -339,6 +344,7 @@ export default function AdminEmpreendimentosPage() {
                 url: g.url,
                 alt: g.alt || formData.name,
               })),
+              videos: formData.videos,
             };
           }
           return item;
@@ -372,6 +378,7 @@ export default function AdminEmpreendimentosPage() {
             url: g.url,
             alt: g.alt || formData.name,
           })),
+          videos: formData.videos,
         };
 
         updated = [created, ...items];
@@ -655,6 +662,14 @@ export default function AdminEmpreendimentosPage() {
                   }))
                 }
                 allowGallery={true}
+              />
+
+              {/* Vídeos do Empreendimento */}
+              <VideoUpload
+                label="Vídeos do Empreendimento"
+                helperText="Envie um arquivo de vídeo ou cole um link (YouTube, Vimeo ou link direto)."
+                videos={formData.videos}
+                onChange={(videos) => setFormData((prev) => ({ ...prev, videos }))}
               />
 
               {/* Localização & Estágio */}

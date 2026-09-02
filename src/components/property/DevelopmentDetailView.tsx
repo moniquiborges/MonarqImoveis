@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Badge } from "@/components/ui/Badge";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
+import { PropertyVideos } from "@/components/property/PropertyVideos";
 import { LeadContactCard } from "@/components/property/LeadContactCard";
 import { SimilarProperties } from "@/components/property/SimilarProperties";
 import { developmentToCard } from "@/components/property/adapters";
@@ -156,6 +157,8 @@ export function DevelopmentDetailView({
           gallery={development.gallery}
           title={development.name}
         />
+
+        <PropertyVideos videos={development.videos} title={development.name} />
 
         {/* Grade Principal de Conteúdo e Conversão */}
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">

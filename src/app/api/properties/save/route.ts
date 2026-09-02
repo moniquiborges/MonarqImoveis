@@ -76,6 +76,23 @@ export async function POST(req: Request) {
         await supabase.from("property_images").insert(imageInserts);
       }
 
+      await supabase.from("property_videos").delete().eq("entity_id", entityId);
+
+      const videoInserts = (prop.videos || [])
+        .filter((v) => v.url && v.url.trim() !== "")
+        .map((v, idx) => ({
+          entity_type: "urban_property",
+          entity_id: entityId,
+          kind: v.kind,
+          url: v.url,
+          alt: v.alt || prop.title,
+          position: idx,
+        }));
+
+      if (videoInserts.length > 0) {
+        await supabase.from("property_videos").insert(videoInserts);
+      }
+
       revalidatePath("/imoveis/campo-grande");
       revalidatePath(`/imoveis/campo-grande/${prop.slug}`);
       revalidatePath(`/i/${prop.code}`);
@@ -150,6 +167,23 @@ export async function POST(req: Request) {
         await supabase.from("property_images").insert(imageInserts);
       }
 
+      await supabase.from("property_videos").delete().eq("entity_id", entityId);
+
+      const videoInserts = (dev.videos || [])
+        .filter((v) => v.url && v.url.trim() !== "")
+        .map((v, idx) => ({
+          entity_type: "development",
+          entity_id: entityId,
+          kind: v.kind,
+          url: v.url,
+          alt: v.alt || dev.name,
+          position: idx,
+        }));
+
+      if (videoInserts.length > 0) {
+        await supabase.from("property_videos").insert(videoInserts);
+      }
+
       revalidatePath("/empreendimentos");
       revalidatePath(`/empreendimentos/${dev.city}`);
       revalidatePath(`/empreendimentos/${dev.city}/${dev.slug}`);
@@ -215,6 +249,23 @@ export async function POST(req: Request) {
 
       if (imageInserts.length > 0) {
         await supabase.from("property_images").insert(imageInserts);
+      }
+
+      await supabase.from("property_videos").delete().eq("entity_id", entityId);
+
+      const videoInserts = (rural.videos || [])
+        .filter((v) => v.url && v.url.trim() !== "")
+        .map((v, idx) => ({
+          entity_type: "rural_property",
+          entity_id: entityId,
+          kind: v.kind,
+          url: v.url,
+          alt: v.alt || rural.title,
+          position: idx,
+        }));
+
+      if (videoInserts.length > 0) {
+        await supabase.from("property_videos").insert(videoInserts);
       }
 
       revalidatePath("/rural");

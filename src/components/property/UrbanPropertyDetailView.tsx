@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Badge } from "@/components/ui/Badge";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
+import { PropertyVideos } from "@/components/property/PropertyVideos";
 import { LeadContactCard } from "@/components/property/LeadContactCard";
 import { SimilarProperties } from "@/components/property/SimilarProperties";
 import { urbanPropertyToCard } from "@/components/property/adapters";
@@ -143,6 +144,8 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
           gallery={property.gallery}
           title={property.title}
         />
+
+        <PropertyVideos videos={property.videos} title={property.title} />
 
         {/* Conteúdo Principal e Lead */}
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">

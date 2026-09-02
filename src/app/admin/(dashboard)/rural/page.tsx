@@ -34,6 +34,7 @@ import {
 } from "@/lib/services/propertyService";
 import { CurrencyInput } from "@/components/admin/CurrencyInput";
 import { ImageUpload, ImageData } from "@/components/admin/ImageUpload";
+import { VideoUpload, VideoData } from "@/components/admin/VideoUpload";
 import type { RuralProperty, RuralActivity, RuralState } from "@/types";
 
 export default function AdminRuralPage() {
@@ -73,6 +74,7 @@ export default function AdminRuralPage() {
     features: string[];
     coverImage: ImageData;
     gallery: ImageData[];
+    videos: VideoData[];
   }>({
     code: "MRQ-R201",
     title: "",
@@ -88,6 +90,7 @@ export default function AdminRuralPage() {
       alt: "",
     },
     gallery: [],
+    videos: [],
   });
 
   const showToast = (msg: string) => {
@@ -199,6 +202,7 @@ export default function AdminRuralPage() {
         alt: "",
       },
       gallery: [],
+      videos: [],
     });
     setFeatureInput("");
     setModalOpen(true);
@@ -218,6 +222,7 @@ export default function AdminRuralPage() {
       features: prop.features || [],
       coverImage: prop.coverImage || { url: "", alt: prop.title },
       gallery: prop.gallery || [],
+      videos: prop.videos || [],
     });
     setFeatureInput("");
     setModalOpen(true);
@@ -271,6 +276,7 @@ export default function AdminRuralPage() {
                 url: g.url,
                 alt: g.alt || formData.title,
               })),
+              videos: formData.videos,
             };
           }
           return item;
@@ -297,6 +303,7 @@ export default function AdminRuralPage() {
             url: g.url,
             alt: g.alt || formData.title,
           })),
+          videos: formData.videos,
         };
 
         updated = [created, ...items];
@@ -618,6 +625,14 @@ export default function AdminRuralPage() {
                   }))
                 }
                 allowGallery={true}
+              />
+
+              {/* Vídeos da Propriedade Rural */}
+              <VideoUpload
+                label="Vídeos da Propriedade Rural"
+                helperText="Envie um arquivo de vídeo ou cole um link (YouTube, Vimeo ou link direto)."
+                videos={formData.videos}
+                onChange={(videos) => setFormData((prev) => ({ ...prev, videos }))}
               />
 
               {/* Estado e Município */}
