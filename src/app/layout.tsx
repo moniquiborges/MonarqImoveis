@@ -74,6 +74,15 @@ export const metadata: Metadata = {
     description:
       "Curadoria imobiliária de alto padrão em Santa Catarina, Campo Grande e agronegócio.",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", type: "image/png" },
+    ],
+  },
   robots: {
     index: true,
     follow: true,
