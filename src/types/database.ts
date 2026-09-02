@@ -32,6 +32,7 @@ export type LeadInterestDb =
   | "investimento";
 export type LeadStatusDb = "novo" | "contatado" | "qualificado" | "negociacao" | "convertido" | "perdido";
 export type LeadTypeDb = "compra" | "venda";
+export type BannerLocationDb = "hero" | "destaque-sc" | "campo-grande" | "rural";
 
 type Timestamps = {
   created_at: string;
@@ -251,6 +252,18 @@ export type SettingRow = {
   updated_at: string;
 };
 
+export type BannerRow = Timestamps & {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  location: BannerLocationDb;
+  image_url: string | null;
+  cta_text: string | null;
+  cta_link: string | null;
+  active: boolean;
+  display_order: number;
+};
+
 type TableDef<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row;
   Insert: Insert;
@@ -273,6 +286,7 @@ export type Database = {
       leads: TableDef<LeadRow>;
       favorites: TableDef<FavoriteRow>;
       settings: TableDef<SettingRow>;
+      banners: TableDef<BannerRow>;
     };
     Views: {
       [_ in never]: never;
