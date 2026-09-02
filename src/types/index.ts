@@ -115,6 +115,7 @@ export interface BlogPost {
   category: string;
   coverImage: PropertyImage;
   publishedAt: string;
+  content?: string;
 }
 
 export type LeadInterest =

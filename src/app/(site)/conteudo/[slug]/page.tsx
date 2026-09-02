@@ -5,9 +5,14 @@ import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { ButtonLink } from "@/components/ui/Button";
 import { mockBlogPosts } from "@/lib/mock/posts";
-import { Calendar, Clock, ArrowLeft, ArrowRight, UserCheck, Share2, Sparkles } from "lucide-react";
+import { fetchBlogPosts, fetchBlogPostBySlug } from "@/lib/services/blogService";
+import { Calendar, Clock, ArrowLeft, UserCheck, Sparkles } from "lucide-react";
 
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return mockBlogPosts.map((post) => ({
@@ -21,7 +26,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = mockBlogPosts.find((p) => p.slug === slug);
+  const post = await fetchBlogPostBySlug(slug);
 
   if (!post) return {};
 
@@ -49,13 +54,18 @@ export default async function BlogPostDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = mockBlogPosts.find((p) => p.slug === slug);
+  const post = await fetchBlogPostBySlug(slug);
 
   if (!post) {
     notFound();
   }
 
-  const relatedPosts = mockBlogPosts.filter((p) => p.slug !== post.slug);
+  const allPosts = await fetchBlogPosts();
+  const relatedPosts = allPosts.filter((p) => p.slug !== post.slug);
+
+  const bodyParagraphs = post.content
+    ? post.content.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+    : null;
 
   return (
     <main className="py-8 md:py-16">
@@ -139,33 +149,39 @@ export default async function BlogPostDetailPage({
 
           {/* Corpo do Artigo */}
           <div className="prose prose-stone max-w-none text-graphite/80 leading-relaxed space-y-6 text-base md:text-lg">
-            <p>
-              O mercado imobiliário de alto padrão no Brasil vem passando por transformações profundas impulsionadas pela busca por segurança patrimonial, qualidade de vida e liquidez estratégica. Regiões com vocação turística consolidada ou forte tração do agronegócio continuam liderando os índices de valorização real acima da inflação.
-            </p>
+            {bodyParagraphs ? (
+              bodyParagraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)
+            ) : (
+              <>
+                <p>
+                  O mercado imobiliário de alto padrão no Brasil vem passando por transformações profundas impulsionadas pela busca por segurança patrimonial, qualidade de vida e liquidez estratégica. Regiões com vocação turística consolidada ou forte tração do agronegócio continuam liderando os índices de valorização real acima da inflação.
+                </p>
 
-            <h2 className="font-display text-2xl md:text-3xl text-graphite font-medium pt-4">
-              Fundamentos de Valorização e Vetores de Expansão
-            </h2>
+                <h2 className="font-display text-2xl md:text-3xl text-graphite font-medium pt-4">
+                  Fundamentos de Valorização e Vetores de Expansão
+                </h2>
 
-            <p>
-              Ao analisar o comportamento dos compradores nos últimos trimestres, observa-se uma preferência nítida por imóveis com projeto arquitetônico autoral, plantas inteligentes e empreendimentos respaldados por incorporadoras consolidadas e compliance jurídico impecável.
-            </p>
+                <p>
+                  Ao analisar o comportamento dos compradores nos últimos trimestres, observa-se uma preferência nítida por imóveis com projeto arquitetônico autoral, plantas inteligentes e empreendimentos respaldados por incorporadoras consolidadas e compliance jurídico impecável.
+                </p>
 
-            <blockquote className="my-8 border-y border-areia/60 py-6 text-center text-xl md:text-2xl font-display italic text-mineral font-normal leading-snug">
-              &ldquo;Investir em imóveis não é apenas adquirir metros quadrados; é posicionar capital em ativos resilientes capazes de atravessar ciclos econômicos com valorização consistente.&rdquo;
-            </blockquote>
+                <blockquote className="my-8 border-y border-areia/60 py-6 text-center text-xl md:text-2xl font-display italic text-mineral font-normal leading-snug">
+                  &ldquo;Investir em imóveis não é apenas adquirir metros quadrados; é posicionar capital em ativos resilientes capazes de atravessar ciclos econômicos com valorização consistente.&rdquo;
+                </blockquote>
 
-            <h2 className="font-display text-2xl md:text-3xl text-graphite font-medium pt-4">
-              Diretrizes para o Investidor Consciente
-            </h2>
+                <h2 className="font-display text-2xl md:text-3xl text-graphite font-medium pt-4">
+                  Diretrizes para o Investidor Consciente
+                </h2>
 
-            <p>
-              Antes de aportar recursos em novos lançamentos ou áreas rurais, é indispensável a realização de um estudo detalhado de viabilidade, conferência da matrícula imobiliária, análise de custo de oportunidade e clareza sobre o horizonte de retorno pretendido (seja via renda de locação, valorização de capital ou expansão operacional).
-            </p>
+                <p>
+                  Antes de aportar recursos em novos lançamentos ou áreas rurais, é indispensável a realização de um estudo detalhado de viabilidade, conferência da matrícula imobiliária, análise de custo de oportunidade e clareza sobre o horizonte de retorno pretendido (seja via renda de locação, valorização de capital ou expansão operacional).
+                </p>
 
-            <p>
-              A equipe da MONARQ permanece à disposição para conduzir reuniões consultivas individuais, apresentando estudos de mercado customizados para cada perfil de investidor.
-            </p>
+                <p>
+                  A equipe da MONARQ permanece à disposição para conduzir reuniões consultivas individuais, apresentando estudos de mercado customizados para cada perfil de investidor.
+                </p>
+              </>
+            )}
           </div>
 
           {/* Box de CTA Consultivo */}
