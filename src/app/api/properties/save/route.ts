@@ -4,6 +4,38 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireStaff } from "@/lib/supabase/require-staff";
 import type { UrbanProperty, Development, RuralProperty } from "@/types";
 
+// Insere as novas linhas ANTES de apagar as antigas, e só apaga o que não
+// acabou de ser inserido. Assim, se o insert falhar (payload grande, erro de
+// rede, etc.), as fotos/vídeos já salvos nunca são perdidos.
+async function syncEntityRows(
+  supabase: any,
+  table: "property_images" | "property_videos",
+  entityType: string,
+  entityId: string,
+  rows: Record<string, any>[]
+): Promise<string | null> {
+  const { data: inserted, error: insertError } =
+    rows.length > 0
+      ? await supabase.from(table).insert(rows).select("id")
+      : { data: [], error: null };
+
+  if (insertError) {
+    return insertError.message;
+  }
+
+  const keepIds = (inserted || []).map((r: any) => r.id);
+  const deleteQuery = supabase
+    .from(table)
+    .delete()
+    .eq("entity_type", entityType)
+    .eq("entity_id", entityId);
+
+  const { error: deleteError } =
+    keepIds.length > 0 ? await deleteQuery.not("id", "in", `(${keepIds.join(",")})`) : await deleteQuery;
+
+  return deleteError?.message ?? null;
+}
+
 export async function POST(req: Request) {
   const staff = await requireStaff();
   if (!staff) {
@@ -49,7 +81,6 @@ export async function POST(req: Request) {
       }
 
       const entityId = row.id;
-      await supabase.from("property_images").delete().eq("entity_id", entityId);
 
       const allImages = [
         ...(prop.coverImage?.url ? [{ url: prop.coverImage.url, alt: prop.coverImage.alt || prop.title, is_cover: true, position: 0 }] : []),
@@ -72,11 +103,10 @@ export async function POST(req: Request) {
         position: img.position,
       }));
 
-      if (imageInserts.length > 0) {
-        await supabase.from("property_images").insert(imageInserts);
+      const imagesError = await syncEntityRows(supabase, "property_images", "urban_property", entityId, imageInserts);
+      if (imagesError) {
+        return NextResponse.json({ success: false, error: `Falha ao salvar fotos: ${imagesError}` }, { status: 400 });
       }
-
-      await supabase.from("property_videos").delete().eq("entity_id", entityId);
 
       const videoInserts = (prop.videos || [])
         .filter((v) => v.url && v.url.trim() !== "")
@@ -89,8 +119,9 @@ export async function POST(req: Request) {
           position: idx,
         }));
 
-      if (videoInserts.length > 0) {
-        await supabase.from("property_videos").insert(videoInserts);
+      const videosError = await syncEntityRows(supabase, "property_videos", "urban_property", entityId, videoInserts);
+      if (videosError) {
+        return NextResponse.json({ success: false, error: `Falha ao salvar vídeos: ${videosError}` }, { status: 400 });
       }
 
       revalidatePath("/imoveis/campo-grande");
@@ -140,7 +171,6 @@ export async function POST(req: Request) {
       }
 
       const entityId = row.id;
-      await supabase.from("property_images").delete().eq("entity_id", entityId);
 
       const allImages = [
         ...(dev.coverImage?.url ? [{ url: dev.coverImage.url, alt: dev.coverImage.alt || dev.name, is_cover: true, position: 0 }] : []),
@@ -163,11 +193,10 @@ export async function POST(req: Request) {
         position: img.position,
       }));
 
-      if (imageInserts.length > 0) {
-        await supabase.from("property_images").insert(imageInserts);
+      const imagesError = await syncEntityRows(supabase, "property_images", "development", entityId, imageInserts);
+      if (imagesError) {
+        return NextResponse.json({ success: false, error: `Falha ao salvar fotos: ${imagesError}` }, { status: 400 });
       }
-
-      await supabase.from("property_videos").delete().eq("entity_id", entityId);
 
       const videoInserts = (dev.videos || [])
         .filter((v) => v.url && v.url.trim() !== "")
@@ -180,8 +209,9 @@ export async function POST(req: Request) {
           position: idx,
         }));
 
-      if (videoInserts.length > 0) {
-        await supabase.from("property_videos").insert(videoInserts);
+      const videosError = await syncEntityRows(supabase, "property_videos", "development", entityId, videoInserts);
+      if (videosError) {
+        return NextResponse.json({ success: false, error: `Falha ao salvar vídeos: ${videosError}` }, { status: 400 });
       }
 
       revalidatePath("/empreendimentos");
@@ -224,7 +254,6 @@ export async function POST(req: Request) {
       }
 
       const entityId = row.id;
-      await supabase.from("property_images").delete().eq("entity_id", entityId);
 
       const allImages = [
         ...(rural.coverImage?.url ? [{ url: rural.coverImage.url, alt: rural.coverImage.alt || rural.title, is_cover: true, position: 0 }] : []),
@@ -247,11 +276,10 @@ export async function POST(req: Request) {
         position: img.position,
       }));
 
-      if (imageInserts.length > 0) {
-        await supabase.from("property_images").insert(imageInserts);
+      const imagesError = await syncEntityRows(supabase, "property_images", "rural_property", entityId, imageInserts);
+      if (imagesError) {
+        return NextResponse.json({ success: false, error: `Falha ao salvar fotos: ${imagesError}` }, { status: 400 });
       }
-
-      await supabase.from("property_videos").delete().eq("entity_id", entityId);
 
       const videoInserts = (rural.videos || [])
         .filter((v) => v.url && v.url.trim() !== "")
@@ -264,8 +292,9 @@ export async function POST(req: Request) {
           position: idx,
         }));
 
-      if (videoInserts.length > 0) {
-        await supabase.from("property_videos").insert(videoInserts);
+      const videosError = await syncEntityRows(supabase, "property_videos", "rural_property", entityId, videoInserts);
+      if (videosError) {
+        return NextResponse.json({ success: false, error: `Falha ao salvar vídeos: ${videosError}` }, { status: 400 });
       }
 
       revalidatePath("/rural");

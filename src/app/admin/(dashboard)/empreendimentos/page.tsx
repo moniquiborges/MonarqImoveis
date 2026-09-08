@@ -393,6 +393,10 @@ export default function AdminEmpreendimentosPage() {
         const res = await saveDevelopmentToDb(targetDev);
         if (!res.success) {
           console.error("Erro no salvamento Supabase:", res.error);
+          alert(
+            `⚠ O empreendimento foi salvo localmente, mas falhou ao sincronizar com a nuvem (ele não aparecerá no site até isso ser corrigido): ${res.error || "erro desconhecido"}`
+          );
+          return;
         }
       }
 

@@ -515,6 +515,10 @@ export default function AdminImoveisPage() {
           const res = await saveDevelopmentToDb(targetDev);
           if (!res.success) {
             console.error("Erro no salvamento Supabase:", res.error);
+            alert(
+              `⚠ O imóvel foi salvo localmente, mas falhou ao sincronizar com a nuvem (ele não aparecerá no site até isso ser corrigido): ${res.error || "erro desconhecido"}`
+            );
+            return;
           }
         }
         showToast(`✓ Imóvel em Santa Catarina (${cityLabel}) salvo e sincronizado na nuvem!`);
@@ -589,6 +593,10 @@ export default function AdminImoveisPage() {
           const res = await saveUrbanPropertyToDb(targetUrban);
           if (!res.success) {
             console.error("Erro no salvamento Supabase:", res.error);
+            alert(
+              `⚠ O imóvel foi salvo localmente, mas falhou ao sincronizar com a nuvem (ele não aparecerá no site até isso ser corrigido): ${res.error || "erro desconhecido"}`
+            );
+            return;
           }
         }
         showToast("✓ Imóvel em Campo Grande / MS salvo e sincronizado na nuvem!");

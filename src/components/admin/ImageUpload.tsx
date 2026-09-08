@@ -37,12 +37,14 @@ export function ImageUpload({
   onGalleryChange,
   onChangeImages,
   allowGallery = true,
+  category = "general",
   className = "",
 }: ImageUploadProps) {
   const [activeTab, setActiveTab] = useState<"upload" | "url">("upload");
   const [urlInput, setUrlInput] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Monta a lista unificada de todas as fotos presentes no anúncio
@@ -96,8 +98,8 @@ export function ImageUpload({
     }
   };
 
-  // Função para redimensionar e comprimir fotos enviadas pelo usuário
-  const compressImage = (file: File): Promise<string> => {
+  // Redimensiona e comprime a foto no navegador antes do envio (economiza banda e storage)
+  const compressImage = (file: File): Promise<Blob> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -124,36 +126,66 @@ export function ImageUpload({
           const ctx = canvas.getContext("2d");
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL("image/jpeg", 0.78));
+            canvas.toBlob(
+              (blob) => resolve(blob || file),
+              "image/jpeg",
+              0.78
+            );
           } else {
-            resolve(dataUrl);
+            resolve(file);
           }
         };
-        img.onerror = () => resolve(dataUrl);
+        img.onerror = () => resolve(file);
         img.src = dataUrl;
       };
-      reader.onerror = () => resolve("");
+      reader.onerror = () => resolve(file);
       reader.readAsDataURL(file);
     });
   };
 
+  // Envia a foto (já comprimida) para o Supabase Storage e retorna a URL pública
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const compressed = await compressImage(file);
+    const body = new FormData();
+    const uploadName = file.name.replace(/\.[^/.]+$/, ".jpg");
+    body.append("file", compressed, uploadName);
+    body.append("category", category);
+
+    const res = await fetch("/api/media/upload-image", { method: "POST", body });
+    const result = await res.json();
+
+    if (result.success && result.url) {
+      return result.url as string;
+    }
+    throw new Error(result.error || "Falha ao enviar a foto.");
+  };
+
   const handleFiles = async (files: FileList) => {
     setIsProcessing(true);
+    setUploadError(null);
     const newItems: ImageData[] = [];
+    const errors: string[] = [];
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (!file.type.startsWith("image/")) continue;
-      const compressedUrl = await compressImage(file);
-      if (compressedUrl) {
-        newItems.push({
-          url: compressedUrl,
-          alt: file.name.replace(/\.[^/.]+$/, ""),
-        });
+      try {
+        const url = await uploadImage(file);
+        if (url) {
+          newItems.push({
+            url,
+            alt: file.name.replace(/\.[^/.]+$/, ""),
+          });
+        }
+      } catch (err) {
+        errors.push(err instanceof Error ? err.message : "Falha ao enviar a foto.");
       }
     }
 
     addImages(newItems);
+    if (errors.length > 0) {
+      setUploadError(`${errors.length} foto(s) não foram enviadas: ${errors[0]}`);
+    }
     setIsProcessing(false);
   };
 
@@ -295,6 +327,9 @@ export function ImageUpload({
               ? "Você pode selecionar várias fotos de uma vez do computador ou celular (PNG, JPG, WEBP)"
               : "Formatos suportados: PNG, JPG, WEBP"}
           </p>
+          {uploadError && (
+            <p className="text-[11px] text-rose-600 mt-2 font-medium">{uploadError}</p>
+          )}
         </div>
       )}
 

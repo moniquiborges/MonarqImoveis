@@ -318,6 +318,10 @@ export default function AdminRuralPage() {
         const res = await saveRuralPropertyToDb(targetRural);
         if (!res.success) {
           console.error("Erro no salvamento Supabase:", res.error);
+          alert(
+            `⚠ A propriedade foi salva localmente, mas falhou ao sincronizar com a nuvem (ela não aparecerá no site até isso ser corrigido): ${res.error || "erro desconhecido"}`
+          );
+          return;
         }
       }
 
