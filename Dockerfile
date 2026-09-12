@@ -6,7 +6,7 @@ WORKDIR /app
 # Dependências
 FROM base AS deps
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci --include=dev
 
 # Compilação
 FROM base AS builder
