@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, LandPlot } from "lucide-react";
@@ -8,7 +9,8 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ButtonLink } from "@/components/ui/Button";
 import { formatBRL } from "@/lib/utils";
 import { mockRuralProperties } from "@/lib/mock/rural";
-import { getStoredRuralProperties, useLiveStoredData } from "@/lib/storage";
+import { getStoredRuralProperties, saveStoredRuralProperties, useLiveStoredData } from "@/lib/storage";
+import { fetchRuralProperties } from "@/lib/services/propertyService";
 import type { RuralProperty } from "@/types";
 import type { HomeBanner } from "@/lib/services/bannerService";
 
@@ -17,11 +19,20 @@ interface RuralSectionProps {
 }
 
 export function RuralSection({ banner }: RuralSectionProps) {
-  const [ruralProperties] = useLiveStoredData<RuralProperty[]>(
+  const [ruralProperties, setRuralProperties] = useLiveStoredData<RuralProperty[]>(
     getStoredRuralProperties,
     mockRuralProperties,
     "rural"
   );
+
+  useEffect(() => {
+    fetchRuralProperties().then((dbProps) => {
+      if (dbProps && dbProps.length > 0) {
+        setRuralProperties(() => dbProps);
+        saveStoredRuralProperties(dbProps);
+      }
+    });
+  }, [setRuralProperties]);
 
   return (
     <section className="bg-mineral py-24 text-offwhite">

@@ -1,12 +1,16 @@
+export const SUPABASE_COOKIE_NAME = "sb-monarqinvest-auth-token";
+
 export const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  "https://gxnqfrmwjobvgcrdguay.supabase.co";
+  typeof window === "undefined" && process.env.INTERNAL_SUPABASE_URL
+    ? process.env.INTERNAL_SUPABASE_URL
+    : process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      "https://monarqinvest.com.br/supabase";
 
 export const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4bnFmcm13am9idmdjcmRndWF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1ODY2NjcsImV4cCI6MjEwMzE2MjY2N30.tMwscQkJs7RURFfGO2FCOErEbIXNTq8f5vdattsbcUs";
+  "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJpc3MiOiAic3VwYWJhc2UiLCAicmVmIjogImxvY2FsIiwgInJvbGUiOiAiYW5vbiIsICJpYXQiOiAxNzA0MDAwMDAwLCAiZXhwIjogMjAxOTM2MDAwMH0.EeyfF_Jsuy4n2iK1S411vsXzz-lUs1S1GWrujdExco0";
 
 export const SUPABASE_SERVICE_ROLE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4bnFmcm13am9idmdjcmRndWF5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzU4NjY2NywiZXhwIjoyMTAzMTYyNjY3fQ.LdOdqyAPSGZUOghKvLVa2uiCl2UfLHnFDDLcGGtkBgI";
+  "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJpc3MiOiAic3VwYWJhc2UiLCAicmVmIjogImxvY2FsIiwgInJvbGUiOiAic2VydmljZV9yb2xlIiwgImlhdCI6IDE3MDQwMDAwMDAsICJleHAiOiAyMDE5MzYwMDAwfQ.8JYs2MgnSbggAC0oSmsSlb6a5A91xGU78OUXLaQQG3c";

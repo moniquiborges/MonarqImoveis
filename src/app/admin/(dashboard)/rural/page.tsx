@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { mockRuralProperties } from "@/lib/mock/rural";
 import { ruralActivityLabels } from "@/lib/labels";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, normalizeImageUrl, getNextSequentialCode } from "@/lib/utils";
 import {
   getStoredRuralProperties,
   saveStoredRuralProperties,
@@ -76,7 +76,7 @@ export default function AdminRuralPage() {
     gallery: ImageData[];
     videos: VideoData[];
   }>({
-    code: "MRQ-R201",
+    code: "",
     title: "",
     state: "MS",
     municipality: "",
@@ -186,7 +186,7 @@ export default function AdminRuralPage() {
 
   const handleOpenCreate = () => {
     setEditingSlug(null);
-    const nextCode = `MRQ-R${200 + items.length + 1}`;
+    const nextCode = getNextSequentialCode(items, "MRQ-R", 201);
     setFormData({
       code: nextCode,
       title: "",
@@ -211,7 +211,7 @@ export default function AdminRuralPage() {
   const handleOpenEdit = (prop: RuralProperty) => {
     setEditingSlug(prop.slug);
     setFormData({
-      code: prop.code || `MRQ-R${200 + items.findIndex((i) => i.slug === prop.slug) + 1}`,
+      code: prop.code || getNextSequentialCode(items, "MRQ-R", 201),
       title: prop.title,
       state: (prop.state as RuralState) || "MS",
       municipality: prop.municipality,
@@ -242,7 +242,18 @@ export default function AdminRuralPage() {
       const ha = Number(formData.totalHectares) || 1;
       const price = formData.price;
       const pricePerHectare = price ? Math.round(price / ha) : undefined;
-      const code = formData.code.trim().toUpperCase() || `MRQ-R${200 + items.length + 1}`;
+      
+      let code = formData.code.trim().toUpperCase();
+      if (!code) {
+        code = getNextSequentialCode(items, "MRQ-R", 201);
+      } else {
+        const isDuplicate = items.some(
+          (it) => it.code?.toUpperCase() === code && it.slug !== editingSlug
+        );
+        if (isDuplicate) {
+          code = getNextSequentialCode(items, "MRQ-R", 201);
+        }
+      }
 
       const rawSlug =
         formData.title
@@ -430,7 +441,7 @@ export default function AdminRuralPage() {
                         {item.coverImage?.url ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
-                            src={item.coverImage.url}
+                            src={normalizeImageUrl(item.coverImage.url)}
                             alt={item.title}
                             className="h-full w-full object-cover"
                           />

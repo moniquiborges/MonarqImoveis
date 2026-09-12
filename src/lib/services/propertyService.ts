@@ -4,6 +4,7 @@ import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockDevelopments } from "@/lib/mock/developments";
 import { mockRuralProperties } from "@/lib/mock/rural";
 import { mockImages } from "@/lib/mock/images";
+import { normalizeImageUrl, normalizeVideoUrl } from "@/lib/utils";
 import type { UrbanProperty, Development, RuralProperty, PropertyImage, PropertyVideo, ScCity, DevelopmentStage, RuralActivity } from "@/types";
 
 /* =========================================================================
@@ -37,7 +38,7 @@ export async function fetchUrbanProperties(): Promise<UrbanProperty[]> {
     const imageMap = new Map<string, PropertyImage[]>();
     (images || []).forEach((img: any) => {
       const list = imageMap.get(img.entity_id) || [];
-      list.push({ url: img.url, alt: img.alt || "" });
+      list.push({ url: normalizeImageUrl(img.url), alt: img.alt || "" });
       imageMap.set(img.entity_id, list);
     });
 
@@ -116,7 +117,7 @@ export async function fetchUrbanPropertyBySlug(slugOrCode: string): Promise<Urba
       .order("position", { ascending: true });
 
     const propImgs: PropertyImage[] = (images || []).map((img: any) => ({
-      url: img.url,
+      url: normalizeImageUrl(img.url),
       alt: img.alt || row.title,
     }));
 
@@ -223,7 +224,7 @@ export async function fetchDevelopments(): Promise<Development[]> {
     const imageMap = new Map<string, PropertyImage[]>();
     (images || []).forEach((img: any) => {
       const list = imageMap.get(img.entity_id) || [];
-      list.push({ url: img.url, alt: img.alt || "" });
+      list.push({ url: normalizeImageUrl(img.url), alt: img.alt || "" });
       imageMap.set(img.entity_id, list);
     });
 
@@ -315,7 +316,7 @@ export async function fetchDevelopmentBySlug(slug: string): Promise<Development 
       .order("position", { ascending: true });
 
     const propImgs: PropertyImage[] = (images || []).map((img: any) => ({
-      url: img.url,
+      url: normalizeImageUrl(img.url),
       alt: img.alt || row.name,
     }));
 
@@ -439,7 +440,7 @@ export async function fetchRuralProperties(): Promise<RuralProperty[]> {
     const imageMap = new Map<string, PropertyImage[]>();
     (images || []).forEach((img: any) => {
       const list = imageMap.get(img.entity_id) || [];
-      list.push({ url: img.url, alt: img.alt || "" });
+      list.push({ url: normalizeImageUrl(img.url), alt: img.alt || "" });
       imageMap.set(img.entity_id, list);
     });
 
@@ -515,7 +516,7 @@ export async function fetchRuralPropertyBySlug(slugOrCode: string): Promise<Rura
       .order("position", { ascending: true });
 
     const propImgs: PropertyImage[] = (images || []).map((img: any) => ({
-      url: img.url,
+      url: normalizeImageUrl(img.url),
       alt: img.alt || row.title,
     }));
 

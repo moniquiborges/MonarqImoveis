@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -8,7 +9,8 @@ import { PropertyCard } from "@/components/property/PropertyCard";
 import { urbanPropertyToCard } from "@/components/property/adapters";
 import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockImages } from "@/lib/mock/images";
-import { getStoredUrbanProperties, useLiveStoredData } from "@/lib/storage";
+import { getStoredUrbanProperties, saveStoredUrbanProperties, useLiveStoredData } from "@/lib/storage";
+import { fetchUrbanProperties } from "@/lib/services/propertyService";
 import type { UrbanProperty } from "@/types";
 import type { HomeBanner } from "@/lib/services/bannerService";
 
@@ -17,11 +19,20 @@ interface CampoGrandeSectionProps {
 }
 
 export function CampoGrandeSection({ banner }: CampoGrandeSectionProps) {
-  const [properties] = useLiveStoredData<UrbanProperty[]>(
+  const [properties, setProperties] = useLiveStoredData<UrbanProperty[]>(
     getStoredUrbanProperties,
     mockUrbanProperties,
     "urban"
   );
+
+  useEffect(() => {
+    fetchUrbanProperties().then((dbProps) => {
+      if (dbProps && dbProps.length > 0) {
+        setProperties(() => dbProps);
+        saveStoredUrbanProperties(dbProps);
+      }
+    });
+  }, [setProperties]);
 
   return (
     <section className="py-24">

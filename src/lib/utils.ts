@@ -144,3 +144,108 @@ export function formatCompactBRL(value: number): string {
   }
   return formatBRL(value);
 }
+
+/**
+ * Gera um UUID v4 compatível tanto com contextos seguros (HTTPS) quanto não-seguros (HTTP/IP).
+ */
+export function generateUUID(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+/**
+ * Garante que URLs de imagens apontem para o domínio oficial HTTPS da Monarq,
+ * corrigindo referências a IPs legados, kong interno ou protocolos inseguros (HTTP).
+ */
+export function normalizeImageUrl(url?: string | null): string {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  // URLs relativas locais (ex: /brand/..., /images/...)
+  if (trimmed.startsWith("/")) return trimmed;
+
+  // Corrige referências a kong:8000, IP da VPS ou localhost
+  if (
+    trimmed.includes("kong:8000") ||
+    trimmed.includes("143.95.166.167") ||
+    trimmed.includes("localhost") ||
+    trimmed.includes("127.0.0.1")
+  ) {
+    const match = trimmed.match(/storage\/v1\/object\/public\/(.*)/);
+    if (match) {
+      return `https://monarqinvest.com.br/supabase/storage/v1/object/public/${match[1]}`;
+    }
+  }
+
+  // Se for HTTP para monarqinvest.com.br, força HTTPS
+  if (trimmed.startsWith("http://monarqinvest.com.br")) {
+    return trimmed.replace("http://monarqinvest.com.br", "https://monarqinvest.com.br");
+  }
+
+  return trimmed;
+}
+
+/**
+ * Garante que URLs de vídeos apontem para HTTPS ou domínio oficial quando aplicável.
+ */
+export function normalizeVideoUrl(url?: string | null): string {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  if (
+    trimmed.includes("kong:8000") ||
+    trimmed.includes("143.95.166.167") ||
+    trimmed.includes("localhost") ||
+    trimmed.includes("127.0.0.1")
+  ) {
+    const match = trimmed.match(/storage\/v1\/object\/public\/(.*)/);
+    if (match) {
+      return `https://monarqinvest.com.br/supabase/storage/v1/object/public/${match[1]}`;
+    }
+  }
+
+  if (trimmed.startsWith("http://monarqinvest.com.br")) {
+    return trimmed.replace("http://monarqinvest.com.br", "https://monarqinvest.com.br");
+  }
+
+  return trimmed;
+}
+
+/**
+ * Calcula o próximo código disponível para um determinado prefixo garantindo que nunca
+ * colida com códigos existentes (mesmo se houver itens deletados ou números fora de ordem).
+ * Exemplo: se já existem MRQ-R202, MRQ-R203, MRQ-R204, o próximo retornado será MRQ-R205.
+ */
+export function getNextSequentialCode(
+  items: Array<{ code?: string | null } | any>,
+  prefix: string,
+  startNumber: number
+): string {
+  let maxNum = startNumber - 1;
+  const escapedPrefix = prefix.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+  const regex = new RegExp(`^${escapedPrefix}(\\d+)$`, "i");
+
+  for (const item of items) {
+    const rawCode = item?.code;
+    if (typeof rawCode === "string") {
+      const match = rawCode.trim().match(regex);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    }
+  }
+
+  return `${prefix}${maxNum + 1}`;
+}
+

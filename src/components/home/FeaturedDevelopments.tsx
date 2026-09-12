@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -7,7 +8,8 @@ import { ButtonLink } from "@/components/ui/Button";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { developmentToCard } from "@/components/property/adapters";
 import { mockDevelopments } from "@/lib/mock/developments";
-import { getStoredDevelopments, useLiveStoredData } from "@/lib/storage";
+import { getStoredDevelopments, saveStoredDevelopments, useLiveStoredData } from "@/lib/storage";
+import { fetchDevelopments } from "@/lib/services/propertyService";
 import type { Development } from "@/types";
 import type { HomeBanner } from "@/lib/services/bannerService";
 
@@ -16,11 +18,20 @@ interface FeaturedDevelopmentsProps {
 }
 
 export function FeaturedDevelopments({ banner }: FeaturedDevelopmentsProps) {
-  const [developments] = useLiveStoredData<Development[]>(
+  const [developments, setDevelopments] = useLiveStoredData<Development[]>(
     getStoredDevelopments,
     mockDevelopments,
     "developments"
   );
+
+  useEffect(() => {
+    fetchDevelopments().then((dbDevs) => {
+      if (dbDevs && dbDevs.length > 0) {
+        setDevelopments(() => dbDevs);
+        saveStoredDevelopments(dbDevs);
+      }
+    });
+  }, [setDevelopments]);
 
   return (
     <section className="bg-areia/25 py-24">

@@ -300,24 +300,43 @@ export default async function AdminDashboardPage() {
 
           {/* Status do Ambiente */}
           <div className="rounded-sm border border-areia/60 bg-white p-6 shadow-xs text-xs">
-            <h4 className="font-display text-sm font-medium text-graphite mb-2 flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-mineral" />
-              Status do Sistema
-            </h4>
-            <div className="space-y-2 text-graphite/70">
+            <div className="flex items-center justify-between mb-3.5">
+              <h4 className="font-display text-sm font-medium text-graphite flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-emerald-700" />
+                Status do Sistema
+              </h4>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 border border-emerald-200/60">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                VPS Ativa (100% Local)
+              </span>
+            </div>
+
+            <div className="space-y-2.5 text-graphite/70">
+              <div className="flex items-center justify-between">
+                <span>Hospedagem:</span>
+                <span className="font-medium text-graphite">VPS HostGator (NVMe Dedicado)</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Servidor Web & SSL:</span>
+                <span className="font-medium text-graphite">Caddy (Proxy + HTTPS)</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Aplicação:</span>
+                <span className="font-mono text-graphite">Next.js 16 (Standalone)</span>
+              </div>
               <div className="flex items-center justify-between">
                 <span>Banco de Dados:</span>
-                <strong className={configured ? "text-emerald-700" : "text-amber-700"}>
-                  {configured ? "Supabase Conectado" : "Modo Demonstração"}
+                <strong className={configured ? "text-emerald-700 font-medium" : "text-amber-700 font-medium"}>
+                  {configured ? "PostgreSQL 15 (Self-Hosted)" : "Modo Demonstração"}
                 </strong>
               </div>
               <div className="flex items-center justify-between">
-                <span>Versão do Portal:</span>
-                <span className="font-mono text-graphite">v1.0.0 (Next.js 16)</span>
+                <span>Autenticação:</span>
+                <span className="font-medium text-graphite">Supabase GoTrue (JWT Local)</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Armazenamento:</span>
-                <span>4 Buckets Configurados</span>
+                <span className="font-medium text-graphite">Disco NVMe (4 Buckets)</span>
               </div>
             </div>
           </div>

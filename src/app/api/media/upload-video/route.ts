@@ -41,9 +41,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: uploadError.message }, { status: 400 });
     }
 
-    const { data: publicUrlData } = supabase.storage.from("property-videos").getPublicUrl(path);
+    const publicBase = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://monarqinvest.com.br/supabase";
+    const publicUrl = `${publicBase}/storage/v1/object/public/property-videos/${path}`;
 
-    return NextResponse.json({ success: true, url: publicUrlData.publicUrl });
+    return NextResponse.json({ success: true, url: publicUrl });
   } catch (err: any) {
     console.error("Erro na rota /api/media/upload-video:", err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

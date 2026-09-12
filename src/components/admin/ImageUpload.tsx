@@ -9,6 +9,7 @@ import {
   Star,
   Layers,
 } from "lucide-react";
+import { normalizeImageUrl } from "@/lib/utils";
 
 export interface ImageData {
   url: string;
@@ -388,7 +389,7 @@ export function ImageUpload({
                   {/* Imagem */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={img.url}
+                    src={normalizeImageUrl(img.url)}
                     alt={img.alt || `Foto ${i + 1}`}
                     className="h-full w-full object-cover"
                   />

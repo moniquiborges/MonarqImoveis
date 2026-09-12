@@ -1,6 +1,7 @@
 import { createClient as createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { siteConfig } from "@/lib/site-config";
+import { generateUUID } from "@/lib/utils";
 
 export interface SocialLink {
   id: string;
@@ -38,6 +39,7 @@ type EditableSiteConfigFields = Pick<
   ResolvedSiteConfig,
   | "name"
   | "tagline"
+  | "address"
   | "whatsappNumber"
   | "whatsappDisplay"
   | "contactEmail"
@@ -59,7 +61,7 @@ function sanitizeSocialLinks(value: unknown): SocialLink[] {
         typeof (item as SocialLink).url === "string"
     )
     .map((item) => ({
-      id: typeof item.id === "string" && item.id ? item.id : crypto.randomUUID(),
+      id: typeof item.id === "string" && item.id ? item.id : generateUUID(),
       label: (item.label ?? "").trim(),
       url: (item.url ?? "").trim(),
     }))
@@ -88,6 +90,7 @@ export async function fetchSiteConfig(): Promise<ResolvedSiteConfig> {
       ...DEFAULT_SITE_CONFIG,
       name: saved.name?.trim() || DEFAULT_SITE_CONFIG.name,
       tagline: saved.tagline?.trim() || DEFAULT_SITE_CONFIG.tagline,
+      address: saved.address !== undefined ? saved.address.trim() : DEFAULT_SITE_CONFIG.address,
       whatsappNumber: saved.whatsappNumber?.trim() || DEFAULT_SITE_CONFIG.whatsappNumber,
       whatsappDisplay: saved.whatsappDisplay?.trim() || DEFAULT_SITE_CONFIG.whatsappDisplay,
       contactEmail: saved.contactEmail?.trim() || DEFAULT_SITE_CONFIG.contactEmail,

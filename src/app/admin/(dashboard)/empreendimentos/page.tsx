@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { mockDevelopments } from "@/lib/mock/developments";
 import { stageLabels } from "@/lib/labels";
-import { formatBRL, formatArea } from "@/lib/utils";
+import { formatBRL, formatArea, normalizeImageUrl, getNextSequentialCode } from "@/lib/utils";
 import {
   getStoredDevelopments,
   saveStoredDevelopments,
@@ -201,7 +201,7 @@ export default function AdminEmpreendimentosPage() {
 
   const handleOpenCreate = () => {
     setEditingSlug(null);
-    const nextCode = `MRQ-SC${100 + items.length + 1}`;
+    const nextCode = getNextSequentialCode(items, "MRQ-SC", 101);
     setFormData({
       code: nextCode,
       name: "",
@@ -233,7 +233,7 @@ export default function AdminEmpreendimentosPage() {
   const handleOpenEdit = (dev: Development) => {
     setEditingSlug(dev.slug);
     setFormData({
-      code: (dev as any).code || `MRQ-SC${100 + items.findIndex((i) => i.slug === dev.slug) + 1}`,
+      code: (dev as any).code || getNextSequentialCode(items, "MRQ-SC", 101),
       name: dev.name,
       city: dev.city,
       neighborhood: dev.neighborhood || "Perequê",
@@ -284,7 +284,10 @@ export default function AdminEmpreendimentosPage() {
           .replace(/ +/g, "-") || `dev-${Date.now()}`;
 
       let updated: Development[];
-      const code = formData.code.trim().toUpperCase() || `MRQ-SC${100 + items.length + 1}`;
+      let code = formData.code.trim().toUpperCase();
+      if (!code || items.some((it: any) => it.code?.toUpperCase() === code && it.slug !== editingSlug)) {
+        code = getNextSequentialCode(items, "MRQ-SC", 101);
+      }
 
       // Configuração condicional de Dormitórios (Opcional)
       const bMin = formData.bedroomsMin !== "" && formData.bedroomsMin !== null && Number(formData.bedroomsMin) > 0 ? Number(formData.bedroomsMin) : null;
@@ -499,7 +502,7 @@ export default function AdminEmpreendimentosPage() {
                         <div className="relative h-12 w-16 overflow-hidden rounded-xs bg-areia/40 shrink-0 border border-areia/60">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={item.coverImage?.url || "/favicon.ico"}
+                            src={normalizeImageUrl(item.coverImage?.url) || "/favicon.ico"}
                             alt={item.name}
                             className="h-full w-full object-cover"
                           />

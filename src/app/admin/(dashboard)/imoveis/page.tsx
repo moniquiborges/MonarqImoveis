@@ -27,7 +27,7 @@ import {
 import { mockUrbanProperties } from "@/lib/mock/properties";
 import { mockDevelopments } from "@/lib/mock/developments";
 import { mockImages } from "@/lib/mock/images";
-import { formatBRL, formatArea } from "@/lib/utils";
+import { formatBRL, formatArea, normalizeImageUrl, getNextSequentialCode } from "@/lib/utils";
 import { stageLabels } from "@/lib/labels";
 import {
   getStoredUrbanProperties,
@@ -328,8 +328,8 @@ export default function AdminImoveisPage() {
     const selectedState = preselectedState || (stateFilter === "MS" ? "MS" : "SC");
     const nextCode =
       selectedState === "SC"
-        ? `MRQ-SC${100 + devItems.length + 1}`
-        : `MRQ-U${100 + urbanItems.length + 1}`;
+        ? getNextSequentialCode(devItems, "MRQ-SC", 101)
+        : getNextSequentialCode(urbanItems, "MRQ-U", 101);
 
     setEditingItem(null);
     setFormData({
@@ -557,9 +557,14 @@ export default function AdminImoveisPage() {
             return item;
           });
         } else {
+          let code = formData.code.trim().toUpperCase();
+          if (!code || urbanItems.some((it) => it.code?.toUpperCase() === code)) {
+            code = getNextSequentialCode(urbanItems, "MRQ-U", 101);
+          }
+
           const newUrban: UrbanProperty = {
             slug: rawSlug,
-            code: formData.code.trim().toUpperCase() || `MRQ-U${100 + urbanItems.length + 1}`,
+            code,
             title: formData.title,
             type: formData.type,
             neighborhood: formData.neighborhood,
@@ -738,7 +743,7 @@ export default function AdminImoveisPage() {
                       <div className="relative h-12 w-16 overflow-hidden rounded-xs bg-areia/40 shrink-0 border border-areia/60">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={item.coverImage.url}
+                          src={normalizeImageUrl(item.coverImage?.url)}
                           alt={item.title}
                           className="h-full w-full object-cover"
                         />

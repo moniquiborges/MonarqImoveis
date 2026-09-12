@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Images, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { normalizeImageUrl } from "@/lib/utils";
 import type { PropertyImage } from "@/types";
 
 export interface PropertyGalleryProps {
@@ -12,7 +13,15 @@ export interface PropertyGalleryProps {
 }
 
 export function PropertyGallery({ coverImage, gallery, title }: PropertyGalleryProps) {
-  const allImages = [coverImage, ...gallery.filter((img) => img.url !== coverImage.url)];
+  const normCover: PropertyImage = {
+    ...coverImage,
+    url: normalizeImageUrl(coverImage.url),
+  };
+  const normGallery: PropertyImage[] = (gallery || []).map((img) => ({
+    ...img,
+    url: normalizeImageUrl(img.url),
+  }));
+  const allImages = [normCover, ...normGallery.filter((img) => img.url !== normCover.url)];
   const [modalOpen, setModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 

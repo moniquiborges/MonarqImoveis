@@ -1,7 +1,7 @@
 import { BedDouble, Bath, Car, Ruler, LandPlot } from "lucide-react";
 import type { Development, RuralProperty, UrbanProperty } from "@/types";
 import { ruralActivityLabels } from "@/lib/labels";
-import { formatArea } from "@/lib/utils";
+import { formatArea, normalizeImageUrl } from "@/lib/utils";
 import type { PropertyCardProps } from "./PropertyCard";
 
 export function developmentToCard(dev: Development): PropertyCardProps {
@@ -23,7 +23,10 @@ export function developmentToCard(dev: Development): PropertyCardProps {
 
   return {
     href: `/empreendimentos/${dev.city}/${dev.slug}`,
-    image: dev.coverImage,
+    image: {
+      ...dev.coverImage,
+      url: normalizeImageUrl(dev.coverImage?.url),
+    },
     badges: dev.badges,
     title: dev.name,
     location: `${dev.neighborhood ? `${dev.neighborhood}, ` : ""}${dev.cityLabel}`,
@@ -49,7 +52,10 @@ export function urbanPropertyToCard(property: UrbanProperty): PropertyCardProps 
 
   return {
     href: `/imoveis/campo-grande/${property.slug}`,
-    image: property.coverImage,
+    image: {
+      ...property.coverImage,
+      url: normalizeImageUrl(property.coverImage?.url),
+    },
     badges: property.badges,
     title: property.title,
     location: `${property.neighborhood}, ${property.city}`,
@@ -62,7 +68,10 @@ export function urbanPropertyToCard(property: UrbanProperty): PropertyCardProps 
 export function ruralPropertyToCard(property: RuralProperty): PropertyCardProps {
   return {
     href: `/rural/${property.slug}`,
-    image: property.coverImage,
+    image: {
+      ...property.coverImage,
+      url: normalizeImageUrl(property.coverImage?.url),
+    },
     badges: property.badges,
     title: property.title,
     location: `${property.municipality}, ${property.state}`,

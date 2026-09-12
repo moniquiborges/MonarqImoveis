@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireStaff } from "@/lib/supabase/require-staff";
+import { normalizeImageUrl, normalizeVideoUrl, getNextSequentialCode } from "@/lib/utils";
 import type { UrbanProperty, Development, RuralProperty } from "@/types";
 
 // Insere as novas linhas ANTES de apagar as antigas, e só apaga o que não
@@ -50,13 +51,30 @@ export async function POST(req: Request) {
 
     if (type === "urban") {
       const prop = data as UrbanProperty;
+
+      let finalCode = prop.code?.trim().toUpperCase();
+      if (!finalCode) {
+        const { data: existingRows } = await supabase.from("urban_properties").select("code");
+        finalCode = getNextSequentialCode(existingRows || [], "MRQ-U", 101);
+      } else {
+        const { data: conflict } = await supabase
+          .from("urban_properties")
+          .select("id, slug")
+          .eq("code", finalCode)
+          .maybeSingle();
+
+        if (conflict && conflict.slug !== prop.slug) {
+          const { data: allRows } = await supabase.from("urban_properties").select("code");
+          finalCode = getNextSequentialCode(allRows || [], "MRQ-U", 101);
+        }
+      }
       
       const { data: row, error: rowError } = await supabase
         .from("urban_properties")
         .upsert(
           {
             slug: prop.slug,
-            code: prop.code,
+            code: finalCode,
             title: prop.title,
             property_type: prop.type,
             neighborhood: prop.neighborhood,
@@ -97,7 +115,7 @@ export async function POST(req: Request) {
       const imageInserts = allImages.map((img) => ({
         entity_type: "urban_property",
         entity_id: entityId,
-        url: img.url,
+        url: normalizeImageUrl(img.url),
         alt: img.alt,
         is_cover: img.is_cover,
         position: img.position,
@@ -114,7 +132,7 @@ export async function POST(req: Request) {
           entity_type: "urban_property",
           entity_id: entityId,
           kind: v.kind,
-          url: v.url,
+          url: normalizeVideoUrl(v.url),
           alt: v.alt || prop.title,
           position: idx,
         }));
@@ -187,7 +205,7 @@ export async function POST(req: Request) {
       const imageInserts = allImages.map((img) => ({
         entity_type: "development",
         entity_id: entityId,
-        url: img.url,
+        url: normalizeImageUrl(img.url),
         alt: img.alt,
         is_cover: img.is_cover,
         position: img.position,
@@ -204,7 +222,7 @@ export async function POST(req: Request) {
           entity_type: "development",
           entity_id: entityId,
           kind: v.kind,
-          url: v.url,
+          url: normalizeVideoUrl(v.url),
           alt: v.alt || dev.name,
           position: idx,
         }));
@@ -226,12 +244,29 @@ export async function POST(req: Request) {
     if (type === "rural") {
       const rural = data as RuralProperty;
 
+      let finalCode = rural.code?.trim().toUpperCase();
+      if (!finalCode) {
+        const { data: existingRows } = await supabase.from("rural_properties").select("code");
+        finalCode = getNextSequentialCode(existingRows || [], "MRQ-R", 201);
+      } else {
+        const { data: conflict } = await supabase
+          .from("rural_properties")
+          .select("id, slug")
+          .eq("code", finalCode)
+          .maybeSingle();
+
+        if (conflict && conflict.slug !== rural.slug) {
+          const { data: allRows } = await supabase.from("rural_properties").select("code");
+          finalCode = getNextSequentialCode(allRows || [], "MRQ-R", 201);
+        }
+      }
+
       const { data: row, error: rowError } = await supabase
         .from("rural_properties")
         .upsert(
           {
             slug: rural.slug,
-            code: rural.code,
+            code: finalCode,
             title: rural.title,
             state: rural.state,
             municipality: rural.municipality,
@@ -270,7 +305,7 @@ export async function POST(req: Request) {
       const imageInserts = allImages.map((img) => ({
         entity_type: "rural_property",
         entity_id: entityId,
-        url: img.url,
+        url: normalizeImageUrl(img.url),
         alt: img.alt,
         is_cover: img.is_cover,
         position: img.position,
@@ -287,7 +322,7 @@ export async function POST(req: Request) {
           entity_type: "rural_property",
           entity_id: entityId,
           kind: v.kind,
-          url: v.url,
+          url: normalizeVideoUrl(v.url),
           alt: v.alt || rural.title,
           position: idx,
         }));

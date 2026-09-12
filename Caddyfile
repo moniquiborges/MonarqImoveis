@@ -1,0 +1,27 @@
+{
+    # Email para notificações do Let's Encrypt sobre certificados SSL
+    email {$ACME_EMAIL:contatomonarqimoveis@gmail.com}
+}
+
+www.monarqinvest.com.br {
+    redir https://monarqinvest.com.br{uri} permanent
+}
+
+{$DOMAIN:monarqinvest.com.br} {
+    # Compressão automática gzip/zstd
+    encode gzip zstd
+
+    # Roteamento da API do Supabase Lite (Auth, REST, Storage)
+    handle_path /supabase/* {
+        reverse_proxy kong:8000
+    }
+
+    # Roteamento da Aplicação Next.js
+    handle {
+        reverse_proxy app:3000
+    }
+}
+
+http://143.95.166.167 {
+    redir https://monarqinvest.com.br{uri} permanent
+}

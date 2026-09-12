@@ -137,21 +137,19 @@ export default function ContatoPage() {
                 </div>
 
                 {/* Endereço Sede */}
-                <div className="flex items-start gap-3.5">
-                  <div className="rounded-xs bg-mineral/10 p-2.5 text-mineral shrink-0">
-                    <Building className="h-5 w-5" />
+                {siteConfig.address && (
+                  <div className="flex items-start gap-3.5">
+                    <div className="rounded-xs bg-mineral/10 p-2.5 text-mineral shrink-0">
+                      <Building className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <span className="text-xs text-graphite/60 block">Escritório Central</span>
+                      <p className="font-medium text-graphite leading-snug">
+                        {siteConfig.address}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs text-graphite/60 block">Escritório Central</span>
-                    <p className="font-medium text-graphite leading-snug">
-                      Av. Afonso Pena, 1.897 – 4° Andar
-                      <br />
-                      <span className="text-xs text-graphite/70 font-normal">
-                        Edifício Executive Center – Campo Grande/MS
-                      </span>
-                    </p>
-                  </div>
-                </div>
+                )}
 
                 {/* Horário */}
                 <div className="flex items-start gap-3.5">

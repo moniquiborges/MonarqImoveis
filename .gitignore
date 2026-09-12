@@ -44,3 +44,8 @@ next-env.d.ts
 # local test tooling (not part of the deployed app)
 /tests
 /vitest.config.ts
+
+# backups and local scripts with secrets
+backups/
+scripts/askpass.bat
+*.sql

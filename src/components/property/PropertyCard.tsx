@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { FavoriteButton } from "./FavoriteButton";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, normalizeImageUrl } from "@/lib/utils";
 import type { PropertyBadge, PropertyImage } from "@/types";
 
 export interface PropertyCardSpec {
@@ -51,7 +51,7 @@ export function PropertyCard({
         <Link href={href} className="focus-ring relative block overflow-hidden">
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-areia/40">
             <Image
-              src={image.url}
+              src={normalizeImageUrl(image.url)}
               alt={image.alt}
               fill
               sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"

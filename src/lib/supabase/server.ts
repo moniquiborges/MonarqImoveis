@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./constants";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_COOKIE_NAME } from "./constants";
 import type { Database } from "@/types/database";
 
 /**
@@ -13,6 +13,9 @@ export async function createClient() {
     SUPABASE_URL,
     SUPABASE_ANON_KEY,
     {
+      cookieOptions: {
+        name: SUPABASE_COOKIE_NAME,
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll();

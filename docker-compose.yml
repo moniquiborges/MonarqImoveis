@@ -1,0 +1,189 @@
+services:
+  # Servidor Web Caddy com SSL Automático Let's Encrypt
+  caddy:
+    image: caddy:2-alpine
+    container_name: monarq-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+      - ACME_EMAIL=${ACME_EMAIL:-admin@localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - kong
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+  # Aplicação Next.js 16 (Modo Standalone)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-http://localhost/supabase}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${ANON_KEY}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
+        NEXT_PUBLIC_WHATSAPP_NUMBER: ${NEXT_PUBLIC_WHATSAPP_NUMBER:-}
+        NEXT_PUBLIC_WHATSAPP_DISPLAY: ${NEXT_PUBLIC_WHATSAPP_DISPLAY:-}
+        NEXT_PUBLIC_CONTACT_EMAIL: ${NEXT_PUBLIC_CONTACT_EMAIL:-}
+        NEXT_PUBLIC_CONTACT_PHONE: ${NEXT_PUBLIC_CONTACT_PHONE:-}
+    container_name: monarq-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - INTERNAL_SUPABASE_URL=http://kong:8000
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://localhost/supabase}
+      - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost}
+    extra_hosts:
+      - "monarqinvest.com.br:host-gateway"
+      - "www.monarqinvest.com.br:host-gateway"
+    depends_on:
+      - kong
+      - db
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  # API Gateway Kong (Supabase Lite)
+  kong:
+    image: kong:2.8.1-alpine
+    container_name: monarq-kong
+    restart: unless-stopped
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+    volumes:
+      - ./docker/kong/kong.yml:/var/lib/kong/kong.yml:ro
+    depends_on:
+      - auth
+      - rest
+      - storage
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+
+  # Supabase GoTrue (Autenticação JWT)
+  auth:
+    image: supabase/gotrue:v2.164.0
+    container_name: monarq-auth
+    restart: unless-stopped
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${API_EXTERNAL_URL:-http://localhost/supabase/auth/v1}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-postgres}?sslmode=disable
+      GOTRUE_SITE_URL: ${SITE_URL:-http://localhost}
+      GOTRUE_URI_ALLOW_LIST: ${SITE_URL:-http://localhost}*
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+    depends_on:
+      - db
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+
+  # PostgREST (API REST Automática do Postgres)
+  rest:
+    image: postgrest/postgrest:v12.2.0
+    container_name: monarq-rest
+    restart: unless-stopped
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-postgres}
+      PGRST_DB_SCHEMAS: public,storage
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_USE_BUILTIN_AUTH: "false"
+    depends_on:
+      - db
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+
+  # Supabase Storage API (Uploads de Fotos de Imóveis no Disco NVMe)
+  storage:
+    image: supabase/storage-api:v1.11.1
+    container_name: monarq-storage
+    restart: unless-stopped
+    environment:
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      POSTGREST_URL: http://rest:3000
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-postgres}?sslmode=disable
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: default
+      GLOBAL_S3_BUCKET: default
+      REST_URL: http://rest:3000
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_FILE_SIZE_LIMIT: 52428800
+    volumes:
+      - storage_data:/var/lib/storage
+    depends_on:
+      - db
+      - rest
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # Banco de Dados PostgreSQL (Otimizado para baixo uso de RAM)
+  db:
+    image: supabase/postgres:15.8.1.085
+    container_name: monarq-db
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - listen_addresses=*
+      - -c
+      - shared_buffers=64MB
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - effective_cache_size=256MB
+      - -c
+      - max_connections=40
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      JWT_SECRET: ${JWT_SECRET}
+      POSTGREST_ROLE: authenticator
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 280M
+
+volumes:
+  db_data:
+  storage_data:
+  caddy_data:
+  caddy_config:

@@ -8,6 +8,7 @@ import type { SocialLink } from "@/lib/services/settingsService";
 export interface SiteConfigSettings {
   name: string;
   tagline: string;
+  address: string;
   whatsappNumber: string;
   whatsappDisplay: string;
   contactEmail: string;

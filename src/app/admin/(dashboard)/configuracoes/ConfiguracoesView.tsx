@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Save, CheckCircle2, Globe, Share2, BarChart3, Plus, Trash2 } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
 import { resolveSocialIcon } from "@/components/ui/SocialIcons";
+import { generateUUID } from "@/lib/utils";
 import { saveSettings, type AnalyticsSettingsInput, type SiteConfigSettings } from "./actions";
 
 interface ConfiguracoesViewProps {
@@ -15,6 +16,7 @@ interface ConfiguracoesViewProps {
 const defaultSiteConfig = (): SiteConfigSettings => ({
   name: siteConfig.name,
   tagline: siteConfig.tagline,
+  address: siteConfig.address || "",
   whatsappNumber: siteConfig.whatsappNumber || "",
   whatsappDisplay: siteConfig.whatsappDisplay || "",
   contactEmail: siteConfig.contactEmail || "",
@@ -34,7 +36,12 @@ export function ConfiguracoesView({
 }: ConfiguracoesViewProps) {
   const [config, setConfig] = useState<SiteConfigSettings>(
     initialSiteConfig
-      ? { ...initialSiteConfig, socialLinks: initialSiteConfig.socialLinks ?? [] }
+      ? {
+          ...defaultSiteConfig(),
+          ...initialSiteConfig,
+          address: initialSiteConfig.address ?? siteConfig.address ?? "",
+          socialLinks: initialSiteConfig.socialLinks ?? [],
+        }
       : defaultSiteConfig()
   );
   const [analytics, setAnalytics] = useState<AnalyticsSettingsInput>(
@@ -49,7 +56,7 @@ export function ConfiguracoesView({
       ...config,
       socialLinks: [
         ...config.socialLinks,
-        { id: crypto.randomUUID(), label: "", url: "" },
+        { id: generateUUID(), label: "", url: "" },
       ],
     });
   };
@@ -124,9 +131,8 @@ export function ConfiguracoesView({
       )}
 
       <div className="rounded-xs border border-mineral/20 bg-mineral/5 px-4 py-3 text-xs text-graphite/70">
-        Os dados institucionais abaixo (WhatsApp, e-mail, redes sociais) ficam salvos aqui para
-        referência da equipe. O site público continua usando os valores publicados em código até
-        que essa reflexão seja conectada.
+        Os dados institucionais abaixo (endereço, WhatsApp, e-mail, redes sociais) são exibidos no
+        site público (rodapé, topo e página de contato) e podem ser atualizados a qualquer momento.
       </div>
 
       <form onSubmit={handleSave} className="space-y-8">
@@ -227,6 +233,22 @@ export function ConfiguracoesView({
                 className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-graphite mb-1">
+              Endereço Comercial / Sede
+            </label>
+            <input
+              type="text"
+              placeholder="Ex: Av. Afonso Pena, 1.897 – 4° Andar – Edifício Executive Center, Campo Grande - MS"
+              value={config.address}
+              onChange={(e) => setConfig({ ...config, address: e.target.value })}
+              className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite"
+            />
+            <p className="mt-1 text-[11px] text-graphite/50">
+              Exibido no rodapé do site e na página de contato ao lado do ícone de localização.
+            </p>
           </div>
         </div>
 

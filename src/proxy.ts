@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/constants";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_COOKIE_NAME } from "@/lib/supabase/constants";
 
 const LOGIN_PATH = "/admin/login";
 const STAFF_ROLES = new Set(["admin", "editor"]);
@@ -10,6 +10,9 @@ export async function proxy(request: NextRequest) {
   const isLoginPath = request.nextUrl.pathname === LOGIN_PATH;
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    cookieOptions: {
+      name: SUPABASE_COOKIE_NAME,
+    },
     cookies: {
       getAll() {
         return request.cookies.getAll();
