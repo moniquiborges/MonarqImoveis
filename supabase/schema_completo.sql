@@ -26,7 +26,7 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 do $$ begin
-  create type public.rural_activity as enum ('venda', 'arrendamento', 'agricultura', 'pecuaria', 'investimento');
+  create type public.rural_activity as enum ('venda', 'arrendamento', 'agricultura', 'pecuaria', 'investimento', 'chacara', 'rancho', 'sitio');
 exception when duplicate_object then null; end $$;
 
 do $$ begin
@@ -48,7 +48,11 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 do $$ begin
-  create type public.rural_state as enum ('MS', 'MT');
+  create type public.rural_state as enum (
+    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
+    'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
+    'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+  );
 exception when duplicate_object then null; end $$;
 
 do $$ begin

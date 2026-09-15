@@ -18,7 +18,15 @@ $files = @(
     @{ local = "src\components\admin\ImageUpload.tsx"; remote = "/opt/monarq/src/components/admin/ImageUpload.tsx" },
     @{ local = "src\app\admin\(dashboard)\imoveis\page.tsx"; remote = "/opt/monarq/src/app/admin/(dashboard)/imoveis/page.tsx" },
     @{ local = "src\app\admin\(dashboard)\empreendimentos\page.tsx"; remote = "/opt/monarq/src/app/admin/(dashboard)/empreendimentos/page.tsx" },
-    @{ local = "src\app\admin\(dashboard)\rural\page.tsx"; remote = "/opt/monarq/src/app/admin/(dashboard)/rural/page.tsx" }
+    @{ local = "src\app\admin\(dashboard)\rural\page.tsx"; remote = "/opt/monarq/src/app/admin/(dashboard)/rural/page.tsx" },
+    @{ local = "src\lib\labels.ts"; remote = "/opt/monarq/src/lib/labels.ts" },
+    @{ local = "src\types\database.ts"; remote = "/opt/monarq/src/types/database.ts" },
+    @{ local = "src\types\index.ts"; remote = "/opt/monarq/src/types/index.ts" },
+    @{ local = "src\components\property\RuralCatalogView.tsx"; remote = "/opt/monarq/src/components/property/RuralCatalogView.tsx" },
+    @{ local = "src\components\home\SearchModule.tsx"; remote = "/opt/monarq/src/components/home/SearchModule.tsx" },
+    @{ local = "supabase\schema_completo.sql"; remote = "/opt/monarq/supabase/schema_completo.sql" },
+    @{ local = "supabase\migrations\20260913000001_expand_rural_state_enum.sql"; remote = "/opt/monarq/supabase/migrations/20260913000001_expand_rural_state_enum.sql" },
+    @{ local = "supabase\migrations\20260915000001_add_chacara_rancho_sitio_to_rural_activity.sql"; remote = "/opt/monarq/supabase/migrations/20260915000001_add_chacara_rancho_sitio_to_rural_activity.sql" }
 )
 
 foreach ($f in $files) {

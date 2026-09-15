@@ -20,7 +20,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { mockRuralProperties } from "@/lib/mock/rural";
-import { ruralActivityLabels } from "@/lib/labels";
+import { ruralActivityLabels, BRAZILIAN_STATES } from "@/lib/labels";
 import { formatBRL, normalizeImageUrl, getNextSequentialCode } from "@/lib/utils";
 import {
   getStoredRuralProperties,
@@ -267,10 +267,14 @@ export default function AdminRuralPage() {
       if (editingSlug) {
         updated = items.map((item) => {
           if (item.slug === editingSlug) {
+            const ruralType = ["chacara", "rancho", "sitio"].includes(formData.activity)
+              ? (formData.activity as "chacara" | "rancho" | "sitio")
+              : (item.type || "fazenda");
             return {
               ...item,
               code,
               title: formData.title,
+              type: ruralType,
               state: formData.state,
               municipality: formData.municipality || "Centro-Oeste",
               totalHectares: ha,
@@ -293,10 +297,14 @@ export default function AdminRuralPage() {
           return item;
         });
       } else {
+        const ruralType = ["chacara", "rancho", "sitio"].includes(formData.activity)
+          ? (formData.activity as "chacara" | "rancho" | "sitio")
+          : "fazenda";
         const created: RuralProperty = {
           slug: rawSlug,
           code,
           title: formData.title,
+          type: ruralType,
           state: formData.state,
           municipality: formData.municipality || "Centro-Oeste",
           totalHectares: ha,
@@ -661,17 +669,11 @@ export default function AdminRuralPage() {
                     onChange={(e) => setFormData({ ...formData, state: e.target.value as RuralState })}
                     className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 px-3 py-2 text-xs text-graphite cursor-pointer"
                   >
-                    <option value="MS">Mato Grosso do Sul (MS)</option>
-                    <option value="MT">Mato Grosso (MT)</option>
-                    <option value="GO">Goiás (GO)</option>
-                    <option value="MG">Minas Gerais (MG)</option>
-                    <option value="SP">São Paulo (SP)</option>
-                    <option value="PR">Paraná (PR)</option>
-                    <option value="BA">Bahia (BA)</option>
-                    <option value="PI">Piauí (PI)</option>
-                    <option value="MA">Maranhão (MA)</option>
-                    <option value="TO">Tocantins (TO)</option>
-                    <option value="PA">Pará (PA)</option>
+                    {BRAZILIAN_STATES.map((st) => (
+                      <option key={st.value} value={st.value}>
+                        {st.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -730,6 +732,9 @@ export default function AdminRuralPage() {
                     <option value="investimento">Investimento / Silvicultura (Eucalipto)</option>
                     <option value="arrendamento">Arrendamento Rural</option>
                     <option value="venda">Venda Geral / Oportunidade</option>
+                    <option value="chacara">Chácara</option>
+                    <option value="rancho">Rancho</option>
+                    <option value="sitio">Sítio</option>
                   </select>
                 </div>
               </div>

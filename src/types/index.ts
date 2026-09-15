@@ -83,20 +83,39 @@ export type RuralActivity =
   | "arrendamento"
   | "agricultura"
   | "pecuaria"
-  | "investimento";
+  | "investimento"
+  | "chacara"
+  | "rancho"
+  | "sitio";
 
 export type RuralState =
-  | "MS"
-  | "MT"
-  | "GO"
-  | "MG"
-  | "SP"
-  | "PR"
+  | "AC"
+  | "AL"
+  | "AP"
+  | "AM"
   | "BA"
-  | "PI"
+  | "CE"
+  | "DF"
+  | "ES"
+  | "GO"
   | "MA"
-  | "TO"
-  | "PA";
+  | "MT"
+  | "MS"
+  | "MG"
+  | "PA"
+  | "PB"
+  | "PR"
+  | "PE"
+  | "PI"
+  | "RJ"
+  | "RN"
+  | "RS"
+  | "RO"
+  | "RR"
+  | "SC"
+  | "SP"
+  | "SE"
+  | "TO";
 
 export interface RuralProperty {
   slug: string;

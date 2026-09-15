@@ -8,6 +8,7 @@ import { PropertyCard } from "@/components/property/PropertyCard";
 import { ruralPropertyToCard } from "@/components/property/adapters";
 import { fetchRuralProperties } from "@/lib/services/propertyService";
 import { saveStoredRuralProperties } from "@/lib/storage";
+import { BRAZILIAN_STATES } from "@/lib/labels";
 import type { RuralProperty, RuralActivity } from "@/types";
 
 interface Props {
@@ -109,17 +110,7 @@ export function RuralCatalogView({ initialProperties }: Props) {
               onChange: setSelectedState,
               options: [
                 { value: "all", label: "Todos os Estados" },
-                { value: "MS", label: "Mato Grosso do Sul (MS)" },
-                { value: "MT", label: "Mato Grosso (MT)" },
-                { value: "GO", label: "Goiás (GO)" },
-                { value: "MG", label: "Minas Gerais (MG)" },
-                { value: "SP", label: "São Paulo (SP)" },
-                { value: "PR", label: "Paraná (PR)" },
-                { value: "BA", label: "Bahia (BA)" },
-                { value: "PI", label: "Piauí (PI)" },
-                { value: "MA", label: "Maranhão (MA)" },
-                { value: "TO", label: "Tocantins (TO)" },
-                { value: "PA", label: "Pará (PA)" },
+                ...BRAZILIAN_STATES.map((s) => ({ value: s.value, label: s.label })),
               ],
             },
             {

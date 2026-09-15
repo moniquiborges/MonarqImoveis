@@ -13,6 +13,9 @@ export const ruralActivityLabels: Record<RuralActivity, string> = {
   agricultura: "Agricultura",
   pecuaria: "Pecuária",
   investimento: "Investimento",
+  chacara: "Chácara",
+  rancho: "Rancho",
+  sitio: "Sítio",
 };
 
 export const ruralTypeLabels: Record<string, string> = {
@@ -33,3 +36,34 @@ export const propertyBadgeLabels: Record<PropertyBadge, string> = {
   "alto-padrao": "Alto padrão",
   vendido: "Vendido",
 };
+
+export const BRAZILIAN_STATES: { value: import("@/types").RuralState; label: string }[] = [
+  { value: "MS", label: "Mato Grosso do Sul (MS)" },
+  { value: "MT", label: "Mato Grosso (MT)" },
+  { value: "GO", label: "Goiás (GO)" },
+  { value: "MG", label: "Minas Gerais (MG)" },
+  { value: "SP", label: "São Paulo (SP)" },
+  { value: "PR", label: "Paraná (PR)" },
+  { value: "BA", label: "Bahia (BA)" },
+  { value: "TO", label: "Tocantins (TO)" },
+  { value: "PA", label: "Pará (PA)" },
+  { value: "MA", label: "Maranhão (MA)" },
+  { value: "PI", label: "Piauí (PI)" },
+  { value: "RO", label: "Rondônia (RO)" },
+  { value: "RS", label: "Rio Grande do Sul (RS)" },
+  { value: "SC", label: "Santa Catarina (SC)" },
+  { value: "AC", label: "Acre (AC)" },
+  { value: "AL", label: "Alagoas (AL)" },
+  { value: "AP", label: "Amapá (AP)" },
+  { value: "AM", label: "Amazonas (AM)" },
+  { value: "CE", label: "Ceará (CE)" },
+  { value: "DF", label: "Distrito Federal (DF)" },
+  { value: "ES", label: "Espírito Santo (ES)" },
+  { value: "PB", label: "Paraíba (PB)" },
+  { value: "PE", label: "Pernambuco (PE)" },
+  { value: "RJ", label: "Rio de Janeiro (RJ)" },
+  { value: "RN", label: "Rio Grande do Norte (RN)" },
+  { value: "RR", label: "Roraima (RR)" },
+  { value: "SE", label: "Sergipe (SE)" },
+];
+

@@ -9,7 +9,15 @@ export type UserRole = "admin" | "editor";
 export type ListingStatus = "draft" | "published" | "archived" | "sold";
 export type DevelopmentStageDb = "lancamento" | "em-obras" | "pronto" | "vendido";
 export type UnitStatus = "disponivel" | "reservado" | "vendido";
-export type RuralActivityDb = "agricultura" | "pecuaria" | "investimento";
+export type RuralActivityDb =
+  | "agricultura"
+  | "pecuaria"
+  | "investimento"
+  | "venda"
+  | "arrendamento"
+  | "chacara"
+  | "rancho"
+  | "sitio";
 export type PropertyBadgeDb =
   | "exclusivo"
   | "lancamento"
@@ -21,7 +29,34 @@ export type PropertyBadgeDb =
   | "alto-padrao"
   | "vendido";
 export type ScCityDb = "porto-belo" | "itapema" | "balneario-camboriu";
-export type RuralStateDb = "MS" | "MT";
+export type RuralStateDb =
+  | "AC"
+  | "AL"
+  | "AP"
+  | "AM"
+  | "BA"
+  | "CE"
+  | "DF"
+  | "ES"
+  | "GO"
+  | "MA"
+  | "MT"
+  | "MS"
+  | "MG"
+  | "PA"
+  | "PB"
+  | "PR"
+  | "PE"
+  | "PI"
+  | "RJ"
+  | "RN"
+  | "RS"
+  | "RO"
+  | "RR"
+  | "SC"
+  | "SP"
+  | "SE"
+  | "TO";
 export type ImageEntityType = "development" | "urban_property" | "rural_property";
 export type LeadInterestDb =
   | "porto-belo"

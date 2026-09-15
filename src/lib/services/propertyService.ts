@@ -478,6 +478,7 @@ export async function fetchRuralProperties(): Promise<RuralProperty[]> {
         videos: videoMap.get(row.id) || [],
         description: row.description || undefined,
         features: row.water_sources || row.features || [],
+        type: row.type || (row.activity?.find((a: string) => ["chacara", "rancho", "sitio"].includes(a))) || "fazenda",
       };
     });
   } catch (err) {
@@ -551,6 +552,7 @@ export async function fetchRuralPropertyBySlug(slugOrCode: string): Promise<Rura
       videos: propVideos,
       description: row.description || undefined,
       features: row.water_sources || row.features || [],
+      type: row.type || (row.activity?.find((a: string) => ["chacara", "rancho", "sitio"].includes(a))) || "fazenda",
     };
   } catch (err) {
     console.error("Erro ao buscar propriedade rural por slug no Supabase:", err);

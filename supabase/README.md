@@ -1,20 +1,28 @@
-# Banco de dados MONARQ — Supabase
+# Banco de dados MONARQ — PostgreSQL / Supabase Lite na VPS
 
-Migrations locais, ainda **não aplicadas** a nenhum projeto Supabase remoto.
+O banco de dados e os serviços do ecossistema Supabase rodam **100% auto-hospedados na própria VPS** via Docker Compose:
 
-## Arquivos
+- **Banco de Dados:** Container `monarq-db` (PostgreSQL 15)
+- **API REST:** Container `monarq-rest` (PostgREST)
+- **Autenticação:** Container `monarq-auth` (GoTrue)
+- **Armazenamento de Fotos:** Container `monarq-storage` (Storage API no disco NVMe)
+- **Gateway:** Container `monarq-kong` (Porta 8000 interna / `/supabase` externa)
 
-- `migrations/20260823000001_init_schema.sql` — tabelas, enums e triggers.
-- `migrations/20260823000002_rls.sql` — Row Level Security (leitura pública de conteúdo publicado; escrita restrita à equipe via `profiles.role`).
-- `migrations/20260823000003_storage.sql` — buckets de imagens/documentos e políticas de acesso.
+## Arquivos de Schema e Migrations
 
-## Como aplicar (quando houver um projeto Supabase real)
+- `schema_completo.sql` — Schema consolidado e atualizado de todas as tabelas e enums.
+- `grants.sql` — Permissões de acesso aos esquemas `public` e `storage`.
+- `migrations/` — Histórico de migrações aplicadas no banco da VPS.
 
-1. Criar o projeto em supabase.com (ou `supabase projects create`, requer login).
-2. `supabase link --project-ref <ref>`
-3. Revisar as migrations acima.
-4. `supabase db push`
-5. Criar o primeiro usuário administrador (Dashboard → Authentication → Add user, ou `supabase auth admin create-user`). Um `profile` com `role = 'admin'` é criado automaticamente pelo trigger `handle_new_user`.
-6. Preencher `.env.local` com `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` (este último nunca é exposto ao navegador).
+## Como aplicar novas migrações no banco da VPS
 
-Nenhum destes passos foi executado por não haver credenciais reais fornecidas.
+Você pode aplicar qualquer arquivo SQL diretamente no container `monarq-db` na VPS usando o script auxiliar:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\run_remote_sql.ps1 -SqlFile caminho/do/arquivo.sql
+```
+
+Ou diretamente via SSH no servidor:
+```bash
+docker exec -i monarq-db psql -U postgres -d postgres < caminho/do/arquivo.sql
+```
