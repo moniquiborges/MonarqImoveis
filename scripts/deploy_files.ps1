@@ -32,6 +32,8 @@ $files = @(
     @{ local = "supabase\schema_completo.sql"; remote = "/opt/monarq/supabase/schema_completo.sql" },
     @{ local = "supabase\migrations\20260913000001_expand_rural_state_enum.sql"; remote = "/opt/monarq/supabase/migrations/20260913000001_expand_rural_state_enum.sql" },
     @{ local = "supabase\migrations\20260915000001_add_chacara_rancho_sitio_to_rural_activity.sql"; remote = "/opt/monarq/supabase/migrations/20260915000001_add_chacara_rancho_sitio_to_rural_activity.sql" },
+    @{ local = "src\components\layout\Header.tsx"; remote = "/opt/monarq/src/components/layout/Header.tsx" },
+    @{ local = "src\components\layout\nav-data.ts"; remote = "/opt/monarq/src/components/layout/nav-data.ts" },
     @{ local = "supabase\migrations\20260922000001_document_property_types_terreno_loteamento.sql"; remote = "/opt/monarq/supabase/migrations/20260922000001_document_property_types_terreno_loteamento.sql" }
 )
 
@@ -40,5 +42,7 @@ foreach ($f in $files) {
     scp -P 22022 -o StrictHostKeyChecking=no $f.local "root@143.95.166.167:$($f.remote)"
 }
 
-Write-Host "Rebuilding and restarting app container on VPS..."
-ssh -p 22022 -o StrictHostKeyChecking=no root@143.95.166.167 "cd /opt/monarq && docker compose build app && docker compose up -d app"
+Write-Host "Acionando build oficial no Coolify via git/Traefik..."
+scp -P 22022 -o StrictHostKeyChecking=no scripts\trigger_coolify.sh "root@143.95.166.167:/tmp/trigger_coolify.sh"
+ssh -p 22022 -o StrictHostKeyChecking=no root@143.95.166.167 "chmod +x /tmp/trigger_coolify.sh && /tmp/trigger_coolify.sh"
+
