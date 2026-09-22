@@ -80,6 +80,7 @@ export default function AdminEmpreendimentosPage() {
     areaMax: string | number;
     leisureArea: string | number;
     distanceToSea: string;
+    isAltoPadrao: boolean;
     coverImage: ImageData;
     gallery: ImageData[];
     videos: VideoData[];
@@ -101,6 +102,7 @@ export default function AdminEmpreendimentosPage() {
     areaMax: "",
     leisureArea: "",
     distanceToSea: "",
+    isAltoPadrao: true,
     coverImage: {
       url: "",
       alt: "",
@@ -222,6 +224,7 @@ export default function AdminEmpreendimentosPage() {
       areaMax: "",
       leisureArea: "",
       distanceToSea: "",
+      isAltoPadrao: true,
       coverImage: {
         url: "",
         alt: "",
@@ -253,6 +256,7 @@ export default function AdminEmpreendimentosPage() {
       areaMax: dev.areaRange ? dev.areaRange[1] : "",
       leisureArea: dev.leisureArea || "",
       distanceToSea: dev.distanceToSea || "",
+      isAltoPadrao: dev.badges?.includes("alto-padrao") ?? true,
       coverImage: dev.coverImage || { url: "", alt: dev.name },
       gallery: dev.gallery || [],
       videos: dev.videos || [],
@@ -324,6 +328,9 @@ export default function AdminEmpreendimentosPage() {
       if (editingSlug) {
         updated = items.map((item) => {
           if (item.slug === editingSlug) {
+            const baseBadges = (item.badges || []).filter((b) => b !== "alto-padrao");
+            const finalBadges: import("@/types").PropertyBadge[] = formData.isAltoPadrao ? [...baseBadges, "alto-padrao"] : baseBadges;
+
             return {
               ...item,
               code,
@@ -345,6 +352,7 @@ export default function AdminEmpreendimentosPage() {
               areaRange,
               leisureArea,
               distanceToSea,
+              badges: finalBadges,
               coverImage: {
                 url: formData.coverImage.url || "",
                 alt: formData.coverImage.alt || formData.name,
@@ -359,6 +367,9 @@ export default function AdminEmpreendimentosPage() {
           return item;
         });
       } else {
+        const baseBadges: import("@/types").PropertyBadge[] = ["lancamento"];
+        const finalBadges: import("@/types").PropertyBadge[] = formData.isAltoPadrao ? [...baseBadges, "alto-padrao"] : baseBadges;
+
         const created: Development = {
           slug: rawSlug,
           code,
@@ -380,7 +391,7 @@ export default function AdminEmpreendimentosPage() {
           areaRange,
           leisureArea,
           distanceToSea,
-          badges: ["lancamento", "alto-padrao"],
+          badges: finalBadges,
           coverImage: {
             url: formData.coverImage.url || "",
             alt: formData.coverImage.alt || formData.name,
@@ -516,7 +527,14 @@ export default function AdminEmpreendimentosPage() {
                           />
                         </div>
                         <div>
-                          <div className="font-semibold text-graphite text-sm">{item.name}</div>
+                          <div className="font-semibold text-graphite text-sm flex items-center gap-2 flex-wrap">
+                            <span>{item.name}</span>
+                            {item.badges?.includes("alto-padrao") ? (
+                              <span className="inline-flex items-center rounded-xs bg-terracota/10 border border-terracota/30 text-terracota px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider shrink-0">
+                                ★ Alto Padrão
+                              </span>
+                            ) : null}
+                          </div>
                           <div className="flex items-center gap-2 mt-0.5">
                             <span className="text-[11px] text-graphite/50">{item.distanceToSea || "Litoral"}</span>
                             {item.gallery && item.gallery.length > 0 && (
@@ -660,6 +678,37 @@ export default function AdminEmpreendimentosPage() {
                     Link curto: <code className="text-mineral">/i/{formData.code || "CODIGO"}</code>
                   </span>
                 </div>
+              </div>
+
+              {/* Controle de Selo Alto Padrão */}
+              <div className="rounded-xs border border-terracota/30 bg-terracota/5 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center rounded-sm bg-terracota px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-xs">
+                    Alto Padrão
+                  </span>
+                  <div>
+                    <p className="text-xs font-semibold text-graphite flex items-center gap-2">
+                      Selo de Destaque &quot;Alto Padrão&quot;
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-xs font-bold uppercase ${formData.isAltoPadrao ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-600"}`}>
+                        {formData.isAltoPadrao ? "Ativado" : "Desativado"}
+                      </span>
+                    </p>
+                    <p className="text-[11px] text-graphite/60">
+                      {formData.isAltoPadrao
+                        ? "O selo terracota 'ALTO PADRÃO' será exibido no card da foto do empreendimento."
+                        : "Nenhum selo de 'Alto Padrão' será exibido na foto deste empreendimento."}
+                    </p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0 select-none">
+                  <input
+                    type="checkbox"
+                    checked={formData.isAltoPadrao}
+                    onChange={(e) => setFormData({ ...formData, isAltoPadrao: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-areia/80 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-terracota"></div>
+                </label>
               </div>
 
               {/* Fotografias do Empreendimento */}

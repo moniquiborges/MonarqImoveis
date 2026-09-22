@@ -87,7 +87,7 @@ export async function POST(req: Request) {
             description: prop.description || null,
             features: prop.features || [],
             status: "published",
-            badges: prop.badges || ["novo", "alto-padrao"],
+            badges: Array.isArray(prop.badges) ? prop.badges : ["novo", "alto-padrao"],
           },
           { onConflict: "slug" }
         )
@@ -178,7 +178,7 @@ export async function POST(req: Request) {
             distance_to_sea: dev.distanceToSea?.trim() || null,
             amenities: dev.features || [],
             status: "published",
-            badges: dev.badges || ["lancamento", "alto-padrao"],
+            badges: Array.isArray(dev.badges) ? dev.badges : ["lancamento", "alto-padrao"],
           },
           { onConflict: "slug" }
         )
@@ -278,7 +278,7 @@ export async function POST(req: Request) {
             description: rural.description?.trim() || null,
             water_sources: rural.features || [],
             status: "published",
-            badges: rural.badges || ["oportunidade"],
+            badges: Array.isArray(rural.badges) ? rural.badges : ["oportunidade"],
           },
           { onConflict: "slug" }
         )

@@ -47,7 +47,7 @@ import {
 import { CurrencyInput } from "@/components/admin/CurrencyInput";
 import { ImageUpload, ImageData } from "@/components/admin/ImageUpload";
 import { VideoUpload, VideoData } from "@/components/admin/VideoUpload";
-import type { UrbanProperty, Development, ScCity, DevelopmentStage } from "@/types";
+import type { UrbanProperty, Development, ScCity, DevelopmentStage, PropertyBadge } from "@/types";
 
 interface UnifiedPropertyItem {
   id: string;
@@ -76,6 +76,8 @@ interface UnifiedPropertyItem {
   description?: string;
   features?: string[];
   siteUrl: string;
+  badges?: PropertyBadge[];
+  isAltoPadrao?: boolean;
 }
 
 export default function AdminImoveisPage() {
@@ -136,6 +138,7 @@ export default function AdminImoveisPage() {
     parking: string | number;
     area: string | number;
     leisureArea: string | number;
+    isAltoPadrao: boolean;
     coverImage: ImageData;
     gallery: ImageData[];
     videos: VideoData[];
@@ -159,6 +162,7 @@ export default function AdminImoveisPage() {
     parking: "",
     area: "",
     leisureArea: "",
+    isAltoPadrao: true,
     coverImage: {
       url: "",
       alt: "",
@@ -196,6 +200,8 @@ export default function AdminImoveisPage() {
       description: dev.description || dev.shortDescription || "",
       features: (dev as any).features || [],
       siteUrl: `/empreendimentos/${dev.city}/${dev.slug}`,
+      badges: dev.badges || [],
+      isAltoPadrao: (dev.badges || []).includes("alto-padrao"),
     }));
 
     const msList: UnifiedPropertyItem[] = urbanItems.map((urban, idx) => ({
@@ -220,6 +226,8 @@ export default function AdminImoveisPage() {
       description: urban.description || "",
       features: urban.features || [],
       siteUrl: `/imoveis/campo-grande/${urban.slug}`,
+      badges: urban.badges || [],
+      isAltoPadrao: (urban.badges || []).includes("alto-padrao"),
     }));
 
     return [...scList, ...msList];
@@ -361,6 +369,7 @@ export default function AdminImoveisPage() {
       parking: "",
       area: "",
       leisureArea: "",
+      isAltoPadrao: true,
       coverImage: {
         url: "",
         alt: "",
@@ -394,6 +403,7 @@ export default function AdminImoveisPage() {
       parking: item.parking || "",
       area: item.area || "",
       leisureArea: item.leisureArea || "",
+      isAltoPadrao: item.isAltoPadrao ?? (item.badges || []).includes("alto-padrao"),
       coverImage: item.coverImage,
       gallery: item.gallery,
       videos: item.videos || [],
@@ -447,16 +457,20 @@ export default function AdminImoveisPage() {
         const deliveryDate = formData.deliveryDate.trim() || undefined;
 
         if (editingItem && editingItem.state === "SC") {
+          const baseBadges = (editingItem.badges || []).filter((b: PropertyBadge) => b !== "alto-padrao");
+          const finalBadges: PropertyBadge[] = formData.isAltoPadrao ? [...baseBadges, "alto-padrao"] : baseBadges;
+
           updatedDevs = devItems.map((dev) => {
             if (dev.slug === editingItem.slug) {
               return {
                 ...dev,
+                code: formData.code.trim().toUpperCase() || (dev as any).code,
                 name: formData.title,
                 city: formData.scCity,
                 cityLabel,
                 type: formData.type,
                 propertyType: formData.type,
-                neighborhood: formData.neighborhood,
+                neighborhood: formData.neighborhood || "Centro",
                 stage: formData.stage,
                 deliveryDate,
                 shortDescription:
@@ -471,6 +485,7 @@ export default function AdminImoveisPage() {
                 areaRange: aNum > 0 ? [aNum, aNum] : undefined,
                 leisureArea,
                 distanceToSea,
+                badges: finalBadges,
                 coverImage: {
                   url: formData.coverImage.url || "",
                   alt: formData.coverImage.alt || formData.title,
@@ -485,14 +500,23 @@ export default function AdminImoveisPage() {
             return dev;
           });
         } else {
+          let code = formData.code.trim().toUpperCase();
+          if (!code || devItems.some((it: any) => it.code?.toUpperCase() === code)) {
+            code = getNextSequentialCode(devItems, "MRQ-SC", 101);
+          }
+
+          const baseBadges: PropertyBadge[] = ["lancamento"];
+          const finalBadges: PropertyBadge[] = formData.isAltoPadrao ? [...baseBadges, "alto-padrao"] : baseBadges;
+
           const newDev: Development = {
             slug: rawSlug,
+            code,
             name: formData.title,
             city: formData.scCity,
             cityLabel,
             type: formData.type,
             propertyType: formData.type,
-            neighborhood: formData.neighborhood,
+            neighborhood: formData.neighborhood || "Centro",
             stage: formData.stage,
             deliveryDate,
             shortDescription:
@@ -507,7 +531,7 @@ export default function AdminImoveisPage() {
             areaRange: aNum > 0 ? [aNum, aNum] : undefined,
             leisureArea,
             distanceToSea,
-            badges: ["lancamento", "alto-padrao"],
+            badges: finalBadges,
             coverImage: {
               url: formData.coverImage.url || "",
               alt: formData.coverImage.alt || formData.title,
@@ -540,6 +564,9 @@ export default function AdminImoveisPage() {
         let updatedUrban: UrbanProperty[];
 
         if (editingItem && editingItem.state === "MS") {
+          const baseBadges = (editingItem.badges || []).filter((b: PropertyBadge) => b !== "alto-padrao");
+          const finalBadges: PropertyBadge[] = formData.isAltoPadrao ? [...baseBadges, "alto-padrao"] : baseBadges;
+
           updatedUrban = urbanItems.map((item) => {
             if (item.slug === editingItem.slug) {
               return {
@@ -554,6 +581,7 @@ export default function AdminImoveisPage() {
                 parking: Number(formData.parking) || 0,
                 area: Number(formData.area) || 0,
                 leisureArea,
+                badges: finalBadges,
                 description: formData.description.trim() || undefined,
                 features: formData.features,
                 coverImage: {
@@ -575,6 +603,9 @@ export default function AdminImoveisPage() {
             code = getNextSequentialCode(urbanItems, "MRQ-U", 101);
           }
 
+          const baseBadges: PropertyBadge[] = ["novo"];
+          const finalBadges: PropertyBadge[] = formData.isAltoPadrao ? [...baseBadges, "alto-padrao"] : baseBadges;
+
           const newUrban: UrbanProperty = {
             slug: rawSlug,
             code,
@@ -590,7 +621,7 @@ export default function AdminImoveisPage() {
             leisureArea,
             description: formData.description.trim() || undefined,
             features: formData.features,
-            badges: ["novo", "alto-padrao"],
+            badges: finalBadges,
             coverImage: {
               url: formData.coverImage.url || "",
               alt: formData.coverImage.alt || formData.title,
@@ -781,7 +812,14 @@ export default function AdminImoveisPage() {
                         />
                       </div>
                       <div>
-                        <div className="font-semibold text-graphite text-sm">{item.title}</div>
+                        <div className="font-semibold text-graphite text-sm flex items-center gap-2 flex-wrap">
+                          <span>{item.title}</span>
+                          {item.isAltoPadrao ? (
+                            <span className="inline-flex items-center rounded-xs bg-terracota/10 border border-terracota/30 text-terracota px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider shrink-0" title="Selo Alto Padrão Ativo">
+                              ★ Alto Padrão
+                            </span>
+                          ) : null}
+                        </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-graphite/60 text-[11px]">
                             {item.neighborhood}, {item.city}
@@ -1001,6 +1039,37 @@ export default function AdminImoveisPage() {
                     Gera o link curto: <code className="text-mineral">/i/{formData.code || "CODIGO"}</code>
                   </span>
                 </div>
+              </div>
+
+              {/* Controle de Selo Alto Padrão */}
+              <div className="rounded-xs border border-terracota/30 bg-terracota/5 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center rounded-sm bg-terracota px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-xs">
+                    Alto Padrão
+                  </span>
+                  <div>
+                    <p className="text-xs font-semibold text-graphite flex items-center gap-2">
+                      Selo de Destaque &quot;Alto Padrão&quot;
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-xs font-bold uppercase ${formData.isAltoPadrao ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-600"}`}>
+                        {formData.isAltoPadrao ? "Ativado" : "Desativado"}
+                      </span>
+                    </p>
+                    <p className="text-[11px] text-graphite/60">
+                      {formData.isAltoPadrao
+                        ? "O selo terracota 'ALTO PADRÃO' será exibido no card da foto do imóvel."
+                        : "Nenhum selo de 'Alto Padrão' será exibido na foto deste imóvel."}
+                    </p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0 select-none">
+                  <input
+                    type="checkbox"
+                    checked={formData.isAltoPadrao}
+                    onChange={(e) => setFormData({ ...formData, isAltoPadrao: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-areia/80 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-terracota"></div>
+                </label>
               </div>
 
               {/* Fotografias (Galeria com Seleção de Capa por Estrela) */}
