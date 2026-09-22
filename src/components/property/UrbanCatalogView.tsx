@@ -51,6 +51,18 @@ export function UrbanCatalogView({
   );
   const [searchQuery, setSearchQuery] = useState<string>(initialSearchQuery || "");
 
+  useEffect(() => {
+    if (initialTypeFilter !== undefined) {
+      setSelectedType(initialTypeFilter || "all");
+    }
+  }, [initialTypeFilter]);
+
+  useEffect(() => {
+    if (initialNeighborhoodFilter !== undefined) {
+      setSelectedNeighborhood(initialNeighborhoodFilter || "all");
+    }
+  }, [initialNeighborhoodFilter]);
+
   const properties = dbProps && dbProps.length > 0 ? dbProps : initialProperties;
 
   // Bairros únicos disponíveis nos dados

@@ -11,6 +11,35 @@ import type { UrbanProperty, Development, RuralProperty, PropertyImage, Property
    URBAN PROPERTIES (Campo Grande / MS)
    ========================================================================= */
 
+export async function fetchCampoGrandePropertyTypes(): Promise<string[]> {
+  if (!isSupabaseConfigured()) {
+    return ["Casa em condomínio", "Terreno"];
+  }
+  try {
+    const supabase = createBrowserSupabaseClient() as any;
+    const { data, error } = await supabase
+      .from("urban_properties")
+      .select("type")
+      .eq("status", "published");
+
+    if (error || !data || data.length === 0) {
+      return ["Casa em condomínio", "Terreno"];
+    }
+
+    const set = new Set<string>();
+    data.forEach((item: any) => {
+      if (item.type && typeof item.type === "string" && item.type.trim()) {
+        set.add(item.type.trim());
+      }
+    });
+
+    const list = Array.from(set);
+    return list.length > 0 ? list : ["Casa em condomínio", "Terreno"];
+  } catch {
+    return ["Casa em condomínio", "Terreno"];
+  }
+}
+
 export async function fetchUrbanProperties(): Promise<UrbanProperty[]> {
   if (!isSupabaseConfigured()) {
     return mockUrbanProperties;
