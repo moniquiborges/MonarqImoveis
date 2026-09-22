@@ -1031,7 +1031,7 @@ export default function AdminImoveisPage() {
               {/* Campos Específicos para Santa Catarina (SC) */}
               {formData.state === "SC" && (
                 <div className="rounded-xs border border-areia/60 bg-offwhite/20 p-3.5 space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-medium text-graphite mb-1">
                         Cidade em Santa Catarina *
@@ -1051,6 +1051,27 @@ export default function AdminImoveisPage() {
 
                     <div>
                       <label className="block text-xs font-medium text-graphite mb-1">
+                        Tipo de Imóvel *
+                      </label>
+                      <select
+                        value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                        className="focus-ring w-full rounded-xs border border-areia/70 bg-white px-3 py-2 text-xs text-graphite cursor-pointer"
+                      >
+                        <option value="Apartamento">Apartamento</option>
+                        <option value="Apartamento Frente Mar">Apartamento Frente Mar</option>
+                        <option value="Cobertura">Cobertura</option>
+                        <option value="Casa em condomínio">Casa em condomínio</option>
+                        <option value="Casa">Casa</option>
+                        <option value="Sobrado">Sobrado</option>
+                        <option value="Terreno">Terreno</option>
+                        <option value="Loteamento">Loteamento</option>
+                        <option value="Comercial">Comercial</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-graphite mb-1">
                         Bairro / Região *
                       </label>
                       <input
@@ -1064,26 +1085,7 @@ export default function AdminImoveisPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-graphite mb-1">
-                        Tipo de Imóvel / Empreendimento
-                      </label>
-                      <select
-                        value={formData.type}
-                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                        className="focus-ring w-full rounded-xs border border-areia/70 bg-white px-3 py-2 text-xs text-graphite cursor-pointer"
-                      >
-                        <option value="Apartamento Frente Mar">Apartamento Frente Mar</option>
-                        <option value="Apartamento">Apartamento</option>
-                        <option value="Cobertura">Cobertura</option>
-                        <option value="Loteamento">Loteamento / Condomínio Fechado</option>
-                        <option value="Terreno">Terreno</option>
-                        <option value="Casa em condomínio">Casa em condomínio</option>
-                        <option value="Empreendimento">Empreendimento Geral</option>
-                      </select>
-                    </div>
-
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-medium text-graphite mb-1">
                         Estágio da Obra *
