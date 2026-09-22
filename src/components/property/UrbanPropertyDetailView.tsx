@@ -165,7 +165,11 @@ export function UrbanPropertyDetailView({ initialSlug, initialProperty }: Props)
                         <Ruler className="h-5 w-5" />
                       </div>
                       <div>
-                        <span className="text-xs text-graphite/50 block">Área Privativa</span>
+                        <span className="text-xs text-graphite/50 block">
+                          {["terreno", "loteamento"].includes((property.type || "").toLowerCase())
+                            ? "Área do Lote / Terreno"
+                            : "Área Privativa"}
+                        </span>
                         <strong className="text-graphite font-medium text-sm md:text-base">
                           {formatArea(property.area)}
                         </strong>

@@ -101,9 +101,11 @@ export function SearchModule() {
             <select className={selectClasses} onChange={(e) => updateField("tipo", e.target.value)} defaultValue="">
               <option value="">Tipo de imóvel</option>
               <option value="apartamento">Apartamento</option>
+              <option value="cobertura">Cobertura</option>
               <option value="casa">Casa</option>
               <option value="condominio">Condomínio fechado</option>
               <option value="terreno">Terreno</option>
+              <option value="loteamento">Loteamento</option>
               <option value="comercial">Comercial</option>
             </select>
             <select className={selectClasses} onChange={(e) => updateField("dormitorios", e.target.value)} defaultValue="">

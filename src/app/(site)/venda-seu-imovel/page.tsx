@@ -282,7 +282,8 @@ export default function VendaSeuImovelPage() {
                         <option value="cobertura">Cobertura</option>
                         <option value="casa-condominio">Casa em Condomínio Fechado</option>
                         <option value="casa-rua">Casa Urbana</option>
-                        <option value="terreno">Terreno / Lote</option>
+                        <option value="terreno">Terreno</option>
+                        <option value="loteamento">Loteamento</option>
                         <option value="fazenda">Fazenda / Propriedade Rural</option>
                         <option value="empreendimento">Empreendimento / Incorporação</option>
                       </select>

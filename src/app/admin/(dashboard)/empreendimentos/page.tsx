@@ -67,6 +67,7 @@ export default function AdminEmpreendimentosPage() {
     name: string;
     city: ScCity;
     neighborhood: string;
+    type: string;
     stage: DevelopmentStage;
     priceFrom: number | null;
     deliveryDate: string;
@@ -87,6 +88,7 @@ export default function AdminEmpreendimentosPage() {
     name: "",
     city: "porto-belo",
     neighborhood: "Perequê",
+    type: "Apartamento",
     stage: "lancamento",
     priceFrom: null,
     deliveryDate: "",
@@ -207,6 +209,7 @@ export default function AdminEmpreendimentosPage() {
       name: "",
       city: "porto-belo",
       neighborhood: "Perequê",
+      type: "Apartamento",
       stage: "lancamento",
       priceFrom: null,
       deliveryDate: "",
@@ -237,6 +240,7 @@ export default function AdminEmpreendimentosPage() {
       name: dev.name,
       city: dev.city,
       neighborhood: dev.neighborhood || "Perequê",
+      type: (dev as any).type || "Apartamento",
       stage: dev.stage,
       priceFrom: dev.priceFrom ?? null,
       deliveryDate: dev.deliveryDate || "",
@@ -326,6 +330,8 @@ export default function AdminEmpreendimentosPage() {
               name: formData.name,
               city: formData.city,
               cityLabel,
+              type: formData.type,
+              propertyType: formData.type,
               neighborhood: formData.neighborhood || "Centro",
               stage: formData.stage,
               deliveryDate,
@@ -359,6 +365,8 @@ export default function AdminEmpreendimentosPage() {
           name: formData.name,
           city: formData.city,
           cityLabel,
+          type: formData.type,
+          propertyType: formData.type,
           neighborhood: formData.neighborhood || "Centro",
           stage: formData.stage,
           deliveryDate,
@@ -679,8 +687,8 @@ export default function AdminEmpreendimentosPage() {
                 onChange={(videos) => setFormData((prev) => ({ ...prev, videos }))}
               />
 
-              {/* Localização & Estágio */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Localização & Estágio & Tipo */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-graphite mb-1">Cidade (SC) *</label>
                   <select
@@ -691,6 +699,22 @@ export default function AdminEmpreendimentosPage() {
                     <option value="porto-belo">Porto Belo</option>
                     <option value="itapema">Itapema</option>
                     <option value="balneario-camboriu">Balneário Camboriú</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-graphite mb-1">Tipo de Empreendimento</label>
+                  <select
+                    value={formData.type || "Apartamento"}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="focus-ring w-full rounded-xs border border-areia/70 bg-white px-3 py-2 text-xs text-graphite cursor-pointer"
+                  >
+                    <option value="Apartamento">Apartamento / Torre</option>
+                    <option value="Apartamento Frente Mar">Apartamento Frente Mar</option>
+                    <option value="Cobertura">Cobertura</option>
+                    <option value="Terreno">Terreno</option>
+                    <option value="Loteamento">Loteamento / Condomínio Fechado</option>
+                    <option value="Casa em condomínio">Casa em condomínio</option>
                   </select>
                 </div>
 

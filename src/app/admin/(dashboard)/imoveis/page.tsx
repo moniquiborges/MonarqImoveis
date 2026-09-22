@@ -107,6 +107,7 @@ export default function AdminImoveisPage() {
   }, [setUrbanItems, setDevItems]);
 
   const [stateFilter, setStateFilter] = useState<"all" | "SC" | "MS">("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -177,7 +178,7 @@ export default function AdminImoveisPage() {
       city: dev.cityLabel,
       scCity: dev.city,
       title: dev.name,
-      type: "Empreendimento / Lançamento",
+      type: (dev as any).type || (dev as any).propertyType || "Apartamento Frente Mar",
       neighborhood: dev.neighborhood || "Centro",
       price: dev.priceFrom ?? null,
       bedrooms: dev.bedroomsRange ? dev.bedroomsRange[0] : 0,
@@ -224,10 +225,18 @@ export default function AdminImoveisPage() {
     return [...scList, ...msList];
   }, [devItems, urbanItems]);
 
-  // Filtro por Estado e Busca
+  // Filtro por Estado, Tipo e Busca
   const filteredItems = useMemo(() => {
     return allUnifiedItems.filter((item) => {
       if (stateFilter !== "all" && item.state !== stateFilter) return false;
+
+      if (typeFilter !== "all") {
+        const itemType = (item.type || "").toLowerCase().trim();
+        const selType = typeFilter.toLowerCase().trim();
+        if (itemType !== selType && !itemType.includes(selType) && !selType.includes(itemType)) {
+          return false;
+        }
+      }
 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -240,7 +249,7 @@ export default function AdminImoveisPage() {
       }
       return true;
     });
-  }, [allUnifiedItems, stateFilter, searchQuery]);
+  }, [allUnifiedItems, stateFilter, typeFilter, searchQuery]);
 
   const countSC = useMemo(() => devItems.length, [devItems]);
   const countMS = useMemo(() => urbanItems.length, [urbanItems]);
@@ -445,6 +454,8 @@ export default function AdminImoveisPage() {
                 name: formData.title,
                 city: formData.scCity,
                 cityLabel,
+                type: formData.type,
+                propertyType: formData.type,
                 neighborhood: formData.neighborhood,
                 stage: formData.stage,
                 deliveryDate,
@@ -479,6 +490,8 @@ export default function AdminImoveisPage() {
             name: formData.title,
             city: formData.scCity,
             cityLabel,
+            type: formData.type,
+            propertyType: formData.type,
             neighborhood: formData.neighborhood,
             stage: formData.stage,
             deliveryDate,
@@ -708,16 +721,35 @@ export default function AdminImoveisPage() {
           </button>
         </div>
 
-        {/* Busca por Texto */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-graphite/40" />
-          <input
-            type="text"
-            placeholder="Buscar por título, cidade, bairro ou tipo..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 py-1.5 pl-9 pr-3 text-xs text-graphite placeholder:text-graphite/40 transition-colors focus:border-mineral focus:bg-white"
-          />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1 max-w-xl">
+          {/* Filtro por Tipo */}
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="focus-ring rounded-xs border border-areia/70 bg-offwhite/30 py-1.5 px-3 text-xs text-graphite cursor-pointer transition-colors focus:border-mineral focus:bg-white shrink-0"
+          >
+            <option value="all">Todos os Tipos</option>
+            <option value="Apartamento">Apartamento</option>
+            <option value="Cobertura">Cobertura</option>
+            <option value="Casa em condomínio">Casa em condomínio</option>
+            <option value="Casa">Casa</option>
+            <option value="Sobrado">Sobrado</option>
+            <option value="Terreno">Terreno</option>
+            <option value="Loteamento">Loteamento</option>
+            <option value="Comercial">Comercial</option>
+          </select>
+
+          {/* Busca por Texto */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-graphite/40" />
+            <input
+              type="text"
+              placeholder="Buscar por título, cidade, bairro ou código..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="focus-ring w-full rounded-xs border border-areia/70 bg-offwhite/30 py-1.5 pl-9 pr-3 text-xs text-graphite placeholder:text-graphite/40 transition-colors focus:border-mineral focus:bg-white"
+            />
+          </div>
         </div>
       </div>
 
@@ -785,10 +817,21 @@ export default function AdminImoveisPage() {
 
                   {/* Quartos / Banheiros / Vagas / Área */}
                   <td className="p-4 text-graphite/70">
-                    <div>
-                      {item.bedrooms} dorms ({item.suites} banheiros) &bull; {item.parking} vagas
-                    </div>
-                    <div className="text-[11px] text-graphite/50">{formatArea(item.area)}</div>
+                    {["terreno", "loteamento"].includes((item.type || "").toLowerCase()) ? (
+                      <div>
+                        <div className="font-semibold text-mineral text-xs">
+                          {item.area ? formatArea(item.area) : "Metragem a consultar"}
+                        </div>
+                        <div className="text-[10px] text-graphite/50 mt-0.5">Lote / Terreno</div>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          {item.bedrooms} dorms ({item.suites} banheiros) &bull; {item.parking} vagas
+                        </div>
+                        <div className="text-[11px] text-graphite/50">{formatArea(item.area)}</div>
+                      </>
+                    )}
                   </td>
 
                   {/* Valor */}
@@ -1021,7 +1064,26 @@ export default function AdminImoveisPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-graphite mb-1">
+                        Tipo de Imóvel / Empreendimento
+                      </label>
+                      <select
+                        value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                        className="focus-ring w-full rounded-xs border border-areia/70 bg-white px-3 py-2 text-xs text-graphite cursor-pointer"
+                      >
+                        <option value="Apartamento Frente Mar">Apartamento Frente Mar</option>
+                        <option value="Apartamento">Apartamento</option>
+                        <option value="Cobertura">Cobertura</option>
+                        <option value="Loteamento">Loteamento / Condomínio Fechado</option>
+                        <option value="Terreno">Terreno</option>
+                        <option value="Casa em condomínio">Casa em condomínio</option>
+                        <option value="Empreendimento">Empreendimento Geral</option>
+                      </select>
+                    </div>
+
                     <div>
                       <label className="block text-xs font-medium text-graphite mb-1">
                         Estágio da Obra *
@@ -1088,6 +1150,7 @@ export default function AdminImoveisPage() {
                         <option value="Casa">Casa</option>
                         <option value="Sobrado">Sobrado</option>
                         <option value="Terreno">Terreno</option>
+                        <option value="Loteamento">Loteamento</option>
                         <option value="Comercial">Comercial</option>
                       </select>
                     </div>
@@ -1113,7 +1176,12 @@ export default function AdminImoveisPage() {
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-graphite mb-1">
-                    Dormitórios <span className="text-graphite/40 font-normal">(Opcional)</span>
+                    Dormitórios{" "}
+                    <span className="text-graphite/40 font-normal">
+                      {["Terreno", "Loteamento"].includes(formData.type)
+                        ? "(N/A p/ Lote)"
+                        : "(Opcional)"}
+                    </span>
                   </label>
                   <input
                     type="number"
@@ -1126,7 +1194,12 @@ export default function AdminImoveisPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-graphite mb-1">
-                    Banheiros <span className="text-graphite/40 font-normal">(Opcional)</span>
+                    Banheiros{" "}
+                    <span className="text-graphite/40 font-normal">
+                      {["Terreno", "Loteamento"].includes(formData.type)
+                        ? "(N/A p/ Lote)"
+                        : "(Opcional)"}
+                    </span>
                   </label>
                   <input
                     type="number"
@@ -1139,7 +1212,12 @@ export default function AdminImoveisPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-graphite mb-1">
-                    Vagas <span className="text-graphite/40 font-normal">(Opcional)</span>
+                    Vagas{" "}
+                    <span className="text-graphite/40 font-normal">
+                      {["Terreno", "Loteamento"].includes(formData.type)
+                        ? "(N/A p/ Lote)"
+                        : "(Opcional)"}
+                    </span>
                   </label>
                   <input
                     type="number"
@@ -1152,7 +1230,10 @@ export default function AdminImoveisPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-graphite mb-1">
-                    Área Privativa (m²) <span className="text-graphite/40 font-normal">(Opcional)</span>
+                    {["Terreno", "Loteamento"].includes(formData.type)
+                      ? "Área do Lote / Terreno (m²)"
+                      : "Área Privativa (m²)"}{" "}
+                    <span className="text-graphite/40 font-normal">(Opcional)</span>
                   </label>
                   <input
                     type="number"

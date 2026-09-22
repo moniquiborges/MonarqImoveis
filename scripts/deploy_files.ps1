@@ -24,9 +24,15 @@ $files = @(
     @{ local = "src\types\index.ts"; remote = "/opt/monarq/src/types/index.ts" },
     @{ local = "src\components\property\RuralCatalogView.tsx"; remote = "/opt/monarq/src/components/property/RuralCatalogView.tsx" },
     @{ local = "src\components\home\SearchModule.tsx"; remote = "/opt/monarq/src/components/home/SearchModule.tsx" },
+    @{ local = "src\components\property\UrbanCatalogView.tsx"; remote = "/opt/monarq/src/components/property/UrbanCatalogView.tsx" },
+    @{ local = "src\components\property\UrbanPropertyDetailView.tsx"; remote = "/opt/monarq/src/components/property/UrbanPropertyDetailView.tsx" },
+    @{ local = "src\app\(site)\imoveis\campo-grande\page.tsx"; remote = "/opt/monarq/src/app/(site)/imoveis/campo-grande/page.tsx" },
+    @{ local = "src\app\(site)\venda-seu-imovel\actions.ts"; remote = "/opt/monarq/src/app/(site)/venda-seu-imovel/actions.ts" },
+    @{ local = "src\app\(site)\venda-seu-imovel\page.tsx"; remote = "/opt/monarq/src/app/(site)/venda-seu-imovel/page.tsx" },
     @{ local = "supabase\schema_completo.sql"; remote = "/opt/monarq/supabase/schema_completo.sql" },
     @{ local = "supabase\migrations\20260913000001_expand_rural_state_enum.sql"; remote = "/opt/monarq/supabase/migrations/20260913000001_expand_rural_state_enum.sql" },
-    @{ local = "supabase\migrations\20260915000001_add_chacara_rancho_sitio_to_rural_activity.sql"; remote = "/opt/monarq/supabase/migrations/20260915000001_add_chacara_rancho_sitio_to_rural_activity.sql" }
+    @{ local = "supabase\migrations\20260915000001_add_chacara_rancho_sitio_to_rural_activity.sql"; remote = "/opt/monarq/supabase/migrations/20260915000001_add_chacara_rancho_sitio_to_rural_activity.sql" },
+    @{ local = "supabase\migrations\20260922000001_document_property_types_terreno_loteamento.sql"; remote = "/opt/monarq/supabase/migrations/20260922000001_document_property_types_terreno_loteamento.sql" }
 )
 
 foreach ($f in $files) {

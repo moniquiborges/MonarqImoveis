@@ -96,6 +96,7 @@ export type DevelopmentRow = Timestamps & {
   slug: string;
   name: string;
   city: ScCityDb;
+  property_type: string | null;
   neighborhood: string | null;
   address: string | null;
   latitude: number | null;

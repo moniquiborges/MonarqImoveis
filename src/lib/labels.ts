@@ -25,6 +25,18 @@ export const ruralTypeLabels: Record<string, string> = {
   rancho: "Rancho",
 };
 
+export const urbanPropertyTypeLabels: Record<string, string> = {
+  apartamento: "Apartamentos de Luxo",
+  cobertura: "Coberturas",
+  "casa em condomínio": "Casas em Condomínio",
+  condominio: "Casas em Condomínio",
+  casa: "Casas",
+  sobrado: "Sobrados",
+  terreno: "Terrenos Exclusivos",
+  loteamento: "Loteamentos",
+  comercial: "Comercial",
+};
+
 export const propertyBadgeLabels: Record<PropertyBadge, string> = {
   exclusivo: "Exclusivo",
   lancamento: "Lançamento",

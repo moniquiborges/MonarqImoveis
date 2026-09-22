@@ -12,9 +12,28 @@ import type { UrbanProperty } from "@/types";
 
 interface Props {
   initialProperties: UrbanProperty[];
+  initialTypeFilter?: string;
+  initialNeighborhoodFilter?: string;
+  initialSearchQuery?: string;
 }
 
-export function UrbanCatalogView({ initialProperties }: Props) {
+const DEFAULT_TYPES = [
+  "Apartamento",
+  "Cobertura",
+  "Casa em condomínio",
+  "Casa",
+  "Sobrado",
+  "Terreno",
+  "Loteamento",
+  "Comercial",
+];
+
+export function UrbanCatalogView({
+  initialProperties,
+  initialTypeFilter,
+  initialNeighborhoodFilter,
+  initialSearchQuery,
+}: Props) {
   const [dbProps, setDbProps] = useState<UrbanProperty[]>(initialProperties);
 
   useEffect(() => {
@@ -26,27 +45,51 @@ export function UrbanCatalogView({ initialProperties }: Props) {
     });
   }, []);
 
-  const [selectedType, setSelectedType] = useState<string>("all");
-  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>(initialTypeFilter || "all");
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>(
+    initialNeighborhoodFilter || "all"
+  );
+  const [searchQuery, setSearchQuery] = useState<string>(initialSearchQuery || "");
 
   const properties = dbProps && dbProps.length > 0 ? dbProps : initialProperties;
 
   // Bairros únicos disponíveis nos dados
   const neighborhoods = useMemo(() => {
-    const set = new Set(properties.map((p) => p.neighborhood));
+    const set = new Set(properties.map((p) => p.neighborhood).filter(Boolean));
     return Array.from(set);
   }, [properties]);
 
-  // Tipos únicos disponíveis
-  const propertyTypes = useMemo(() => {
-    const set = new Set(properties.map((p) => p.type));
+  const typeLabels: Record<string, string> = {
+    apartamento: "Apartamentos de Luxo",
+    cobertura: "Coberturas",
+    "casa em condomínio": "Casas em Condomínio",
+    casa: "Casas",
+    sobrado: "Sobrados",
+    terreno: "Terrenos Exclusivos",
+    loteamento: "Loteamentos",
+    comercial: "Comercial",
+  };
+
+  // Tipos únicos disponíveis (garantindo os padrão + tipos customizados existentes nos dados)
+  const availableTypes = useMemo(() => {
+    const set = new Set<string>();
+    DEFAULT_TYPES.forEach((t) => set.add(t));
+    properties.forEach((p) => {
+      if (p.type) set.add(p.type);
+    });
     return Array.from(set);
   }, [properties]);
 
   const filteredProperties = useMemo(() => {
     return properties.filter((item) => {
-      if (selectedType !== "all" && item.type !== selectedType) return false;
+      if (selectedType !== "all") {
+        const itemType = (item.type || "").toLowerCase().trim();
+        const selType = selectedType.toLowerCase().trim();
+        if (itemType !== selType && !itemType.includes(selType) && !selType.includes(itemType)) {
+          return false;
+        }
+      }
+
       if (selectedNeighborhood !== "all" && item.neighborhood !== selectedNeighborhood) return false;
 
       if (searchQuery.trim()) {
@@ -70,13 +113,6 @@ export function UrbanCatalogView({ initialProperties }: Props) {
     setSearchQuery("");
   };
 
-  const typeLabels: Record<string, string> = {
-    casa: "Casas em Condomínio",
-    apartamento: "Apartamentos de Luxo",
-    terreno: "Terrenos Exclusivos",
-    cobertura: "Coberturas",
-  };
-
   return (
     <main className="py-8 md:py-12">
       <Container>
@@ -97,8 +133,8 @@ export function UrbanCatalogView({ initialProperties }: Props) {
             Imóveis de Alto Padrão em Campo Grande
           </h1>
           <p className="mt-4 text-sm md:text-base text-graphite/70 leading-relaxed">
-            Casas em condomínios fechados renomados (Damha, Alphaville) e apartamentos sofisticados
-            nos bairros mais nobres da capital sul-mato-grossense.
+            Casas em condomínios fechados renomados (Damha, Alphaville), apartamentos sofisticados,
+            terrenos exclusivos e loteamentos nos bairros mais nobres da capital sul-mato-grossense.
           </p>
         </div>
 
@@ -115,10 +151,13 @@ export function UrbanCatalogView({ initialProperties }: Props) {
               onChange: setSelectedType,
               options: [
                 { value: "all", label: "Todos os Tipos" },
-                ...propertyTypes.map((t) => ({
-                  value: t,
-                  label: typeLabels[t] || t.charAt(0).toUpperCase() + t.slice(1),
-                })),
+                ...availableTypes.map((t) => {
+                  const key = t.toLowerCase().trim();
+                  return {
+                    value: key,
+                    label: typeLabels[key] || t,
+                  };
+                }),
               ],
             },
             {

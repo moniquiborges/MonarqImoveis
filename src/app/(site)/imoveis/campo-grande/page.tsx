@@ -11,8 +11,18 @@ export const metadata: Metadata = {
     "Casas em condomínios fechados (Damha, Alphaville) e apartamentos sofisticados nos bairros nobres de Campo Grande, MS.",
 };
 
-export default async function CampoGrandePage() {
+export default async function CampoGrandePage(props: {
+  searchParams?: Promise<{ tipo?: string; bairro?: string; q?: string }>;
+}) {
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
   const properties = await fetchUrbanProperties();
 
-  return <UrbanCatalogView initialProperties={properties} />;
+  return (
+    <UrbanCatalogView
+      initialProperties={properties}
+      initialTypeFilter={searchParams?.tipo}
+      initialNeighborhoodFilter={searchParams?.bairro}
+      initialSearchQuery={searchParams?.q}
+    />
+  );
 }

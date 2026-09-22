@@ -161,6 +161,7 @@ export async function POST(req: Request) {
             name: dev.name,
             city: dev.city,
             neighborhood: dev.neighborhood,
+            property_type: (dev as any).propertyType || (dev as any).type || null,
             stage: dev.stage,
             delivery_forecast: dev.deliveryDate?.trim() || null,
             short_description: dev.shortDescription?.trim() || null,

@@ -278,6 +278,8 @@ export async function fetchDevelopments(): Promise<Development[]> {
             ? [Number(row.area_min), Number(row.area_min)]
             : undefined,
         distanceToSea: row.distance_to_sea || undefined,
+        type: row.property_type || undefined,
+        propertyType: row.property_type || undefined,
         badges: row.badges || ["lancamento", "alto-padrao"],
         coverImage,
         gallery,

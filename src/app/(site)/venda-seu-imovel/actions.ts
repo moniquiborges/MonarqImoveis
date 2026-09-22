@@ -17,7 +17,8 @@ const PROPERTY_TYPE_LABELS: Record<string, string> = {
   cobertura: "Cobertura",
   "casa-condominio": "Casa em Condomínio Fechado",
   "casa-rua": "Casa Urbana",
-  terreno: "Terreno / Lote",
+  terreno: "Terreno",
+  loteamento: "Loteamento",
   fazenda: "Fazenda / Propriedade Rural",
   empreendimento: "Empreendimento / Incorporação",
 };

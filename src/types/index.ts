@@ -39,6 +39,8 @@ export interface Development {
   builder?: string;
   stage: DevelopmentStage;
   deliveryDate?: string;
+  type?: string;
+  propertyType?: string;
   shortDescription: string;
   priceFrom?: number;
   bedroomsRange?: [number, number];
@@ -55,11 +57,21 @@ export interface Development {
   leisureArea?: number;
 }
 
+export type UrbanPropertyType =
+  | "Apartamento"
+  | "Cobertura"
+  | "Casa em condomínio"
+  | "Casa"
+  | "Sobrado"
+  | "Terreno"
+  | "Loteamento"
+  | "Comercial";
+
 export interface UrbanProperty {
   slug: string;
   code: string;
   title: string;
-  type: string;
+  type: UrbanPropertyType | string;
   neighborhood: string;
   city: "Campo Grande";
   price: number | null;
